@@ -269,8 +269,10 @@ app.post("/create-checkout-session", async (req, res) => {
       line_items: [{ price: priceId, quantity: 1 }], 
       metadata: { userId },
       // Asegúrate de que FRONTEND_URL en tu .env sea http://localhost:5500 (o tu IP)
-      success_url: `${process.env.FRONTEND_URL}?success=true`,
-      cancel_url:  `${process.env.FRONTEND_URL}?cancel=true`
+      // Sustituye process.env.FRONTEND_URL por tu link de Vercel entre comillas
+      success_url: `https://zetta-ai-pnhu.vercel.app?success=true`,
+      cancel_url:  `https://zetta-ai-pnhu.vercel.app?cancel=true`
+
     });
 
     // Guardar el Customer ID de Stripe en Firebase para futuras cancelaciones
