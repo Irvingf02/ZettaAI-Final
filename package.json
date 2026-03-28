@@ -1,5 +1,5 @@
 {
-  "name": "mi-ia-pro-backend",
+  "name": "ZettaxAI",
   "version": "2.0.0",
   "description": "Backend para Mi IA PRO — con rate limit, memoria y verificación premium",
   "type": "module",
