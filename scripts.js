@@ -5,6 +5,39 @@ import cors from "cors";
 import Stripe from "stripe";
 import bodyParser from "body-parser";
 import admin from "firebase-admin";
+import { readFileSync } from "fs";
+
+// --- Reemplaza la sección 1 (Firebase) con esto ---
+let serviceAccount;
+
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+  // En Railway: usamos la variable que creaste
+  try {
+    serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+  } catch (e) {
+    console.error("❌ Error parseando la variable de Firebase:", e.message);
+  }
+}else {
+
+  // En Local: Solo intenta leer el archivo SI existe
+
+  try {
+
+    const fs = await import("fs"); // Importación dinámica para que Railway no se queje
+
+    serviceAccount = JSON.parse(fs.readFileSync("./serviceAccountKey.json", "utf8"));
+
+  } catch (e) {
+
+    // Si estamos en Railway, este error es normal y no romperá el servidor
+
+    console.log("ℹ️ Archivo local no encontrado (normal en producción)");
+
+  }
+
+}
+
+const db = admin.firestore();
 
 // ── 1. FIREBASE ADMIN ─────────────────────────────────────────────────────────
 // En Railway usa variable de entorno. En local usa el archivo JSON.
