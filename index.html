@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZettaAI</title>
+<title>ZettaxAI</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
 
 <style>
@@ -469,7 +469,7 @@
 <!-- LOGIN -->
 <div id="loginDiv">
   <div class="login-logo">🤖</div>
-  <div class="login-title">ZettaAI</div>
+  <div class="login-title">ZettaxAI</div>
   <div class="login-sub">Inicia sesión para continuar</div>
 
   <div class="field">
@@ -510,7 +510,7 @@
 
   <!-- TOP BAR -->
   <div class="top-bar">
-    <div class="app-name">ZettaAi<span>PRO</span></div>
+    <div class="app-name">ZettaxAI<span>PRO</span></div>
     <div class="top-right">
       <span class="msg-counter" id="msgCounter">10 mensajes restantes</span>
       <span class="badge-premium" id="badgePremium">⭐ PREMIUM</span>
@@ -848,51 +848,61 @@ window.login = async () => {
     alert("Error al iniciar sesión: " + e.message);
   }
 };
+
+// 1. Configurar los Proveedores
+const googleProvider = new GoogleAuthProvider();
+const facebookProvider = new FacebookAuthProvider();
+const appleProvider = new OAuthProvider('apple.com');
+
   // --- LOGIN CON GOOGLE ---
+
 window.loginGoogle = async () => {
-  const provider = new GoogleAuthProvider();
   try {
-    const result = await signInWithPopup(auth, provider);
-    console.log("Usuario entró con Google:", result.user.email);
-  } catch (e) {
-    alert("Error con Google: " + e.message);
+    await signInWithPopup(auth, googleProvider);
+    alert("¡Bienvenido a ZettaAI!");
+  } catch (error) {
+    console.error(error);
+    alert("Error en Google: " + error.message);
   }
 };
 
 // --- LOGIN CON FACEBOOK ---
+
 window.loginFacebook = async () => {
-  const provider = new FacebookAuthProvider();
   try {
-    await signInWithPopup(auth, provider);
-  } catch (e) {
-    alert("Error con Facebook: " + e.message);
+    await signInWithPopup(auth, facebookProvider);
+    alert("¡Sesión iniciada con Facebook!");
+  } catch (error) {
+    console.error(error);
+    alert("Error en Facebook: " + error.message);
   }
 };
 
 // --- LOGIN CON APPLE ---
+
 window.loginApple = async () => {
-  const provider = new OAuthProvider('apple.com');
   try {
-    await signInWithPopup(auth, provider);
-  } catch (e) {
-    alert("Error con Apple: " + e.message);
+    // Apple requiere que uses el proveedor de OAuth
+    const result = await signInWithPopup(auth, appleProvider);
+    console.log("¡Entraste con Apple!", result.user);
+    alert("Sesión iniciada con Apple");
+  } catch (error) {
+    console.error("Error en Apple:", error.code);
+    // Nota: A veces Apple da error si no has configurado el ID de servicio en Firebase
+    alert("Error en Apple: " + error.message);
   }
 };
 
 // --- LOGIN ANONIMO ---
-window.loginAnonimo = function() {
-    const auth = getAuth();
-    signInAnonymously(auth)
-      .then(() => {
-        console.log("Acceso anónimo exitoso");
-        // Quitamos la redirección a ia.html porque no existe
-        // El onAuthStateChanged se encargará de ocultar el login y mostrar el chat automáticamente
-      })
-      .catch((error) => {
-        console.error("Error en acceso anónimo:", error.code);
-        alert("No se pudo iniciar sesión como invitado.");
-      });
-  };
+window.loginAnonimo = async () => {
+  try {
+    const { signInAnonymously } = await import("https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js");
+    await signInAnonymously(auth);
+    alert("Entrando como invitado...");
+  } catch (error) {
+    alert("Error de invitado: " + error.message);
+  }
+};
 
 // ── Paywall ───────────────────────────────────────────────────────────────────
 window.showPaywall  = () => { document.getElementById("paywallModal").classList.add("show"); };
