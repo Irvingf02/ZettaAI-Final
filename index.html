@@ -600,12 +600,14 @@
 }
 
 #main-content {
-  flex-grow: 1; /* El chat toma todo el espacio restante */
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  transition: margin 0.3s ease;
+  transition: all 0.3s ease; /* Transición suave para todo */
+  background: var(--bg);    /* Asegura que el fondo sea el correcto */
+  padding: 0 20px;          /* Espacio de seguridad para que no toque los bordes */
 }
 
 /* Ajuste para que "Chat Rápido" tenga aire y no se pegue al borde */
@@ -622,10 +624,9 @@
 
 <body>
 
-<!-- LOGIN -->
 <div id="loginDiv">
   <div class="login-logo">🤖</div>
-  <div class="login-title">ZettaAI</div>
+  <div class="login-title">ZettaxAI</div>
   <div class="login-sub">Inicia sesión para continuar</div>
 
   <div class="field">
@@ -660,7 +661,7 @@
   </button>
 
 </div>
-</div></div>
+</div>
 
 <div id="sidebar" class="sidebar-closed">
   <div class="sidebar-top">
@@ -920,50 +921,7 @@ function toggleSidebar() {
   }
 }
 
-function loadChatHistory() {
-  if (!currentUser) return;
-  
-  // Usamos el ID del contenedor que pusimos en el nuevo HTML de la sidebar
-  const list = document.getElementById("history-list"); 
-  list.innerHTML = "<p style='font-size: 0.8rem; color: var(--muted); padding: 10px;'>Cargando...</p>";
 
-  try {
-    // Tu consulta original a Firestore (es perfecta, no la toques)
-    const q = query(
-      collection(db, "chats"), 
-      where("userId", "==", currentUser.uid), 
-      orderBy("timestamp", "desc")
-    );
-    
-    const querySnapshot = await getDocs(q);
-    list.innerHTML = ""; // Limpiamos el "Cargando..."
-
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      
-      // CREAMOS EL BOTÓN CON EL DISEÑO DE GEMINI (IMAGEN 6)
-      const btn = document.createElement("div");
-      btn.className = "sidebar-item"; // Usamos la clase que definimos en el CSS nuevo
-      
-      // Estructura de Icono + Texto
-      btn.innerHTML = `
-        <span class="icon">💬</span>
-        <span class="text">${data.title || "Chat sin título"}</span>
-      `;
-      
-      btn.onclick = () => {
-          loadSpecificChat(doc.id);
-          // Opcional: cerrar sidebar en móviles al elegir un chat
-          if(window.innerWidth < 768) toggleSidebar(); 
-      };
-      
-      list.appendChild(btn);
-    });
-  } catch (error) {
-    console.error("Error al cargar historial:", error);
-    list.innerHTML = "<p style='color: var(--danger);'>Error al cargar</p>";
-  }
-}
 
 // ── Modo ─────────────────────────────────────────────────────────────────────
 window.setMode = (m) => {
@@ -995,6 +953,57 @@ function addMessage(text, role, extra = "") {
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
   return div;
+}
+async function loadChatHistory() {
+  if (!currentUser) return;
+  
+  const list = document.getElementById("history-list"); 
+  list.innerHTML = "<p style='font-size: 0.8rem; color: var(--muted); padding: 10px;'>Cargando...</p>";
+
+  try {
+    // 1. Tu consulta a Firestore (Mantenla siempre)
+    const q = query(
+      collection(db, "chats"), 
+      where("userId", "==", currentUser.uid), 
+      orderBy("timestamp", "desc")
+    );
+    
+    const querySnapshot = await getDocs(q);
+    list.innerHTML = ""; // Limpiamos el "Cargando..."
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      
+      // 2. Creamos el elemento con el diseño pro
+      const item = document.createElement("div");
+      item.className = "sidebar-item"; 
+      
+      // 3. Forzamos que el clic sea detectable
+      item.style.pointerEvents = "auto"; 
+      item.style.cursor = "pointer";
+
+      // Estructura de Icono + Texto
+      item.innerHTML = `
+        <span class="icon">💬</span>
+        <span class="text">${data.title || "Chat nuevo"}</span>
+      `;
+      
+      // 4. Lógica de carga al hacer clic
+      item.onclick = (e) => {
+          e.stopPropagation(); // Evita que otros elementos interfieran
+          console.log("Cargando chat:", doc.id); 
+          loadSpecificChat(doc.id);
+          
+          // Cerrar sidebar en móviles para mejorar la experiencia
+          if(window.innerWidth < 768) toggleSidebar(); 
+      };
+      
+      list.appendChild(item);
+    });
+  } catch (error) {
+    console.error("Error al cargar historial:", error);
+    list.innerHTML = "<p style='color: var(--danger); padding: 10px;'>Error al cargar</p>";
+  }
 }
 
 // ── Enviar mensaje ────────────────────────────────────────────────────────────
