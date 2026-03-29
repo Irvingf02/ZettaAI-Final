@@ -8,7 +8,7 @@ import admin from "firebase-admin";
 import { readFileSync } from "fs";
 
 // --- Reemplaza la sección 1 (Firebase) con esto ---
-let serviceAccount;
+let serviceAccount = null;
 
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
   // En Railway: usamos la variable que creaste
@@ -28,21 +28,21 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
 }
 // ── 1. FIREBASE ADMIN ─────────────────────────────────────────────────────────
 // En Railway usa variable de entorno. En local usa el archivo JSON.
+if (!admin.apps.length) {
 if (serviceAccount) {
-  try {
-    if (!admin.apps.length) {
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount)
     });
     console.log("🔥 Firebase conectado correctamente");
-   }
-  } catch (e) {
-    console.error("❌ Error inicializando Firebase:", e.message);
-  }
-} else {
+   }else {
   console.error("🚨 CRÍTICO: No se pudo cargar ninguna credencial de Firebase.");
+  process.exit(1);
 }
+
+}
+
 const db = admin.firestore();
+
 // ── 2. STRIPE ─────────────────────────────────────────────────────────────────
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
