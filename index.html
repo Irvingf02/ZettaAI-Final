@@ -511,127 +511,67 @@
   }
  
 /* EL PADRE: Obliga a que la barra y el chat sean vecinos, no pisos */
+/* FUERZA EL DISEÑO LATERAL */
 .app-container {
   display: flex !important;
-  flex-direction: row !important; /* Esto evita que se baje el chat */
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  position: relative;
 }
 
 #sidebar {
-  width: 68px; /* Cerrada */
-  flex-shrink: 0; /* No permite que el chat la aplaste */
-  transition: width 0.3s ease;
+  width: 68px; /* Ancho cerrado */
+  min-width: 68px;
+  height: 100vh;
+  flex-shrink: 0;
   background: #0f1114;
-  z-index: 10;
+  transition: width 0.3s ease;
+  z-index: 1000; /* Siempre por encima para el clic */
+  border-right: 1px solid rgba(255,255,255,0.1);
 }
 
-/* Cuando se abre (Imagen 5 y 6) */
 #sidebar.sidebar-open {
-  width: 280px; /* Ancho abierto */
+  width: 280px; /* Empuja el chat al abrirse */
 }
 
-/* Ocultar el texto físicamente cuando la sidebar está cerrada */
-#sidebar.sidebar-closed .text {
-  display: none; 
+#main-content {
+  flex-grow: 1; /* Ocupa el resto de la derecha */
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: #000; /* O tu color de fondo */
 }
 
-/* Mostrar el texto y darle opacidad cuando está abierta */
-#sidebar.sidebar-open .text {
-  display: inline-block;
-  opacity: 1;
-}
-
-/* Asegura que los items del historial sean detectables para el clic */
+/* Mantén esto debajo del nuevo bloque para que se vean bien los botones */
 .sidebar-item {
-  /* Estructura y Alineación */
   display: flex;
   align-items: center;
   height: 48px;
-  min-width: 260px;
   padding: 0 16px;
-  margin-bottom: 4px;
-  
-  /* Estética Pro */
   border-radius: 24px;
-  color: var(--text);
-  background: transparent;
-  border: none;
-  transition: background 0.2s;
-  
-  /* Lógica de Clic y Capas (Vital para que funcione) */
   cursor: pointer;
-  pointer-events: auto;
+  color: #fff;
+  transition: background 0.2s;
+  pointer-events: auto; /* IMPORTANTE PARA EL CLIC */
   position: relative;
-  z-index: 101;
-  user-select: none;
-}
-
-.sidebar-item:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-.sidebar-item.active {
-  background-color: var(--user-bg);
-  color: var(--accent);
-}
-
-.icon {
-  font-size: 20px;
-  min-width: 32px;
-  display: flex;
-  justify-content: center;
+  z-index: 1100; 
 }
 
 .text {
   margin-left: 12px;
   font-size: 14px;
   white-space: nowrap;
-  opacity: 0; /* Oculto por defecto */
+  opacity: 0;
   transition: opacity 0.2s;
 }
 
 #sidebar.sidebar-open .text {
   opacity: 1;
 }
-
-.sidebar-label {
-  padding: 20px 16px 10px;
-  font-size: 12px;
-  color: var(--muted);
-  text-transform: uppercase;
-  opacity: 0;
-}
-
-#sidebar.sidebar-open .sidebar-label {
-  opacity: 1;
-}
-
-.sidebar-middle {
-  flex: 1;
-  overflow-y: auto;
-}
-
-/* El chat NUNCA se bajará con esto */
-#main-content {
-  flex-grow: 1; /* Toma todo el espacio que sobra a la derecha */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: relative;
-}
-
-/* Ajuste para que "Chat Rápido" tenga aire y no se pegue al borde */
-#chat-container {
-  margin-top: 20px; /* Ajusta esto según tu logo */
-  padding: 0 40px;
-  width: 100%;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
 </style>
 </head>
 
