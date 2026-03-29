@@ -5,42 +5,18 @@ import cors from "cors";
 import Stripe from "stripe";
 import bodyParser from "body-parser";
 import admin from "firebase-admin";
-import { readFileSync } from "fs";
 
-// --- Reemplaza la sección 1 (Firebase) con esto ---
-let serviceAccount = null;
-
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
-  // En Railway: usamos la variable que creaste
-  try {
-    serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-  } catch (e) {
-    console.error("❌ Error en JSON de variable Railway:", e.message);
-  }
-}else {
-// En Local: Solo intenta leer el archivo SI existe
-   try {
-     serviceAccount = JSON.parse(readFileSync("./serviceAccountKey.json", "utf8"));
-      } catch (e) {
-        // Si estamos en Railway, este error es normal y no romperá el servidor
-        console.log("ℹ️ Modo Producción: No se encontró archivo físico (usando variables).");
-  }
-}
 // ── 1. FIREBASE ADMIN ─────────────────────────────────────────────────────────
 // En Railway usa variable de entorno. En local usa el archivo JSON.
-if (!admin.apps.length) {
-if (serviceAccount) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-    console.log("🔥 Firebase conectado correctamente");
-   }else {
-  console.error("🚨 CRÍTICO: No se pudo cargar ninguna credencial de Firebase.");
-  process.exit(1);
+let serviceAccount;
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+  serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+} else {
+  const { readFileSync } = await import("fs");
+  serviceAccount = JSON.parse(readFileSync("./serviceAccountKey.json"));
 }
 
-}
-
+admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
 
 // ── 2. STRIPE ─────────────────────────────────────────────────────────────────
@@ -70,7 +46,7 @@ const MODOS_IA = {
     system: "Eres un tutor para estudiantes. Explica con analogías simples y ejemplos claros.",
     tokens: 500,
     temp: 0.7,
-    premium: true
+    premium: false
   }
 };
 
@@ -293,10 +269,8 @@ app.post("/create-checkout-session", async (req, res) => {
       line_items: [{ price: priceId, quantity: 1 }], 
       metadata: { userId },
       // Asegúrate de que FRONTEND_URL en tu .env sea http://localhost:5500 (o tu IP)
-      // Sustituye process.env.FRONTEND_URL por tu link de Vercel entre comillas
-      success_url: `https://zetta-ai-pnhu.vercel.app?success=true`,
-      cancel_url:  `https://zetta-ai-pnhu.vercel.app?cancel=true`
-
+      success_url: `${process.env.FRONTEND_URL}?success=true`,
+      cancel_url:  `${process.env.FRONTEND_URL}?cancel=true`
     });
 
     // Guardar el Customer ID de Stripe en Firebase para futuras cancelaciones

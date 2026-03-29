@@ -469,7 +469,7 @@
 <!-- LOGIN -->
 <div id="loginDiv">
   <div class="login-logo">🤖</div>
-  <div class="login-title">ZettaxAI</div>
+  <div class="login-title">ZettaAI</div>
   <div class="login-sub">Inicia sesión para continuar</div>
 
   <div class="field">
@@ -501,16 +501,17 @@
 
   <button class="btn btn-ghost" onclick="loginAnonimo()" style="background: #f4f4f4; color: #333; margin-top: 8px; border: 1px solid #ddd;">
     ⚡ Probar como invitado (Rápido)
-</button>
-</div></div>
+  </button>
 
+</div>
+</div>
 
 <!-- APP -->
-<div id="appDiv" style="display: none;">></div>
+<div id="appDiv"></div>
 
   <!-- TOP BAR -->
   <div class="top-bar">
-    <div class="app-name">ZettaxAI<span>PRO</span></div>
+    <div class="app-name">ZettaxAi<span>PRO</span></div>
     <div class="top-right">
       <span class="msg-counter" id="msgCounter">10 mensajes restantes</span>
       <span class="badge-premium" id="badgePremium">⭐ PREMIUM</span>
@@ -526,7 +527,7 @@
     <button class="mode-btn active" id="btn-chat"    onclick="setMode('chat')">💬 Chat</button>
     <button class="mode-btn"        id="btn-resumen" onclick="setMode('resumen')">📝 Resumir <span class="lock">🔒</span></button>
     <button class="mode-btn"        id="btn-ideas"   onclick="setMode('ideas')">💡 Ideas <span class="lock">🔒</span></button>
-    <button class="mode-btn"        id="btn-tarea"   onclick="setMode('tarea')">🎓 Tarea <span class="lock">🔒</span></button>
+    <button class="mode-btn active"        id="btn-tarea"   onclick="setMode('tarea')">🎓 Tarea</button>
     <button class="btn-pro"         onclick="showPaywall()">✨ Ser PRO</button>
 
   </div>
@@ -553,7 +554,7 @@
 <!-- PAYWALL MODAL -->
 <div id="paywallModal">
   <div class="modal-card" style="max-width: 500px;"> <div class="modal-icon">🚀</div>
-    <div class="modal-title">Elige tu Plan ZettaxAI</div>
+    <div class="modal-title">Elige tu Plan ZettaAI</div>
     <div class="modal-desc">Potencia tu productividad con el nivel que necesites.</div>
     
     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
@@ -597,8 +598,7 @@ import {
   GoogleAuthProvider,
   FacebookAuthProvider,
   OAuthProvider,
-  signInWithPopup,
-  signInAnonymously
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
 // Importaciones para que el navegador entienda la Base de Datos
@@ -638,7 +638,7 @@ const MODOS = {
   chat:    { emoji: "💬", title: "Chat Rápido",        desc: "Respuestas cortas y directas",      premium: false },
   resumen: { emoji: "📝", title: "Resumidor Pro",       desc: "Sintetiza cualquier texto",          premium: true  },
   ideas:   { emoji: "💡", title: "Generador de Ideas",  desc: "Ideas creativas y originales",       premium: true  },
-  tarea:   { emoji: "🎓", title: "Tutor de Tareas",     desc: "Explica conceptos fácilmente",       premium: true  }
+  tarea:   { emoji: "🎓", title: "Tutor de Tareas",     desc: "Explica conceptos fácilmente",       premium: false  }
 };
 
 
@@ -772,7 +772,7 @@ window.send = async () => {
         message: text,
         mode,
         uid:     currentUser.uid,     // para verificación premium en backend
-        history: history.slice(-20)   // últimos 10 mensajes como contexto
+        history: history.slice(-10)   // últimos 10 mensajes como contexto
       })
     });
 
@@ -846,59 +846,50 @@ window.login = async () => {
     alert("Error al iniciar sesión: " + e.message);
   }
 };
-
-// 1. Configurar los Proveedores
-const googleProvider = new GoogleAuthProvider();
-const facebookProvider = new FacebookAuthProvider();
-const appleProvider = new OAuthProvider('apple.com');
   // --- LOGIN CON GOOGLE ---
 window.loginGoogle = async () => {
-  
+  const provider = new GoogleAuthProvider();
   try {
-    await signInWithPopup(auth, googleProvider);
-    alert("¡Bienvenido a ZettaAI!");
-  } catch (error) {
-    console.error(error);
-    alert("Error en Google: " + error.message);
+    const result = await signInWithPopup(auth, provider);
+    console.log("Usuario entró con Google:", result.user.email);
+  } catch (e) {
+    alert("Error con Google: " + e.message);
   }
 };
 
 // --- LOGIN CON FACEBOOK ---
 window.loginFacebook = async () => {
-
+  const provider = new FacebookAuthProvider();
   try {
-    await signInWithPopup(auth, facebookProvider);
-    alert("¡Sesión iniciada con Facebook!");
-  } catch (error) {
-    console.error(error);
-    alert("Error en Facebook: " + error.message);
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    alert("Error con Facebook: " + e.message);
   }
 };
 
 // --- LOGIN CON APPLE ---
 window.loginApple = async () => {
-
+  const provider = new OAuthProvider('apple.com');
   try {
-    // Apple requiere que uses el proveedor de OAuth
-    const result = await signInWithPopup(auth, appleProvider);
-    console.log("¡Entraste con Apple!", result.user);
-    alert("Sesión iniciada con Apple");
-  } catch (error) {
-    console.error("Error en Apple:", error.code);
-    // Nota: A veces Apple da error si no has configurado el ID de servicio en Firebase
-    alert("Error en Apple: " + error.message);
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    alert("Error con Apple: " + e.message);
   }
 };
 
-// --- LOGIN ANONIMO ---
-window.loginAnonimo = async () => {
-  try {
-    await signInAnonymously(auth);
-    alert("Entrando como invitado...");
-  } catch (error) {
-    alert("Error de invitado: " + error.message);
-  }
-};
+// --- LOGIN CON ANONIMO ---
+  window.loginAnonimo = function() {
+    const auth = getAuth();
+    signInAnonymously(auth)
+      .then(() => {
+        console.log("Acceso anónimo exitoso");
+        window.location.href = "ia.html"; // Asegúrate que este sea el nombre de tu archivo principal
+      })
+      .catch((error) => {
+        console.error("Error en acceso anónimo:", error.code);
+        alert("No se pudo iniciar sesión como invitado.");
+      });
+  };
 
 // ── Paywall ───────────────────────────────────────────────────────────────────
 window.showPaywall  = () => { document.getElementById("paywallModal").classList.add("show"); };
