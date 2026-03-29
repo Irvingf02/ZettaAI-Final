@@ -299,10 +299,13 @@
 
   /* ── CHAT BOX ── */
   #chatBox {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
+    background: transparent; 
+    border: none;            
+    box-shadow: none;        
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 0;
   }
 
   .chat-header {
@@ -327,13 +330,13 @@
   }
 
   #messages {
-    height: 420px;
+    flex: 1;
     overflow-y: auto;
-    padding: 16px;
+    padding: 20px 0;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    scroll-behavior: smooth;
+    gap: 16px;
+    background: transparent;
   }
 
   #messages::-webkit-scrollbar { width: 3px; }
@@ -384,25 +387,21 @@
   }
 
   /* ── INPUT ── */
-  .input-area {
-    padding: 12px 20px;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
+   .input-area {
+   background: transparent; 
+    border: none;
+    padding: 20px 0; 
     display: flex;
-    gap: 12px;
+    justify-content: center;
   }
 
   .chat-input {
-    flex: 1;
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 12px 20px;
-    color: var(--text);
-    font-family: 'Cabinet Grotesk', sans-serif;
-    font-size: 16px;
-    outline: none;
-    transition: border-color 0.2s;
+    border-radius: 28px;
+    padding: 14px 24px;
+    width: 90%;             
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   }
 
   .chat-input:focus { border-color: var(--accent); }
