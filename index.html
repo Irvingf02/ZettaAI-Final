@@ -9,7 +9,9 @@
 <meta property="og:title" content="ZettaxAI">
 <meta property="og:description" content="Respuestas inteligentes y rápidas en un solo clic.">
 <meta property="og:url" content="https://zettax-ai-pnhu.vercel.app/">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="manifest" href="/manifest.json">
 <link rel="canonical" href="https://zettax-ai-pnhu.vercel.app/">
 
@@ -30,12 +32,15 @@
     --user-bg:  #0D3A52;
     --bot-bg:   #141920;
     --radius:   14px;
+
+    /* ── AJUSTES DE DISEÑO ESTILO GEMINI ── */
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2); 
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'Cabinet Grotesk', sans-serif;
+    font-family: 'Inter', sans-serif; /* Cambiamos la fuente aquí */
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -46,7 +51,7 @@
     background-image:
       radial-gradient(ellipse 60% 40% at 10% 0%, rgba(0,212,255,0.05) 0%, transparent 70%),
       radial-gradient(ellipse 40% 30% at 90% 100%, rgba(245,166,35,0.04) 0%, transparent 60%);
-  }
+}
   
   /* ── 📱 DISEÑO BASE (CELULAR) ── */
 #appDiv {
@@ -172,42 +177,8 @@
     color: var(--text);
     border: 1px solid var(--border);
   }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* ── APP WRAPPER ── */
-  #appDiv {
-    display: none;
-    width: 100%;
-    max-width: 580px;
-    flex-direction: column;
-    gap: 10px;
-    animation: fadeUp 0.3s ease;
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); 
   }
-  /* ── DISEÑO PARA TABLETS (iPad, Android Tablets) ── */
-@media (min-width: 600px) {
-  #appDiv {
-    max-width: 700px;   /* Se ensancha más que el celular pero menos que la PC */
-    .mode-bar {
-    justify-content: space-around; /* Distribuye los modos uniformemente */
-    padding: 12px;
-  }
-  }
-  #messages {
-    height: 500px;      /* Un poco más de altura para leer cómodamente */
-  }
-}
-/* ── CONFIGURACIÓN PARA COMPUTADORA (PC) ── */
-@media (min-width: 1024px) {
-  #appDiv {
-    max-width: 900px;    /* Solo se agranda si la pantalla es de una PC */
-    gap: 20px;
-  }
-  
-  #messages {
-    height: 600px;       /* El chat se hace más alto en PC */
-  }
-}
-
   /* ── TOP BAR ── */
   .top-bar {
     display: flex;
@@ -414,21 +385,22 @@
 
   /* ── INPUT ── */
   .input-area {
-    padding: 12px 16px;
+    padding: 12px 20px;
+    background: var(--surface);
     border-top: 1px solid var(--border);
     display: flex;
-    gap: 8px;
+    gap: 12px;
   }
 
   .chat-input {
     flex: 1;
-    background: var(--surface);
+    background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 11px 14px;
+    border-radius: 24px;
+    padding: 12px 20px;
     color: var(--text);
     font-family: 'Cabinet Grotesk', sans-serif;
-    font-size: 0.9rem;
+    font-size: 16px;
     outline: none;
     transition: border-color 0.2s;
   }
@@ -437,10 +409,10 @@
   .chat-input::placeholder { color: var(--muted); }
 
   .send-btn {
-    padding: 11px 20px;
+    padding: 12px 24px;
     background: var(--accent);
     border: none;
-    border-radius: 10px;
+    border-radius: 24px;
     color: #000;
     font-family: 'Cabinet Grotesk', sans-serif;
     font-weight: 800;
