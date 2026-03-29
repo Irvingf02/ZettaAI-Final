@@ -501,8 +501,7 @@
 
   <button class="btn btn-ghost" onclick="loginAnonimo()" style="background: #f4f4f4; color: #333; margin-top: 8px; border: 1px solid #ddd;">
     ⚡ Probar como invitado (Rápido)
-
-</div>
+</button>
 </div>
 
 <!-- APP -->
@@ -553,7 +552,7 @@
 <!-- PAYWALL MODAL -->
 <div id="paywallModal">
   <div class="modal-card" style="max-width: 500px;"> <div class="modal-icon">🚀</div>
-    <div class="modal-title">Elige tu Plan ZettaAI</div>
+    <div class="modal-title">Elige tu Plan ZettaxAI</div>
     <div class="modal-desc">Potencia tu productividad con el nivel que necesites.</div>
     
     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
@@ -597,7 +596,8 @@ import {
   GoogleAuthProvider,
   FacebookAuthProvider,
   OAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signInAnonymously
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
 // Importaciones para que el navegador entienda la Base de Datos
@@ -630,10 +630,8 @@ import {
 
 // 🔴 Cambia por tu URL de Railway al publicar
 const BACKEND_URL = "https://zettaai-final-production.up.railway.app";
-const cors = require('cors');
-app.use(cors()); 
 
-const LIMITE_GRATIS = 10;
+const LIMITE_GRATIS = 15;
 
 const MODOS = {
   chat:    { emoji: "💬", title: "Chat Rápido",        desc: "Respuestas cortas y directas",      premium: false },
@@ -642,9 +640,6 @@ const MODOS = {
   tarea:   { emoji: "🎓", title: "Tutor de Tareas",     desc: "Explica conceptos fácilmente",       premium: true  }
 };
 
-const fbApp  = initializeApp(firebaseConfig);
-const auth   = getAuth(fbApp);
-const db     = getFirestore(fbApp);
 
 // ── Estado ──────────────────────────────────────────────────────────────────
 let currentUser = null;
@@ -855,10 +850,9 @@ window.login = async () => {
 const googleProvider = new GoogleAuthProvider();
 const facebookProvider = new FacebookAuthProvider();
 const appleProvider = new OAuthProvider('apple.com');
-
   // --- LOGIN CON GOOGLE ---
-
 window.loginGoogle = async () => {
+  
   try {
     await signInWithPopup(auth, googleProvider);
     alert("¡Bienvenido a ZettaAI!");
@@ -869,8 +863,8 @@ window.loginGoogle = async () => {
 };
 
 // --- LOGIN CON FACEBOOK ---
-
 window.loginFacebook = async () => {
+
   try {
     await signInWithPopup(auth, facebookProvider);
     alert("¡Sesión iniciada con Facebook!");
@@ -881,8 +875,8 @@ window.loginFacebook = async () => {
 };
 
 // --- LOGIN CON APPLE ---
-
 window.loginApple = async () => {
+
   try {
     // Apple requiere que uses el proveedor de OAuth
     const result = await signInWithPopup(auth, appleProvider);
@@ -898,7 +892,6 @@ window.loginApple = async () => {
 // --- LOGIN ANONIMO ---
 window.loginAnonimo = async () => {
   try {
-    const { signInAnonymously } = await import("https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js");
     await signInAnonymously(auth);
     alert("Entrando como invitado...");
   } catch (error) {
