@@ -518,7 +518,6 @@
  height: 100vh;
  overflow: hidden;
 }
-
 #sidebar {
   position: fixed;
   left: 0;
@@ -689,25 +688,10 @@
       <span class="icon">⚙️</span>
       <span class="text">Configuración y ayuda</span>
     </div>
-  </div>
-</div>
+  </div></div>
 
-<div class="app-container">
-  <aside id="sidebar" class="sidebar-closed">
-    </aside>
+  <!-- APP -->
 
-  <main id="main-content">
-    <header>
-      </header>
-    
-    <div id="chat-container">
-       <h2 id="chat-title">💬 Chat Rápido</h2> <div id="messages"></div>
-       </div>
-  </main>
-</div>
-</div>
-
-<!-- APP -->
 <div id="appDiv"></div>
 
   <!-- TOP BAR -->
@@ -935,14 +919,16 @@ function toggleSidebar() {
       loadChatHistory();
   }
 }
-async function loadChatHistory() {
+
+function loadChatHistory() {
   if (!currentUser) return;
+  
+  // Usamos el ID del contenedor que pusimos en el nuevo HTML de la sidebar
   const list = document.getElementById("history-list"); 
-  
-  // Limpieza inicial
   list.innerHTML = "<p style='font-size: 0.8rem; color: var(--muted); padding: 10px;'>Cargando...</p>";
-  
+
   try {
+    // Tu consulta original a Firestore (es perfecta, no la toques)
     const q = query(
       collection(db, "chats"), 
       where("userId", "==", currentUser.uid), 
@@ -950,38 +936,32 @@ async function loadChatHistory() {
     );
     
     const querySnapshot = await getDocs(q);
-    list.innerHTML = ""; 
+    list.innerHTML = ""; // Limpiamos el "Cargando..."
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      const item = document.createElement("div");
-      item.className = "sidebar-item";
-
-      // --- ESTO ES LO QUE RESCATA TUS BOTONES ---
-      item.style.position = "relative";
-      item.style.zIndex = "9999"; 
-      item.style.pointerEvents = "all"; 
-      item.style.cursor = "pointer";
-      // -----------------------------------------
-
-      item.innerHTML = `
+      
+      // CREAMOS EL BOTÓN CON EL DISEÑO DE GEMINI (IMAGEN 6)
+      const btn = document.createElement("div");
+      btn.className = "sidebar-item"; // Usamos la clase que definimos en el CSS nuevo
+      
+      // Estructura de Icono + Texto
+      btn.innerHTML = `
         <span class="icon">💬</span>
-        <span class="text">${data.title || "Chat nuevo"}</span>
+        <span class="text">${data.title || "Chat sin título"}</span>
       `;
       
-      item.onclick = (e) => {
-          e.stopPropagation(); // Seguridad extra para el clic
-          console.log("Cargando chat:", doc.id); 
+      btn.onclick = () => {
           loadSpecificChat(doc.id);
-          
+          // Opcional: cerrar sidebar en móviles al elegir un chat
           if(window.innerWidth < 768) toggleSidebar(); 
       };
       
-      list.appendChild(item);
+      list.appendChild(btn);
     });
   } catch (error) {
-    console.error("Error:", error);
-    list.innerHTML = "<p style='color: var(--danger); padding: 10px;'>Error al cargar</p>";
+    console.error("Error al cargar historial:", error);
+    list.innerHTML = "<p style='color: var(--danger);'>Error al cargar</p>";
   }
 }
 
