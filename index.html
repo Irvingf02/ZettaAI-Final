@@ -510,21 +510,27 @@
     to   { opacity: 1; transform: translateY(0); }
   }
  
-  .app-container {
-  display: flex; /* Pone la barra y el chat uno al lado del otro */
+.app-container {
+  display: flex !important; 
+  flex-direction: row !important; /* Fuerza la línea horizontal */
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  position: fixed; /* Evita que cosas externas lo muevan */
+  top: 0;
+  left: 0;
 }
 
  #sidebar {
-  width: 68px; /* Ancho cerrado como en imagen 2 */
+  width: 68px; 
+  height: 100vh;
   transition: width 0.3s ease;
-  flex-shrink: 0; /* Evita que la barra se aplaste */
-  z-index: 100;
-  background: var(--surface);
+  flex-shrink: 0; 
+  z-index: 1000; /* Asegura que esté por encima de todo */
+  background: #0f1114; /* Color oscuro de tu fondo */
   display: flex;
   flex-direction: column;
+  border-right: 1px solid rgba(255,255,255,0.1); /* Separación sutil */
 }
 
 /* Cuando se abre (Imagen 5 y 6) */
@@ -613,25 +619,24 @@
   overflow-y: auto;
 }
 
+/* El chat NUNCA se bajará con esto */
 #main-content {
-  flex-grow: 1;
+  flex: 1; 
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
   position: relative;
-  transition: all 0.3s ease; /* Para que se mueva junto con la sidebar */
-  padding: 0 20px;
 }
 
 /* Ajuste para que "Chat Rápido" tenga aire y no se pegue al borde */
 #chat-container {
-  padding-top: 20px; /* Esto le da el look limpio de la imagen 2 */
-  max-width: 900px;
-  margin: 0 auto;
+  margin-top: 20px; /* Ajusta esto según tu logo */
+  padding: 0 40px;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Fuerza a que el texto no se encime */
@@ -958,15 +963,14 @@ function toggleSidebar() {
       loadChatHistory();
   }
 }
-
 async function loadChatHistory() {
   if (!currentUser) return;
-  
   const list = document.getElementById("history-list"); 
+  
+  // Limpieza inicial
   list.innerHTML = "<p style='font-size: 0.8rem; color: var(--muted); padding: 10px;'>Cargando...</p>";
-
+  
   try {
-    // 1. Tu consulta a Firestore (Mantenla siempre)
     const q = query(
       collection(db, "chats"), 
       where("userId", "==", currentUser.uid), 
@@ -974,39 +978,37 @@ async function loadChatHistory() {
     );
     
     const querySnapshot = await getDocs(q);
-    list.innerHTML = ""; // Limpiamos el "Cargando..."
+    list.innerHTML = ""; 
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      
-      // 2. Creamos el elemento con el diseño pro
       const item = document.createElement("div");
-      item.className = "sidebar-item"; 
-      
-      // 3. Forzamos que el clic sea detectable
-      item.style.pointerEvents = "auto"; 
-      item.style.cursor = "pointer";
+      item.className = "sidebar-item";
 
-      // Estructura de Icono + Texto
+      // --- ESTO ES LO QUE RESCATA TUS BOTONES ---
+      item.style.position = "relative";
+      item.style.zIndex = "9999"; 
+      item.style.pointerEvents = "all"; 
+      item.style.cursor = "pointer";
+      // -----------------------------------------
+
       item.innerHTML = `
         <span class="icon">💬</span>
         <span class="text">${data.title || "Chat nuevo"}</span>
       `;
       
-      // 4. Lógica de carga al hacer clic
       item.onclick = (e) => {
-          e.stopPropagation(); // Evita que otros elementos interfieran
+          e.stopPropagation(); // Seguridad extra para el clic
           console.log("Cargando chat:", doc.id); 
           loadSpecificChat(doc.id);
           
-          // Cerrar sidebar en móviles para mejorar la experiencia
           if(window.innerWidth < 768) toggleSidebar(); 
       };
       
       list.appendChild(item);
     });
   } catch (error) {
-    console.error("Error al cargar historial:", error);
+    console.error("Error:", error);
     list.innerHTML = "<p style='color: var(--danger); padding: 10px;'>Error al cargar</p>";
   }
 }
