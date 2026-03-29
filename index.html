@@ -3,8 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZettaxAI</title>
+<title>ZettaxAI - La IA más simple y rápida</title>
+<meta name="description" content="ZettaxAI: Inteligencia Artificial con respuestas cortas, directas y potentes. Prueba nuestros modos de Resumen, Ideas y Tareas.">
+<meta name="keywords" content="ZettaxAI, inteligencia artificial, chat ai, gpt-4o, productividad">
+<meta property="og:title" content="ZettaxAI">
+<meta property="og:description" content="Respuestas inteligentes y rápidas en un solo clic.">
+<meta property="og:url" content="https://zettax-ai-pnhu.vercel.app/">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.json">
+<link rel="canonical" href="https://zettax-ai-pnhu.vercel.app/">
 
 <style>
   :root {
@@ -40,6 +47,29 @@
       radial-gradient(ellipse 60% 40% at 10% 0%, rgba(0,212,255,0.05) 0%, transparent 70%),
       radial-gradient(ellipse 40% 30% at 90% 100%, rgba(245,166,35,0.04) 0%, transparent 60%);
   }
+  /* ── DISEÑO PARA TABLETS (iPad, Android Tablets) ── */
+@media (min-width: 600px) {
+  #appDiv {
+    max-width: 700px;   /* Se ensancha más que el celular pero menos que la PC */
+    .mode-bar {
+    justify-content: space-around; /* Distribuye los modos uniformemente */
+    padding: 12px;
+  }
+  }
+  #messages {
+    height: 500px;      /* Un poco más de altura para leer cómodamente */
+  }
+}
+
+/* ── DISEÑO PARA COMPUTADORA (PC / Laptop) ── */
+@media (min-width: 1024px) {
+  #appDiv {
+    max-width: 900px;   /* Máximo aprovechamiento en pantallas grandes */
+  }
+  #messages {
+    height: 600px;      /* Chat bien alto en monitores de PC */
+  }
+}
 
   /* ── LOGIN ── */
   #loginDiv {
@@ -131,6 +161,30 @@
     gap: 10px;
     animation: fadeUp 0.3s ease;
   }
+  /* ── DISEÑO PARA TABLETS (iPad, Android Tablets) ── */
+@media (min-width: 600px) {
+  #appDiv {
+    max-width: 700px;   /* Se ensancha más que el celular pero menos que la PC */
+    .mode-bar {
+    justify-content: space-around; /* Distribuye los modos uniformemente */
+    padding: 12px;
+  }
+  }
+  #messages {
+    height: 500px;      /* Un poco más de altura para leer cómodamente */
+  }
+}
+/* ── CONFIGURACIÓN PARA COMPUTADORA (PC) ── */
+@media (min-width: 1024px) {
+  #appDiv {
+    max-width: 900px;    /* Solo se agranda si la pantalla es de una PC */
+    gap: 20px;
+  }
+  
+  #messages {
+    height: 600px;       /* El chat se hace más alto en PC */
+  }
+}
 
   /* ── TOP BAR ── */
   .top-bar {
