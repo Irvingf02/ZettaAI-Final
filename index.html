@@ -506,6 +506,15 @@
 </div>
 </div>
 
+<div id="sidebar" style="display: none; position: fixed; left: 0; top: 0; height: 100%; width: 250px; background: var(--card); border-right: 1px solid var(--border); z-index: 1000; padding: 20px;">
+  <h3 style="margin-bottom: 20px; font-size: 1rem;">Historial</h3>
+  <div id="historyList" style="display: flex; flex-direction: column; gap: 10px; overflow-y: auto; height: 80%;">
+    </div>
+  <button class="btn btn-ghost" onclick="toggleSidebar()" style="margin-top: 20px; width: 100%;">Cerrar</button>
+</div>
+
+<button class="mode-btn" onclick="toggleSidebar()" style="position: absolute; left: 16px; top: 20px;">📜</button>
+
 <!-- APP -->
 <div id="appDiv"></div>
 
@@ -543,6 +552,10 @@
     <div id="messages"></div>
 
     <div class="input-area">
+      <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf,.txt" onchange="handleFile(event)">
+  
+  <button class="mode-btn" onclick="document.getElementById('fileInput').click()" style="padding: 10px; font-size: 1.2rem;">+</button>
+
       <input class="chat-input" id="input" placeholder="Escribe un mensaje..."
         onkeypress="if(event.key==='Enter' && !event.shiftKey) send()" />
       <button class="send-btn" id="sendBtn" onclick="send()">Enviar</button>
@@ -706,6 +719,43 @@ function updateUI() {
   // Candados en modos premium
   document.querySelectorAll(".mode-btn .lock").forEach(el => {
     el.style.display = isPremium ? "none" : "inline";
+  });
+}
+window.handleFile = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    addMessage(`Archivo seleccionado: ${file.name}`, "user", "📎 Archivo listo");
+    // Aquí podrías implementar la subida a Firebase Storage o enviarlo al backend
+    console.log("Archivo listo para procesar:", file);
+  }
+};
+
+//
+window.toggleSidebar = () => {
+  const sb = document.getElementById("sidebar");
+  sb.style.display = sb.style.display === "none" ? "block" : "none";
+  if (sb.style.display === "block") loadChatHistory();
+};
+
+async function loadChatHistory() {
+  if (!currentUser) return;
+  const list = document.getElementById("historyList");
+  list.innerHTML = "<p style='font-size: 0.7rem; color: var(--muted);'>Cargando...</p>";
+
+  // Consultar chats del usuario en Firestore
+  const q = query(collection(db, "chats"), where("userId", "==", currentUser.uid), orderBy("timestamp", "desc"));
+  const querySnapshot = await getDocs(q);
+  
+  list.innerHTML = "";
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    const btn = document.createElement("button");
+    btn.className = "mode-btn";
+    btn.style.width = "100%";
+    btn.style.textAlign = "left";
+    btn.textContent = data.title || "Chat sin título";
+    btn.onclick = () => loadSpecificChat(doc.id);
+    list.appendChild(btn);
   });
 }
 
