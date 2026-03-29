@@ -396,6 +396,7 @@
   }
 
   .chat-input {
+   
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 28px;
@@ -508,41 +509,63 @@
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-
-  #sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
+ 
+  .app-container {
+  display: flex; /* Pone la barra y el chat uno al lado del otro */
+  width: 100vw;
   height: 100vh;
-  background-color: var(--surface);
-  border-right: 1px solid var(--border);
-  width: 68px; /* Ancho cerrada (Imagen 4) */
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+ #sidebar {
+  width: 68px; /* Ancho cerrado como en imagen 2 */
+  transition: width 0.3s ease;
+  flex-shrink: 0; /* Evita que la barra se aplaste */
+  z-index: 100;
+  background: var(--surface);
   display: flex;
   flex-direction: column;
-  padding: 12px 8px;
-  z-index: 1000;
-  overflow: hidden;
 }
 
 /* Cuando se abre (Imagen 5 y 6) */
 #sidebar.sidebar-open {
-  width: 280px;
+  width: 280px; /* Ancho abierto */
 }
 
+/* Ocultar el texto físicamente cuando la sidebar está cerrada */
+#sidebar.sidebar-closed .text {
+  display: none; 
+}
+
+/* Mostrar el texto y darle opacidad cuando está abierta */
+#sidebar.sidebar-open .text {
+  display: inline-block;
+  opacity: 1;
+}
+
+/* Asegura que los items del historial sean detectables para el clic */
 .sidebar-item {
+  /* Estructura y Alineación */
   display: flex;
   align-items: center;
   height: 48px;
-  min-width: 260px; /* Para que el texto no se amontone */
+  min-width: 260px;
   padding: 0 16px;
-  border-radius: 24px; /* Redondeado Gemini */
-  cursor: pointer;
-  color: var(--text);
-  transition: background 0.2s;
-  border: none;
-  background: transparent;
   margin-bottom: 4px;
+  
+  /* Estética Pro */
+  border-radius: 24px;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  transition: background 0.2s;
+  
+  /* Lógica de Clic y Capas (Vital para que funcione) */
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  z-index: 101;
+  user-select: none;
 }
 
 .sidebar-item:hover {
@@ -550,7 +573,7 @@
 }
 
 .sidebar-item.active {
-  background-color: var(--user-bg); /* El azul sutil de tu imagen 6 */
+  background-color: var(--user-bg);
   color: var(--accent);
 }
 
@@ -588,6 +611,35 @@
 .sidebar-middle {
   flex: 1;
   overflow-y: auto;
+}
+
+#main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s ease; /* Para que se mueva junto con la sidebar */
+  padding: 0 20px;
+}
+
+/* Ajuste para que "Chat Rápido" tenga aire y no se pegue al borde */
+#chat-container {
+  padding-top: 20px; /* Esto le da el look limpio de la imagen 2 */
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Fuerza a que el texto no se encime */
+h2#chat-title {
+  white-space: nowrap; 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 10px; 
 }
 </style>
 </head>
@@ -661,6 +713,21 @@
       <span class="text">Configuración y ayuda</span>
     </div>
   </div>
+</div>
+
+<div class="app-container">
+  <aside id="sidebar" class="sidebar-closed">
+    </aside>
+
+  <main id="main-content">
+    <header>
+      </header>
+    
+    <div id="chat-container">
+       <h2 id="chat-title">💬 Chat Rápido</h2> <div id="messages"></div>
+       </div>
+  </main>
+</div>
 </div>
 
 <!-- APP -->
@@ -895,12 +962,11 @@ function toggleSidebar() {
 async function loadChatHistory() {
   if (!currentUser) return;
   
-  // Usamos el ID del contenedor que pusimos en el nuevo HTML de la sidebar
   const list = document.getElementById("history-list"); 
   list.innerHTML = "<p style='font-size: 0.8rem; color: var(--muted); padding: 10px;'>Cargando...</p>";
 
   try {
-    // Tu consulta original a Firestore (es perfecta, no la toques)
+    // 1. Tu consulta a Firestore (Mantenla siempre)
     const q = query(
       collection(db, "chats"), 
       where("userId", "==", currentUser.uid), 
@@ -913,30 +979,37 @@ async function loadChatHistory() {
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       
-      // CREAMOS EL BOTÓN CON EL DISEÑO DE GEMINI (IMAGEN 6)
-      const btn = document.createElement("div");
-      btn.className = "sidebar-item"; // Usamos la clase que definimos en el CSS nuevo
+      // 2. Creamos el elemento con el diseño pro
+      const item = document.createElement("div");
+      item.className = "sidebar-item"; 
       
+      // 3. Forzamos que el clic sea detectable
+      item.style.pointerEvents = "auto"; 
+      item.style.cursor = "pointer";
+
       // Estructura de Icono + Texto
-      btn.innerHTML = `
+      item.innerHTML = `
         <span class="icon">💬</span>
-        <span class="text">${data.title || "Chat sin título"}</span>
+        <span class="text">${data.title || "Chat nuevo"}</span>
       `;
       
-      btn.onclick = () => {
+      // 4. Lógica de carga al hacer clic
+      item.onclick = (e) => {
+          e.stopPropagation(); // Evita que otros elementos interfieran
+          console.log("Cargando chat:", doc.id); 
           loadSpecificChat(doc.id);
-          // Opcional: cerrar sidebar en móviles al elegir un chat
+          
+          // Cerrar sidebar en móviles para mejorar la experiencia
           if(window.innerWidth < 768) toggleSidebar(); 
       };
       
-      list.appendChild(btn);
+      list.appendChild(item);
     });
   } catch (error) {
     console.error("Error al cargar historial:", error);
-    list.innerHTML = "<p style='color: var(--danger);'>Error al cargar</p>";
+    list.innerHTML = "<p style='color: var(--danger); padding: 10px;'>Error al cargar</p>";
   }
 }
-
 
 // ── Modo ─────────────────────────────────────────────────────────────────────
 window.setMode = (m) => {
