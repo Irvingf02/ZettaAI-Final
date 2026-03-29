@@ -508,6 +508,87 @@
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+
+  #sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  background-color: var(--surface);
+  border-right: 1px solid var(--border);
+  width: 68px; /* Ancho cerrada (Imagen 4) */
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 8px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+/* Cuando se abre (Imagen 5 y 6) */
+#sidebar.sidebar-open {
+  width: 280px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  min-width: 260px; /* Para que el texto no se amontone */
+  padding: 0 16px;
+  border-radius: 24px; /* Redondeado Gemini */
+  cursor: pointer;
+  color: var(--text);
+  transition: background 0.2s;
+  border: none;
+  background: transparent;
+  margin-bottom: 4px;
+}
+
+.sidebar-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-item.active {
+  background-color: var(--user-bg); /* El azul sutil de tu imagen 6 */
+  color: var(--accent);
+}
+
+.icon {
+  font-size: 20px;
+  min-width: 32px;
+  display: flex;
+  justify-content: center;
+}
+
+.text {
+  margin-left: 12px;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0; /* Oculto por defecto */
+  transition: opacity 0.2s;
+}
+
+#sidebar.sidebar-open .text {
+  opacity: 1;
+}
+
+.sidebar-label {
+  padding: 20px 16px 10px;
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  opacity: 0;
+}
+
+#sidebar.sidebar-open .sidebar-label {
+  opacity: 1;
+}
+
+.sidebar-middle {
+  flex: 1;
+  overflow-y: auto;
+}
 </style>
 </head>
 
@@ -553,14 +634,34 @@
 </div>
 </div>
 
-<div id="sidebar" style="display: none; position: fixed; left: 0; top: 0; height: 100%; width: 250px; background: var(--card); border-right: 1px solid var(--border); z-index: 1000; padding: 20px;">
-  <h3 style="margin-bottom: 20px; font-size: 1rem;">Historial</h3>
-  <div id="historyList" style="display: flex; flex-direction: column; gap: 10px; overflow-y: auto; height: 80%;">
-    </div>
-  <button class="btn btn-ghost" onclick="toggleSidebar()" style="margin-top: 20px; width: 100%;">Cerrar</button>
-</div>
+<div id="sidebar" class="sidebar-closed">
+  <div class="sidebar-top">
+    <button class="sidebar-item toggle-btn" onclick="toggleSidebar()">
+      <span class="icon">☰</span>
+    </button>
+    <button class="sidebar-item new-chat-btn">
+      <span class="icon">➕</span>
+      <span class="text">Nuevo chat</span>
+    </button>
+  </div>
 
-<button class="mode-btn" onclick="toggleSidebar()" style="position: absolute; left: 16px; top: 20px;">📜</button>
+  <div class="sidebar-middle">
+    <div class="sidebar-label">Recientes</div>
+    <div id="history-list">
+      <div class="sidebar-item active">
+        <span class="icon">💬</span>
+        <span class="text">Revisión de código de IA</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="sidebar-item">
+      <span class="icon">⚙️</span>
+      <span class="text">Configuración y ayuda</span>
+    </div>
+  </div>
+</div>
 
 <!-- APP -->
 <div id="appDiv"></div>
@@ -777,34 +878,65 @@ window.handleFile = (event) => {
   }
 };
 
-//
-window.toggleSidebar = () => {
-  const sb = document.getElementById("sidebar");
-  sb.style.display = sb.style.display === "none" ? "block" : "none";
-  if (sb.style.display === "block") loadChatHistory();
-};
+// ── FUSIÓN DE SIDEBAR PROFESIONAL Y CARGA DE DATOS ──
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  
+  // 1. Activa o desactiva la clase CSS para abrir/cerrar suavemente
+  sidebar.classList.toggle('sidebar-open');
+  
+  // 2. Si la abrimos, aprovechamos para cargar el historial de Firebase
+  if (sidebar.classList.contains('sidebar-open')) {
+      loadChatHistory();
+  }
+}
 
 async function loadChatHistory() {
   if (!currentUser) return;
-  const list = document.getElementById("historyList");
-  list.innerHTML = "<p style='font-size: 0.7rem; color: var(--muted);'>Cargando...</p>";
-
-  // Consultar chats del usuario en Firestore
-  const q = query(collection(db, "chats"), where("userId", "==", currentUser.uid), orderBy("timestamp", "desc"));
-  const querySnapshot = await getDocs(q);
   
-  list.innerHTML = "";
-  querySnapshot.forEach((doc) => {
-    const data = doc.data();
-    const btn = document.createElement("button");
-    btn.className = "mode-btn";
-    btn.style.width = "100%";
-    btn.style.textAlign = "left";
-    btn.textContent = data.title || "Chat sin título";
-    btn.onclick = () => loadSpecificChat(doc.id);
-    list.appendChild(btn);
-  });
+  // Usamos el ID del contenedor que pusimos en el nuevo HTML de la sidebar
+  const list = document.getElementById("history-list"); 
+  list.innerHTML = "<p style='font-size: 0.8rem; color: var(--muted); padding: 10px;'>Cargando...</p>";
+
+  try {
+    // Tu consulta original a Firestore (es perfecta, no la toques)
+    const q = query(
+      collection(db, "chats"), 
+      where("userId", "==", currentUser.uid), 
+      orderBy("timestamp", "desc")
+    );
+    
+    const querySnapshot = await getDocs(q);
+    list.innerHTML = ""; // Limpiamos el "Cargando..."
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      
+      // CREAMOS EL BOTÓN CON EL DISEÑO DE GEMINI (IMAGEN 6)
+      const btn = document.createElement("div");
+      btn.className = "sidebar-item"; // Usamos la clase que definimos en el CSS nuevo
+      
+      // Estructura de Icono + Texto
+      btn.innerHTML = `
+        <span class="icon">💬</span>
+        <span class="text">${data.title || "Chat sin título"}</span>
+      `;
+      
+      btn.onclick = () => {
+          loadSpecificChat(doc.id);
+          // Opcional: cerrar sidebar en móviles al elegir un chat
+          if(window.innerWidth < 768) toggleSidebar(); 
+      };
+      
+      list.appendChild(btn);
+    });
+  } catch (error) {
+    console.error("Error al cargar historial:", error);
+    list.innerHTML = "<p style='color: var(--danger);'>Error al cargar</p>";
+  }
 }
+
 
 // ── Modo ─────────────────────────────────────────────────────────────────────
 window.setMode = (m) => {
@@ -869,7 +1001,7 @@ window.send = async () => {
         message: text,
         mode,
         uid:     currentUser.uid,     // para verificación premium en backend
-        history: history.slice(-10)   // últimos 10 mensajes como contexto
+        history: history.slice(-15)   // últimos 10 mensajes como contexto
       })
     });
 
