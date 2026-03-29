@@ -15,43 +15,34 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
   try {
     serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
   } catch (e) {
-    console.error("❌ Error parseando la variable de Firebase:", e.message);
+    console.error("❌ Error en JSON de variable Railway:", e.message);
   }
 }else {
-
-  // En Local: Solo intenta leer el archivo SI existe
-
-  try {
-
-    const fs = await import("fs"); // Importación dinámica para que Railway no se queje
-
-    serviceAccount = JSON.parse(fs.readFileSync("./serviceAccountKey.json", "utf8"));
-
-  } catch (e) {
-
-    // Si estamos en Railway, este error es normal y no romperá el servidor
-
-    console.log("ℹ️ Archivo local no encontrado (normal en producción)");
-
+// En Local: Solo intenta leer el archivo SI existe
+   try {
+     serviceAccount = JSON.parse(readFileSync("./serviceAccountKey.json", "utf8"));
+      } catch (e) {
+        // Si estamos en Railway, este error es normal y no romperá el servidor
+        console.log("ℹ️ Modo Producción: No se encontró archivo físico (usando variables).");
   }
-
 }
-
-const db = admin.firestore();
-
 // ── 1. FIREBASE ADMIN ─────────────────────────────────────────────────────────
 // En Railway usa variable de entorno. En local usa el archivo JSON.
-let serviceAccount;
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
-  serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+if (serviceAccount) {
+  try {
+    if (!admin.apps.length) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    console.log("🔥 Firebase conectado correctamente");
+   }
+  } catch (e) {
+    console.error("❌ Error inicializando Firebase:", e.message);
+  }
 } else {
-  const { readFileSync } = await import("fs");
-  serviceAccount = JSON.parse(readFileSync("./serviceAccountKey.json"));
+  console.error("🚨 CRÍTICO: No se pudo cargar ninguna credencial de Firebase.");
 }
-
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
-
 // ── 2. STRIPE ─────────────────────────────────────────────────────────────────
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
