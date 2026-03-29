@@ -510,27 +510,21 @@
     to   { opacity: 1; transform: translateY(0); }
   }
  
+/* EL PADRE: Obliga a que la barra y el chat sean vecinos, no pisos */
 .app-container {
-  display: flex !important; 
-  flex-direction: row !important; /* Fuerza la línea horizontal */
+  display: flex !important;
+  flex-direction: row !important; /* Esto evita que se baje el chat */
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  position: fixed; /* Evita que cosas externas lo muevan */
-  top: 0;
-  left: 0;
 }
 
- #sidebar {
-  width: 68px; 
-  height: 100vh;
+#sidebar {
+  width: 68px; /* Cerrada */
+  flex-shrink: 0; /* No permite que el chat la aplaste */
   transition: width 0.3s ease;
-  flex-shrink: 0; 
-  z-index: 1000; /* Asegura que esté por encima de todo */
-  background: #0f1114; /* Color oscuro de tu fondo */
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid rgba(255,255,255,0.1); /* Separación sutil */
+  background: #0f1114;
+  z-index: 10;
 }
 
 /* Cuando se abre (Imagen 5 y 6) */
@@ -621,11 +615,10 @@
 
 /* El chat NUNCA se bajará con esto */
 #main-content {
-  flex: 1; 
-  height: 100vh;
+  flex-grow: 1; /* Toma todo el espacio que sobra a la derecha */
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
   position: relative;
 }
 
