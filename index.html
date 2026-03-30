@@ -797,18 +797,9 @@
   </div>
 
   <div class="middle-content">
-    <div class="sidebar-item">
-      <span class="icon">⭐</span>
-      <span class="text">Mis cosas</span>
-    </div>
-    <div class="sidebar-item">
-      <span class="icon">💎</span>
-      <span class="text">Gems</span>
-    </div>
-    <div class="sidebar-item active">
-      <span class="icon">💬</span>
-      <span class="text">Revisión de código de IA</span>
-    </div>
+    <div class="sidebar-item"><span class="icon">⭐</span><span class="text">Mis cosas</span></div>
+    <div class="sidebar-item"><span class="icon">💎</span><span class="text">Gems</span></div>
+    <div class="sidebar-item active"><span class="icon">💬</span><span class="text">Revisión de código</span></div>
   </div>
 
   <div class="sidebar-item settings">
@@ -816,7 +807,6 @@
     <span class="text">Configuración y ayuda</span>
   </div>
 </div>
-
   <!-- APP -->
 
 <div id="appDiv"></div>
@@ -1035,18 +1025,22 @@ window.handleFile = (event) => {
 
 // ── FUSIÓN DE SIDEBAR PROFESIONAL Y CARGA DE DATOS ──
 
-
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   
-  // 1. Cambia las clases para pasar de 3 iconos a 7 elementos (y viceversa)
   if (sidebar.classList.contains('sidebar-closed')) {
-    sidebar.classList.replace('sidebar-closed', 'sidebar-open');
+    // PASAR A 7 ELEMENTOS
+    sidebar.classList.remove('sidebar-closed');
+    sidebar.classList.add('sidebar-open');
     
-    // 2. Solo si se abre, cargamos el historial de Firebase
-    loadChatHistory(); 
+    // CARGAR TUS CHATS DE FIREBASE
+    if (typeof loadChatHistory === "function") {
+        loadChatHistory();
+    }
   } else {
-    sidebar.classList.replace('sidebar-open', 'sidebar-closed');
+    // VOLVER A 3 ICONOS
+    sidebar.classList.remove('sidebar-open');
+    sidebar.classList.add('sidebar-closed');
   }
 }
 
