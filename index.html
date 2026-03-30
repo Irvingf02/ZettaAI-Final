@@ -1760,53 +1760,57 @@ window.toggleProfileMenu = function() {
 };
 
 function updateUserProfile(user) {
-  if (!user) return;
+  console.log('Actualizando perfil, user:', user?.email);
   
-  // Esperar un momento para asegurar que el DOM esté listo
-  setTimeout(() => {
-    const email = user.email || '';
-    const displayName = user.displayName || email.split('@')[0] || 'Usuario';
-    const photoURL = user.photoURL || '';
-    const initial = email.charAt(0).toUpperCase() || '?';
-    
-    // Avatar pequeño
-    const avatarImg = document.getElementById('userAvatarImg');
-    const avatarLetter = document.getElementById('userAvatarLetter');
-    
-    if (avatarImg && avatarLetter) {
-      if (photoURL) {
-        avatarImg.src = photoURL;
-        avatarImg.style.display = 'block';
-        avatarLetter.style.display = 'none';
-      } else {
-        avatarImg.style.display = 'none';
-        avatarLetter.style.display = 'flex';
-        avatarLetter.textContent = initial;
-      }
+  // Si no hay usuario, usar datos de ejemplo para prueba (quitar después)
+  const email = user?.email || 'floresirving208@gmail.com';
+  const displayName = user?.displayName || email.split('@')[0];
+  const photoURL = user?.photoURL || '';
+  const initial = email.charAt(0).toUpperCase();
+  
+  console.log('Email usado:', email);
+  console.log('Inicial:', initial);
+  
+  // Función auxiliar para actualizar elementos
+  const updateElement = (id, property, value) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el[property] = value;
+      console.log(`✓ ${id} actualizado`);
+    } else {
+      console.log(`✗ ${id} NO encontrado`);
     }
-    
-    // Menú de perfil
-    const menuImg = document.getElementById('profileMenuImg');
-    const menuLetter = document.getElementById('profileMenuLetter');
-    const profileName = document.getElementById('profileName');
-    const profileEmail = document.getElementById('profileEmail');
-    
-    if (menuImg && menuLetter) {
-      if (photoURL) {
-        menuImg.src = photoURL;
-        menuImg.style.display = 'block';
-        menuLetter.style.display = 'none';
-      } else {
-        menuImg.style.display = 'none';
-        menuLetter.style.display = 'flex';
-        menuLetter.textContent = initial;
-      }
+  };
+  
+  // Actualizar avatar pequeño
+  const avatarImg = document.getElementById('userAvatarImg');
+  const avatarLetter = document.getElementById('userAvatarLetter');
+  
+  if (avatarImg && avatarLetter) {
+    if (photoURL) {
+      avatarImg.src = photoURL;
+      avatarImg.style.display = 'block';
+      avatarLetter.style.display = 'none';
+    } else {
+      avatarImg.style.display = 'none';
+      avatarLetter.style.display = 'flex';
+      avatarLetter.textContent = initial;
+      avatarLetter.style.alignItems = 'center';
+      avatarLetter.style.justifyContent = 'center';
+      avatarLetter.style.width = '100%';
+      avatarLetter.style.height = '100%';
     }
-    
-    if (profileName) profileName.textContent = `¡Hola, ${displayName.split(' ')[0]}!`;
-    if (profileEmail) profileEmail.textContent = email;
-    
-  }, 100); // Esperar 100ms
+  }
+  
+  // Actualizar menú
+  updateElement('profileMenuLetter', 'textContent', initial);
+  updateElement('profileMenuLetter', 'style.display', 'flex');
+  updateElement('profileMenuImg', 'style.display', 'none');
+  updateElement('profileName', 'textContent', `¡Hola, ${displayName.split(' ')[0]}!`);
+  updateElement('profileEmail', 'textContent', email);
+  updateElement('accountItemLetter', 'textContent', initial);
+  updateElement('accountItemName', 'textContent', displayName);
+  updateElement('accountItemEmail', 'textContent', email);
 }
 
 const MODOS = {
@@ -2226,6 +2230,18 @@ window.payPremium = async (plan) => { // <--- Recibe el plan ('go', 'plus', 'ult
     alert("Error conectando con el servidor de pagos.");
   }
 };
+
+// Forzar actualización después de 2 segundos (para prueba)
+setTimeout(() => {
+  if (currentUser) {
+    console.log('Forzando actualización de perfil...');
+    updateUserProfile(currentUser);
+  } else {
+    console.log('No hay currentUser, usando email de prueba');
+    updateUserProfile({ email: 'floresirving208@gmail.com' });
+  }
+}, 2000);
+
 </script>
 
 </body>
