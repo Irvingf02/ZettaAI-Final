@@ -53,110 +53,99 @@
       radial-gradient(ellipse 40% 30% at 90% 100%, rgba(245,166,35,0.04) 0%, transparent 60%);
 }
 
-
- /* ============================================================
-   1. DISEÑO PARA COMPUTADORA DE ESCRITORIO (Monitores Grandes)
-   Referencia: Imagen 5 (Tu diseño actual corregido)
-   ============================================================ */
+/*============================================================ 
+ 1. DISEÑO PARA COMPUTADORA DE ESCRITORIO (Monitores Grandes)
+Referencia: Imagen 5 (Tu diseño actual corregido)
+============================================================ */
 @media (min-width: 1441px) {
-  #chat-title-container {
+   #chat-title-container {
     padding-left: 20px;
     transition: padding-left 0.3s ease;
+
   }
 
   .sidebar-open + #main-content #chat-title-container {
-    padding-left: 280px; 
+   padding-left: 280px; 
+
   }
+
 }
 
 /* ============================================================
-   2. DISEÑO PARA LAPTOP (Pantallas Estándar)
-   Evita que el texto se corte en pantallas de 13" o 15"
-   ============================================================ */
+2. DISEÑO PARA LAPTOP (Pantallas Estándar)
+ Evita que el texto se corte en pantallas de 13" o 15"
+  ============================================================ */
 @media (min-width: 1025px) and (max-width: 1440px) {
-  #chat-title-container {
+   #chat-title-container {
     padding-left: 15px;
     transition: padding-left 0.3s ease;
-  }
-
+   }
   /* Ajuste de fuente para que no sea gigante en la lap */
   #chat-title-container h2 {
     font-size: 1.1rem;
   }
 
-  /* Empuje específico para Laptop */
+/* Empuje específico para Laptop */
   .sidebar-open + #main-content #chat-title-container {
     padding-left: 280px;
   }
+
 }
 
 /* ============================================================
-   3. DISEÑO PARA TABLETA
-   Un híbrido entre móvil y escritorio
-   ============================================================ */
+3. DISEÑO PARA TABLETA
+Un híbrido entre móvil y escritorio
+============================================================ */
+
 @media (min-width: 768px) and (max-width: 1024px) {
-#chat-title-container {
-    display: flex !important;
-    justify-content: center !important;
-    width: 100% !important;
-    padding: 15px 0 !important;
-    position: relative !important;
-  
-  .sidebar-open + #main-content #chat-title-container {
-    padding-left: 200px; 
+   #chat-title-container {
+   padding-left: 15px; 
+
+  }
+   .sidebar-open + #main-content #chat-title-container {
+   padding-left: 200px; 
   }
 }
-/* La barra debe ser flotante (estilo móvil/tableta) */
-  #sidebar {
-    position: fixed !important;
-    left: -280px; /* Escondida */
-    z-index: 10000;
-    height: 100vh !important;
-    transition: left 0.3s ease;
-  }
 
-  #sidebar.sidebar-open {
-    left: 0 !important; /* Aparece encima sin empujar el chat */
-  }
-
-  /* Asegurar que los 7 elementos se vean en lista vertical */
-  .sidebar-open .middle-content {
-    display: flex !important;
-    flex-direction: column !important;
-  }
-}
 /* ============================================================
-   4. DISEÑO PARA TELÉFONO (Móvil) - REPARACIÓN FINAL
-   ============================================================ */
+4. DISEÑO PARA TELÉFONO (Móvil) - REPARACIÓN FINAL
+============================================================ */
 @media (max-width: 767px) {
-  /* Centrar título como en la Imagen 7 de Gemini */
+
+  /* Forzamos que el contenedor del título ocupe todo el ancho y se centre */
+
   #chat-title-container {
-    display: flex !important;
-    justify-content: center !important;
+    display: block !important;
     width: 100% !important;
     padding: 15px 0 !important;
-    position: relative !important;
-
-  /* La barra debe ser flotante (estilo móvil/tableta) */
-  #sidebar {
-    position: fixed !important;
-    left: -280px; /* Escondida */
-    z-index: 10000;
-    height: 100vh !important;
-    transition: left 0.3s ease;
+    text-align: center !important; 
+    margin: 0 auto !important;
+    background: #000 !important; /* Asegura que el fondo sea sólido */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
   }
 
-  #sidebar.sidebar-open {
-    left: 0 !important; /* Aparece encima sin empujar el chat */
+  /* Hacemos el texto más pequeño para que NO se corte */
+   #chat-title-container h2 {
+    font-size: 1rem !important; /* Más pequeño que antes para asegurar espacio */
+    margin: 0 !important;
+    display: block !important;
+    white-space: normal !important; /* Permite que el texto baje si es muy largo */
+
   }
 
-  /* Asegurar que los 7 elementos se vean en lista vertical */
-  .sidebar-open .middle-content {
-    display: flex !important;
-    flex-direction: column !important;
-  }
-}
+  #chat-title-container span {
+    font-size: 0.75rem !important;
+    display: block !important;
+    opacity: 0.7 !important;
 
+  }
+
+  /* ELIMINAMOS EL EMPUJE: En móvil la sidebar NO debe mover el chat */
+  .sidebar-open + #main-content #chat-title-container {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+
+  }
 }
 
   /* ── LOGIN ── */
@@ -961,16 +950,10 @@ function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   
   if (sidebar.classList.contains('sidebar-closed')) {
-    // PASAR A 7 ELEMENTOS
     sidebar.classList.remove('sidebar-closed');
     sidebar.classList.add('sidebar-open');
-    
-    // CARGAR TUS CHATS DE FIREBASE
-    if (typeof loadChatHistory === "function") {
-        loadChatHistory();
-    }
+    if (typeof loadChatHistory === 'function') loadChatHistory();
   } else {
-    // VOLVER A 3 ICONOS
     sidebar.classList.remove('sidebar-open');
     sidebar.classList.add('sidebar-closed');
   }
