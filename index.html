@@ -904,7 +904,8 @@ import {
     where,         // ← FALTABA ESTA
     orderBy,       // ← FALTABA ESTA
     getDocs,       // ← FALTABA ESTA
-    limit 
+    limit,
+    collection  
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
   // TODO: Add SDKs for Firebase products that you want to use
   // https://firebase.google.com/docs/web/setup#available-libraries
@@ -1197,25 +1198,31 @@ window.send = async () => {
     addMessage(data.reply, "bot");
     history.push({ role: "assistant", content: data.reply });
 
-    // Actualizar contador
+    // GUARDAR CHAT EN FIRESTORE (nuevo)
+   try {
+      const chatRef = doc(collection(db, "chats"));
+      await setDoc(chatRef, {
+        userId: currentUser.uid,
+        title: text.substring(0, 50),
+        timestamp: new Date(),
+        messages: history
+      });
+      console.log("Chat guardado:", chatRef.id);
+    } catch (e) {
+      console.error("Error guardando chat:", e);
+    }
+    // ⬆️⬆️⬆️ FIN CÓDIGO NUEVO ⬆️⬆️⬆️
+
     msgCount++;
     if (!isPremium) {
-      // Guardar en Firestore para persistir el conteo
-      await setDoc(doc(db, "users", currentUser.uid),
-        { msgCount }, { merge: true });
+      await setDoc(doc(db, "users", currentUser.uid), { msgCount }, { merge: true });
     }
     updateUI();
 
   } catch (e) {
-    typing.remove();
-    addMessage("⚠️ Error conectando con el servidor.", "bot error");
-    console.error(e);
-  } finally {
-    sendBtn.disabled = false;
-    input.focus();
+    // ... (error handling) ...
   }
 };
-
 // ── Auth ──────────────────────────────────────────────────────────────────────
 window.register = async () => {
   const email = document.getElementById("email").value.trim();
