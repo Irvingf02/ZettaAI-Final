@@ -87,8 +87,34 @@
   /* Empuje específico para Laptop */
   .sidebar-open + #main-content #chat-title-container {
     padding-left: 280px;
+  }/* Alineación vertical de los 3 iconos al cerrar (Imagen 10) */
+  #sidebar.sidebar-closed {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Manda Configuración al final */
+    align-items: center;
+    padding: 20px 0;
   }
-  
+
+  /* Ocultar lo que no debe verse (4 elementos de en medio) */
+  .sidebar-closed .text, 
+  .sidebar-closed .middle-content {
+    display: none !important;
+  }
+  /* Alineación vertical de los 3 iconos al cerrar (Imagen 10) */
+  #sidebar.sidebar-closed {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Manda Configuración al final */
+    align-items: center;
+    padding: 20px 0;
+  }
+
+  /* Ocultar lo que no debe verse (4 elementos de en medio) */
+  .sidebar-closed .text, 
+  .sidebar-closed .middle-content {
+    display: none !important;
+  }
 }
 
 /* ============================================================
