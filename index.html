@@ -88,20 +88,7 @@
   .sidebar-open + #main-content #chat-title-container {
     padding-left: 280px;
   }
-  /* Alineación vertical de los 3 iconos al cerrar (Imagen 10) */
-  #sidebar.sidebar-closed {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Manda Configuración al final */
-    align-items: center;
-    padding: 20px 0;
-  }
-
-  /* Ocultar lo que no debe verse (4 elementos de en medio) */
-  .sidebar-closed .text, 
-  .sidebar-closed .middle-content {
-    display: none !important;
-  }
+  
 }
 
 /* ============================================================
@@ -116,33 +103,6 @@
   .sidebar-open + #main-content #chat-title-container {
     padding-left: 200px; 
   }
-/* Centrar título como en la Imagen 7 de Gemini */
-  #chat-title-container {
-    display: flex !important;
-    justify-content: center !important;
-    width: 100% !important;
-    padding: 15px 0 !important;
-    position: relative !important;
-  }
-
-  /* La barra debe ser flotante (estilo móvil/tableta) */
-  #sidebar {
-    position: fixed !important;
-    left: -280px; /* Escondida */
-    z-index: 10000;
-    height: 100vh !important;
-    transition: left 0.3s ease;
-  }
-
-  #sidebar.sidebar-open {
-    left: 0 !important; /* Aparece encima sin empujar el chat */
-  }
-
-  /* Asegurar que los 7 elementos se vean en lista vertical */
-  .sidebar-open .middle-content {
-    display: flex !important;
-    flex-direction: column !important;
-  }
 }
 
 /* ============================================================
@@ -150,35 +110,6 @@
    ============================================================ */
 @media (max-width: 767px) {
   /* Forzamos que el contenedor del título ocupe todo el ancho y se centre */
-  #chat-title-container {
-    display: block !important;
-    width: 100% !important;
-    padding: 15px 0 !important;
-    text-align: center !important; 
-    margin: 0 auto !important;
-    background: #000 !important; /* Asegura que el fondo sea sólido */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-  }
-
-  /* Hacemos el texto más pequeño para que NO se corte */
-  #chat-title-container h2 {
-    font-size: 1rem !important; /* Más pequeño que antes para asegurar espacio */
-    margin: 0 !important;
-    display: block !important;
-    white-space: normal !important; /* Permite que el texto baje si es muy largo */
-  }
-
-  #chat-title-container span {
-    font-size: 0.75rem !important;
-    display: block !important;
-    opacity: 0.7 !important;
-  }
-
-  /* ELIMINAMOS EL EMPUJE: En móvil la sidebar NO debe mover el chat */
-  .sidebar-open + #main-content #chat-title-container {
-    padding-left: 0 !important;
-    margin-left: 0 !important;
-  }
 /* Título centrado y limpio como la Imagen 7 */
   #chat-title-container {
     display: flex !important;
@@ -197,6 +128,7 @@
   #sidebar.sidebar-open {
     left: 0 !important;
   }
+
 }
 
 
