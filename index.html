@@ -701,32 +701,35 @@
 </div>
 
 <div id="sidebar" class="sidebar-closed">
-  <div class="sidebar-top">
-    <button class="sidebar-item toggle-btn" onclick="toggleSidebar()">
-      <span class="icon">☰</span>
-    </button>
-    <button class="sidebar-item new-chat-btn">
-      <span class="icon">➕</span>
-      <span class="text">Nuevo chat</span>
-    </button>
+  <div class="menu-icon-container" onclick="toggleSidebar()">
+    <span>☰</span>
   </div>
 
-  <div class="sidebar-middle">
-    <div class="sidebar-label">Recientes</div>
-    <div id="history-list">
-      <div class="sidebar-item active">
-        <span class="icon">💬</span>
-        <span class="text">Revisión de código de IA</span>
-      </div>
-    </div>
+  <div class="sidebar-item new-chat">
+    <span class="icon">📝</span>
+    <span class="text">Nuevo chat</span>
   </div>
 
-  <div class="sidebar-bottom">
+  <div class="sidebar-content">
     <div class="sidebar-item">
-      <span class="icon">⚙️</span>
-      <span class="text">Configuración y ayuda</span>
+      <span class="icon">⭐</span>
+      <span class="text">Mis cosas</span>
     </div>
-  </div></div>
+    <div class="sidebar-item">
+      <span class="icon">💎</span>
+      <span class="text">Gems</span>
+    </div>
+    <div class="sidebar-item active">
+      <span class="icon">💬</span>
+      <span class="text">Revisión de código de IA</span>
+    </div>
+  </div>
+
+  <div class="sidebar-item settings">
+    <span class="icon">⚙️</span>
+    <span class="text">Configuración y ayuda</span>
+  </div>
+</div>
 
   <!-- APP -->
 
