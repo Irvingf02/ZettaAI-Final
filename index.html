@@ -104,31 +104,38 @@
 }
 
 /* ============================================================
-   4. DISEÑO PARA TELÉFONO (Móvil)
-   Referencia: Imagen 8 (Gemini Móvil) y tu Imagen 6
+   4. DISEÑO PARA TELÉFONO (Móvil) - REPARACIÓN FINAL
    ============================================================ */
 @media (max-width: 767px) {
+  /* Forzamos que el contenedor del título ocupe todo el ancho y se centre */
   #chat-title-container {
-    width: 100%;
-    padding: 10px 0;
-    text-align: center; 
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+    display: block !important;
+    width: 100% !important;
+    padding: 15px 0 !important;
+    text-align: center !important; 
+    margin: 0 auto !important;
+    background: #000 !important; /* Asegura que el fondo sea sólido */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
   }
 
+  /* Hacemos el texto más pequeño para que NO se corte */
   #chat-title-container h2 {
-    font-size: 1.2rem;
-    margin: 0;
-    display: inline-block; 
+    font-size: 1rem !important; /* Más pequeño que antes para asegurar espacio */
+    margin: 0 !important;
+    display: block !important;
+    white-space: normal !important; /* Permite que el texto baje si es muy largo */
   }
 
   #chat-title-container span {
-    font-size: 0.8rem;
-    display: block; 
-    margin-top: 2px;
+    font-size: 0.75rem !important;
+    display: block !important;
+    opacity: 0.7 !important;
   }
 
+  /* ELIMINAMOS EL EMPUJE: En móvil la sidebar NO debe mover el chat */
   .sidebar-open + #main-content #chat-title-container {
-    padding-left: 0 !important; 
+    padding-left: 0 !important;
+    margin-left: 0 !important;
   }
 }
 
