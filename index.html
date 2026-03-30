@@ -64,38 +64,74 @@
   animation: fadeUp 0.3s ease;
 }
 
-  /* ── 📑 TABLETS (De 600px a 1023px) ── */
-@media (min-width: 600px) {
-  #appDiv {
-    max-width: 650px; 
+  /* ============================================================
+   1. DISEÑO PARA COMPUTADORA (Escritorio / Desktopt)
+   Referencia: Imagen 5 (Tu diseño actual corregido)
+   ============================================================ */
+@media (min-width: 1025px) {
+  #chat-title-container {
+    padding-left: 20px; /* Un pequeño aire para que "Chat Rápido" no se pegue */
+    transition: padding-left 0.3s ease; /* Movimiento suave al abrir/cerrar sidebar */
   }
-  #messages {
-    height: 450px;
+
+  /* Si la sidebar está abierta (como en Gemini), empujamos el título */
+  .sidebar-open + #main-content #chat-title-container {
+    padding-left: 280px; /* Ancho de la sidebar abierta */
+  }
+}
+/* NUEVO: DISEÑO ESPECÍFICO PARA LAPTOP 
+   (Se coloca aquí para que ajuste pantallas medianas sin romper el de arriba) */
+@media (min-width: 1200px) and (max-width: 1440px) {
+  #chat-title-container h2 {
+    font-size: 1.1rem; /* Solo ajustamos el tamaño para que quepa en la lap */
   }
 }
 
-/* ── 💻 LAPTOPS (De 1024px a 1440px) ── */
-@media (min-width: 1024px) {
-  #appDiv {
-    max-width: 800px; /* Un ancho equilibrado para laptops */
-    gap: 15px;
+/* ============================================================
+   2. DISEÑO PARA TABLETA
+   Un híbrido entre móvil y escritorio
+   ============================================================ */
+@media (min-width: 768px) and (max-width: 1024px) {
+  #chat-title-container {
+    padding-left: 15px; /* Menor margen que en PC */
   }
-  #messages {
-    height: 520px; /* Ajustamos la altura para que no desaparezca el input */
-  }
-  .mode-bar {
-    justify-content: center;
-    gap: 20px;
+
+  /* En tableta, la sidebar suele ser colapsable pero más ancha */
+  .sidebar-open + #main-content #chat-title-container {
+    padding-left: 200px; /* Ajusta este valor al ancho de tu sidebar en tableta */
   }
 }
 
-/* ── 🖥️ PC DE ESCRITORIO / MONITORES GRANDES (1441px en adelante) ── */
-@media (min-width: 1441px) {
-  #appDiv {
-    max-width: 1000px; /* Aquí ya nos expandimos más */
+/* ============================================================
+   3. DISEÑO PARA TELÉFONO (Móvil)
+   Referencia: Imagen 8 (Gemini Móvil) y tu Imagen 6
+   ============================================================ */
+@media (max-width: 767px) {
+  /* Hacemos el contenedor del título más pequeño y centrado */
+  #chat-title-container {
+    width: 100%;
+    padding: 10px 0; /* Menos espacio arriba/abajo */
+    text-align: center; /* Centramos "Chat Rápido" como en Imagen 8 */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Línea sutil de separación */
   }
-  #messages {
-    height: 650px; /* Mucho más espacio visual */
+
+  /* Ajustamos el tamaño del texto "Chat Rápido" */
+  #chat-title-container h2 {
+    font-size: 1.2rem; /* Más pequeño para que no corte en pantallas chicas */
+    margin: 0;
+    display: inline-block; /* Para centrarlo bien */
+  }
+
+  /* Ajustamos el subtítulo "Respuestas cortas y directas" */
+  #chat-title-container span {
+    font-size: 0.8rem;
+    display: block; /* Va debajo del título */
+    margin-top: 2px;
+  }
+
+  /* IMPORTANTE: En móvil, la sidebar NO debe empujar el chat */
+  .sidebar-open + #main-content #chat-title-container {
+    padding-left: 0 !important; /* El chat se queda donde está */
   }
 }
   /* ── LOGIN ── */
