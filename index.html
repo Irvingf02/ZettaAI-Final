@@ -1173,60 +1173,290 @@
 }
 
 /* ============================================================
-   FIJAR VISIBILIDAD DEL AVATAR
+   MENÚ DE PERFIL - VERSIÓN CORREGIDA
    ============================================================ */
 
+.user-profile-container {
+  position: relative;
+  margin-left: 12px;
+}
+
 .user-avatar-btn {
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 50% !important;
-  background: var(--accent) !important; /* Fondo cyan */
-  border: none !important;
-  cursor: pointer !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  overflow: hidden !important;
-  padding: 0 !important;
-  flex-shrink: 0 !important;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: #000;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0;
 }
 
-/* La imagen de foto */
-#userAvatarImg {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  border-radius: 50% !important;
+.user-avatar-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-/* La letra inicial */
-#userAvatarLetter {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  height: 100% !important;
-  color: #000 !important; /* Negro para contrastar con fondo cyan */
-  font-size: 16px !important;
-  font-weight: 600 !important;
-  text-transform: uppercase !important;
+.user-avatar-btn span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
-/* Menú posicionado correctamente */
+/* Menú desplegable */
 .profile-menu {
-  position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  width: 320px;
+  max-width: 90vw;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  z-index: 2000;
 }
 
+.profile-menu.show {
+  display: block;
+}
+
+/* Overlay para móvil */
+.profile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1999;
+}
+
+.profile-overlay.show {
+  display: block;
+}
+
+/* Header */
+.profile-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 20px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.close-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text);
+}
+
+/* Info del usuario */
+.profile-info {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.profile-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 600;
+  color: #000;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-icon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: var(--surface);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border: 2px solid var(--card);
+}
+
+.profile-info h3 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.profile-info p {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 16px;
+  word-break: break-all;
+}
+
+.btn-manage-account {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 10px 20px;
+  color: var(--accent);
+  font-size: 0.85rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-manage-account:hover {
+  background: rgba(0,212,255,0.1);
+}
+
+/* Sección de cuenta */
+.profile-section {
+  border-top: 1px solid var(--border);
+  padding: 16px 0;
+  margin: 16px 0;
+}
+
+.account-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.account-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.account-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+  flex-shrink: 0;
+}
+
+.account-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.account-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-name {
+  font-size: 0.9rem;
+  color: var(--text);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-email {
+  font-size: 0.75rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.session-status {
+  font-size: 0.7rem;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+/* Footer */
+.profile-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.btn-add-account,
+.btn-logout {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.btn-add-account:hover,
+.btn-logout:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.btn-logout {
+  color: var(--danger);
+}
+
+/* Desktop: menú como dropdown */
 @media (min-width: 768px) {
   .profile-menu {
-    position: absolute !important;
-    top: 50px !important;
-    right: 0 !important;
-    left: auto !important;
-    transform: none !important;
+    position: absolute;
+    top: 50px;
+    right: 0;
+    left: auto;
+    transform: none;
+    width: 360px;
+  }
+  
+  .profile-overlay {
+    display: none !important;
   }
 }
 
@@ -1336,55 +1566,56 @@
     <div class="top-right">
     <span class="badge-premium" id="badgePremium">⭐ PREMIUM</span>
       
-      <!-- MENÚ DE PERFIL - Ahora en el lugar correcto -->
-      <div class="user-profile-container">
-        <button class="user-avatar-btn" onclick="toggleProfileMenu()">
-          <img id="userAvatarImg" src="" alt="" style="display: none;">
-          <span id="userAvatarLetter"></span>
-        </button>
-        
-        <div id="profileMenu" class="profile-menu">
-          <div class="profile-header">
-            <button class="close-btn" onclick="toggleProfileMenu()">✕</button>
-          </div>
-          
-          <div class="profile-info">
-            <div class="profile-avatar-large">
-              <img id="profileMenuImg" src="" alt="" style="display: none;">
-              <span id="profileMenuLetter"></span>
-              <div class="camera-icon">📷</div>
-            </div>
-            <h3 id="profileName">¡Hola!</h3>
-            <p id="profileEmail"></p>
-            <button class="btn-manage-account" onclick="manageAccount()">Gestionar tu cuenta de ZettaxAI</button>
-          </div>
-          
-          <div class="profile-section">
-            <div class="account-row">
-              <div class="account-info">
-                <img id="otherAccountImg" src="" alt="" style="display: none; width: 32px; height: 32px; border-radius: 50%;">
-                <span id="otherAccountLetter" style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #000; display: flex; align-items: center; justify-content: center; font-weight: 600;"></span>
-                <div class="account-details">
-                  <span id="otherAccountName"></span>
-                  <span id="otherAccountEmail" class="account-email"></span>
-                </div>
-              </div>
-              <span class="session-status">Sesión iniciada</span>
-            </div>
-            <div class="account-actions">
-              <button class="btn-text" onclick="logout()">Cerrar sesión</button>
-            </div>
-          </div>
-          
-          <div class="profile-footer">
-            <button class="btn-add-account" onclick="addAccount()"><span>+</span> Añadir otra cuenta</button>
-          </div>
-        </div>
-      </div>
-      
+       <div class="user-profile-container">
+      <button class="user-avatar-btn" onclick="toggleProfileMenu()">
+        <img id="userAvatarImg" src="" alt="" style="display: none;">
+        <span id="userAvatarLetter">?</span>
+      </button>
     </div>
   </div>
-   
+</div>
+
+<!-- Overlay para móvil -->
+<div id="profileOverlay" class="profile-overlay" onclick="toggleProfileMenu()"></div>
+
+<!-- Menú de perfil (fuera del top-bar para mejor posicionamiento) -->
+<div id="profileMenu" class="profile-menu">
+  <div class="profile-header">
+    <button class="close-btn" onclick="toggleProfileMenu()">✕</button>
+  </div>
+  
+  <div class="profile-info">
+    <div class="profile-avatar-large">
+      <img id="profileMenuImg" src="" alt="" style="display: none;">
+      <span id="profileMenuLetter">?</span>
+      <div class="camera-icon">📷</div>
+    </div>
+    <h3 id="profileName">¡Hola!</h3>
+    <p id="profileEmail"></p>
+    <button class="btn-manage-account" onclick="manageAccount()">Gestionar tu cuenta de ZettaxAI</button>
+  </div>
+  
+  <div class="profile-section">
+    <div class="account-item" onclick="logout()">
+      <div class="account-avatar">
+        <img id="accountItemImg" src="" alt="" style="display: none;">
+        <span id="accountItemLetter">?</span>
+      </div>
+      <div class="account-details">
+        <div class="account-name" id="accountItemName">Usuario</div>
+        <div class="account-email" id="accountItemEmail">correo@ejemplo.com</div>
+      </div>
+      <span class="session-status">Cerrar sesión →</span>
+    </div>
+  </div>
+  
+  <div class="profile-footer">
+    <button class="btn-add-account" onclick="addAccount()">
+      <span>+</span> Añadir otra cuenta
+    </button>
+  </div>
+</div>
+
   <!-- BANNER ÉXITO -->
   <div id="successBanner">⭐ ¡Pago exitoso! Ya eres usuario Premium. Recarga si no ves los cambios.</div>
 
@@ -1511,66 +1742,55 @@ const BACKEND_URL = "https://zettaai-final-production.up.railway.app";
 
 const LIMITE_GRATIS = 15;
 
-// ============================================================
-  // FUNCIONES DEL MENÚ DE PERFIL
   // ============================================================
-  
-  window.toggleProfileMenu = function() {
-    const menu = document.getElementById('profileMenu');
-    menu.classList.toggle('show');
-    const sidebar = document.getElementById('sidebar');
-    if (sidebar.classList.contains('sidebar-open')) {
-      toggleSidebar();
-    }
-  };
+// FUNCIONES DEL MENÚ DE PERFIL
+// ============================================================
 
-  function updateUserProfile(user) {
+window.toggleProfileMenu = function() {
+  const menu = document.getElementById('profileMenu');
+  const overlay = document.getElementById('profileOverlay');
+  
+  if (menu.classList.contains('show')) {
+    menu.classList.remove('show');
+    overlay.classList.remove('show');
+  } else {
+    menu.classList.add('show');
+    overlay.classList.add('show');
+  }
+};
+
+function updateUserProfile(user) {
   if (!user) {
     console.log('No hay usuario');
     return;
   }
   
+  console.log('Actualizando perfil:', user.email);
+  
   const email = user.email || '';
   const displayName = user.displayName || email.split('@')[0] || 'Usuario';
   const photoURL = user.photoURL || '';
+  const initial = email.charAt(0).toUpperCase() || '?';
   
-  // Obtener inicial del email (primera letra antes del @)
-  const initial = email.charAt(0).toUpperCase();
-  
-  console.log('Email:', email);
-  console.log('Inicial:', initial);
-  console.log('Foto:', photoURL);
-  
-  // Avatar pequeño (top bar)
+  // Avatar pequeño (botón)
   const avatarImg = document.getElementById('userAvatarImg');
   const avatarLetter = document.getElementById('userAvatarLetter');
   
-  if (photoURL && photoURL !== '') {
-    // Si tiene foto, mostrar foto
+  if (photoURL) {
     avatarImg.src = photoURL;
     avatarImg.style.display = 'block';
     avatarLetter.style.display = 'none';
-    console.log('Mostrando foto');
   } else {
-    // Si NO tiene foto, mostrar inicial con fondo del tema
     avatarImg.style.display = 'none';
     avatarLetter.style.display = 'flex';
     avatarLetter.textContent = initial;
-    avatarLetter.style.width = '100%';
-    avatarLetter.style.height = '100%';
-    avatarLetter.style.alignItems = 'center';
-    avatarLetter.style.justifyContent = 'center';
-    avatarLetter.style.fontSize = '16px';
-    avatarLetter.style.fontWeight = '600';
-    avatarLetter.style.color = '#000'; // Texto negro sobre fondo accent
-    console.log('Mostrando inicial:', initial);
   }
   
-  // Menú de perfil (el grande)
+  // Avatar grande (menú)
   const menuImg = document.getElementById('profileMenuImg');
   const menuLetter = document.getElementById('profileMenuLetter');
   
-  if (photoURL && photoURL !== '') {
+  if (photoURL) {
     menuImg.src = photoURL;
     menuImg.style.display = 'block';
     menuLetter.style.display = 'none';
@@ -1578,44 +1798,46 @@ const LIMITE_GRATIS = 15;
     menuImg.style.display = 'none';
     menuLetter.style.display = 'flex';
     menuLetter.textContent = initial;
-    menuLetter.style.width = '100%';
-    menuLetter.style.height = '100%';
-    menuLetter.style.alignItems = 'center';
-    menuLetter.style.justifyContent = 'center';
-    menuLetter.style.fontSize = '36px';
-    menuLetter.style.fontWeight = '600';
-    menuLetter.style.color = '#000';
   }
   
-  // Textos del menú
-  const profileName = document.getElementById('profileName');
-  const profileEmail = document.getElementById('profileEmail');
+  // Avatar de la cuenta en la lista
+  const accountImg = document.getElementById('accountItemImg');
+  const accountLetter = document.getElementById('accountItemLetter');
   
-  if (profileName) profileName.textContent = `¡Hola, ${displayName.split(' ')[0]}!`;
-  if (profileEmail) profileEmail.textContent = email;
-  
-  // Otra cuenta (mostrar la misma por ahora)
-  const otherImg = document.getElementById('otherAccountImg');
-  const otherLetter = document.getElementById('otherAccountLetter');
-  
-  if (photoURL && photoURL !== '') {
-    otherImg.src = photoURL;
-    otherImg.style.display = 'block';
-    if (otherLetter) otherLetter.style.display = 'none';
+  if (photoURL) {
+    accountImg.src = photoURL;
+    accountImg.style.display = 'block';
+    accountLetter.style.display = 'none';
   } else {
-    otherImg.style.display = 'none';
-    if (otherLetter) {
-      otherLetter.style.display = 'flex';
-      otherLetter.textContent = initial;
-    }
+    accountImg.style.display = 'none';
+    accountLetter.style.display = 'flex';
+    accountLetter.textContent = initial;
   }
   
-  const otherAccountName = document.getElementById('otherAccountName');
-  const otherAccountEmail = document.getElementById('otherAccountEmail');
-  
-  if (otherAccountName) otherAccountName.textContent = displayName;
-  if (otherAccountEmail) otherAccountEmail.textContent = email;
+  // Textos
+  document.getElementById('profileName').textContent = `¡Hola, ${displayName.split(' ')[0]}!`;
+  document.getElementById('profileEmail').textContent = email;
+  document.getElementById('accountItemName').textContent = displayName;
+  document.getElementById('accountItemEmail').textContent = email;
 }
+
+window.manageAccount = function() {
+  console.log('Gestionar cuenta');
+};
+
+window.addAccount = function() {
+  console.log('Añadir otra cuenta');
+};
+
+window.logout = async function() {
+  try {
+    await auth.signOut();
+    toggleProfileMenu();
+    console.log('Sesión cerrada');
+  } catch (e) {
+    console.error('Error al cerrar sesión:', e);
+  }
+};
 
 const MODOS = {
   chat:    { emoji: "💬", title: "Chat Rápido",        desc: "Respuestas cortas y directas",      premium: false },
