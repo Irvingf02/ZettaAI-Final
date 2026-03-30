@@ -140,6 +140,58 @@
   }
 }
 
+/* ============================================================
+   ESTADO CERRADO (Imagen 10): 3 ICONOS VISIBLES
+   ============================================================ */
+.sidebar-closed {
+  width: 68px !important; /* El ancho exacto para los iconos */
+}
+
+/* Ocultamos los textos y la sección del medio */
+.sidebar-closed .text, 
+.sidebar-closed .middle-content {
+  display: none !important;
+}
+
+/* Alineamos los 3 iconos que quedan (Barras, Nuevo Chat y Configuración) */
+.sidebar-closed .menu-icon-container,
+.sidebar-closed .new-chat,
+.sidebar-closed .settings {
+  display: flex !important;
+  justify-content: center;
+  padding: 15px 0;
+}
+
+/* ============================================================
+   ESTADO ABIERTO (Imagen 11): 7 ELEMENTOS VISIBLES
+   ============================================================ */
+.sidebar-open {
+  width: 280px !important;
+}
+
+/* Mostramos todo el contenido */
+.sidebar-open .text,
+.sidebar-open .middle-content {
+  display: block !important;
+}
+
+.sidebar-open .sidebar-item {
+  display: flex !important;
+  align-items: center;
+  padding: 12px 20px;
+}
+
+/* Aseguramos que los iconos tengan espacio del texto al abrir */
+.sidebar-open .icon {
+  margin-right: 15px;
+}
+
+/* Configuración siempre abajo (7mo elemento) */
+.settings {
+  margin-top: auto;
+  margin-bottom: 10px;
+}
+
   /* ── LOGIN ── */
   #loginDiv {
     background: var(--card);
@@ -744,7 +796,7 @@
     <span class="text">Nuevo chat</span>
   </div>
 
- <div class="middle-content">
+  <div class="middle-content">
     <div class="sidebar-item">
       <span class="icon">⭐</span>
       <span class="text">Mis cosas</span>
@@ -983,19 +1035,20 @@ window.handleFile = (event) => {
 
 // ── FUSIÓN DE SIDEBAR PROFESIONAL Y CARGA DE DATOS ──
 
+
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   
-  // 1. Activa o desactiva la clase CSS para abrir/cerrar suavemente
-  sidebar.classList.toggle('sidebar-open');
-  
-  // 2. Si la abrimos, aprovechamos para cargar el historial de Firebase
-  if (sidebar.classList.contains('sidebar-open')) {
-      loadChatHistory();
+  // 1. Cambia las clases para pasar de 3 iconos a 7 elementos (y viceversa)
+  if (sidebar.classList.contains('sidebar-closed')) {
+    sidebar.classList.replace('sidebar-closed', 'sidebar-open');
+    
+    // 2. Solo si se abre, cargamos el historial de Firebase
+    loadChatHistory(); 
+  } else {
+    sidebar.classList.replace('sidebar-open', 'sidebar-closed');
   }
 }
-
-
 
 // ── Modo ─────────────────────────────────────────────────────────────────────
 window.setMode = (m) => {
