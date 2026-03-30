@@ -1129,32 +1129,74 @@
   font-size: 1.2rem;
 }
 
+/* ============================================================
+   ALINEAR AVATAR A LA DERECHA SIN MSGCOUNTER
+   ============================================================ */
+
+.top-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+}
+
+.app-name {
+  flex: 0 0 auto !important;
+}
+
+.top-right {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-left: auto !important;
+  flex: 0 0 auto !important;
+}
+
+/* El avatar */
+.user-avatar-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: var(--accent) !important;
+  color: #000 !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+#userAvatarLetter {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Menú posicionado correctamente */
+.profile-menu {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
 @media (min-width: 768px) {
   .profile-menu {
-    position: absolute;
-    top: 50px;
-    right: 0;
-    left: auto;
-    transform: none;
-    width: 360px;
-  }
-  
-  .profile-menu::before {
-    display: none;
+    position: absolute !important;
+    top: 50px !important;
+    right: 0 !important;
+    left: auto !important;
+    transform: none !important;
   }
 }
-
-/* Ajuste para alinear el avatar a la derecha */
-.top-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.user-profile-container {
-  margin-left: auto; /* Empuja el avatar a la derecha */
-}
-
 
 </style>
 </head>
