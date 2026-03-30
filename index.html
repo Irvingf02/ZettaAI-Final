@@ -1144,6 +1144,18 @@
   }
 }
 
+/* Ajuste para alinear el avatar a la derecha */
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-profile-container {
+  margin-left: auto; /* Empuja el avatar a la derecha */
+}
+
+
 </style>
 </head>
 
@@ -1246,18 +1258,17 @@
   <!-- TOP BAR -->
   <div class="top-bar">
     <div class="app-name">ZettaxAI<span>PRO</span></div>
+    
     <div class="top-right">
-
-      <span class="badge-premium" id="badgePremium">⭐ PREMIUM</span>
+    <span class="badge-premium" id="badgePremium">⭐ PREMIUM</span>
       
-      <!-- NUEVO: Menú de perfil estilo Google -->
+      <!-- MENÚ DE PERFIL - Ahora en el lugar correcto -->
       <div class="user-profile-container">
         <button class="user-avatar-btn" onclick="toggleProfileMenu()">
           <img id="userAvatarImg" src="" alt="" style="display: none;">
           <span id="userAvatarLetter"></span>
         </button>
         
-        <!-- Menú desplegable de perfil -->
         <div id="profileMenu" class="profile-menu">
           <div class="profile-header">
             <button class="close-btn" onclick="toggleProfileMenu()">✕</button>
@@ -1271,17 +1282,14 @@
             </div>
             <h3 id="profileName">¡Hola!</h3>
             <p id="profileEmail"></p>
-            
-            <button class="btn-manage-account" onclick="manageAccount()">
-              Gestionar tu cuenta de ZettaxAI
-            </button>
+            <button class="btn-manage-account" onclick="manageAccount()">Gestionar tu cuenta de ZettaxAI</button>
           </div>
           
           <div class="profile-section">
             <div class="account-row">
               <div class="account-info">
                 <img id="otherAccountImg" src="" alt="" style="display: none; width: 32px; height: 32px; border-radius: 50%;">
-                <span id="otherAccountLetter" style="display: none; width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #000; display: flex; align-items: center; justify-content: center; font-weight: 600;"></span>
+                <span id="otherAccountLetter" style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #000; display: flex; align-items: center; justify-content: center; font-weight: 600;"></span>
                 <div class="account-details">
                   <span id="otherAccountName"></span>
                   <span id="otherAccountEmail" class="account-email"></span>
@@ -1295,9 +1303,7 @@
           </div>
           
           <div class="profile-footer">
-            <button class="btn-add-account" onclick="addAccount()">
-              <span>+</span> Añadir otra cuenta
-            </button>
+            <button class="btn-add-account" onclick="addAccount()"><span>+</span> Añadir otra cuenta</button>
           </div>
         </div>
       </div>
