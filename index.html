@@ -17,7 +17,7 @@
 
 <style>
   :root {
-    --bg:       transparent;
+    --bg:       #080B0F;
     --surface:  #0E1117;
     --card:     #141920;
     --border:   #1E2530;
@@ -32,6 +32,8 @@
     --user-bg:  #0D3A52;
     --bot-bg:   #141920;
     --radius:   14px;
+
+    /* ── AJUSTES DE DISEÑO ESTILO GEMINI ── */
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2); 
   }
 
@@ -39,125 +41,179 @@
 
   body {
     font-family: 'Inter', sans-serif;
-    background: var(--bg);
+    /* SIN BACKGROUND COLOR FORZADO - hereda del sistema */
     color: var(--text);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 24px 16px;
+}
+
+/* ============================================================
+   SIDEBAR - VERSIÓN CORREGIDA
+   ============================================================ */
+#sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  background-color: var(--surface);
+  border-right: 1px solid var(--border);
+  width: 68px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 8px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+#sidebar.sidebar-open {
+  width: 280px;
+}
+
+/* ============================================================
+   MÓVIL Y TABLET - SIDEBAR OCULTA (ESTILO GEMINI APP)
+   ============================================================ */
+@media (max-width: 1023px) {
+  #sidebar {
+    transform: translateX(-100%);
+    width: 280px;
+    transition: transform 0.3s ease;
+  }
+  
+  #sidebar.sidebar-open {
+    transform: translateX(0);
+    width: 280px;
+  }
+  
+  /* Overlay oscuro cuando sidebar está abierta */
+  #sidebar::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 280px;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: -1;
+  }
+  
+  #sidebar.sidebar-open::before {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* ============================================================
+   LAPTOP/ESCRITORIO - SIDEBAR VISIBLE, NO CORTA EL CHAT
+   ============================================================ */
+@media (min-width: 1024px) {
+  body {
+    padding-left: 68px; /* Espacio para sidebar cerrada */
+    transition: padding-left 0.3s ease;
+  }
+  
+  body:has(#sidebar.sidebar-open) {
+    padding-left: 280px; /* Espacio para sidebar abierta */
+  }
+  
+  #appDiv {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 20px;
+  }
+  
+  /* Asegurar que el chat no se corte */
+  #chatBox {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  /* El título "Chat Rápido" siempre visible */
+  .chat-header {
+    width: 100%;
+  }
+}
+
+/* ============================================================
+   BREAKPOINTS ESPECÍFICOS (mantengo tus originales ajustados)
+   ============================================================ */
+
+/* Monitores grandes */
+@media (min-width: 1441px) {
+   #chat-title-container {
+    padding-left: 20px;
+    transition: padding-left 0.3s ease;
   }
 
-  /* ==================== */
-  /* SIDEBAR RESPONSIVE */
-  /* ==================== */
+  .sidebar-open + #main-content #chat-title-container {
+   padding-left: 280px; 
+  }
+}
 
-  /* MÓVIL Y TABLET: Sidebar oculta completamente (estilo Gemini) */
-  @media (max-width: 1023px) {
-    #sidebar {
-      position: fixed;
-      left: 0;
-      top: 0;
-      height: 100vh;
-      width: 280px;
-      background-color: var(--surface);
-      border-right: 1px solid var(--border);
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      padding: 12px 8px;
-    }
-
-    #sidebar.sidebar-open {
-      transform: translateX(0);
-      box-shadow: 4px 0 15px rgba(0,0,0,0.3);
-    }
-
-    .menu-icon-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-      margin-bottom: 16px;
-      border-radius: 50%;
-    }
-
-    #appDiv {
-      width: 100%;
-      margin-left: 0 !important;
-      padding-left: 0 !important;
-    }
-
-    .top-bar {
-      padding-left: 50px;
-    }
+/* Laptop */
+@media (min-width: 1000px) and (max-width: 1300px) {
+   #chat-title-container {
+    padding-left: 15px;
+    transition: padding-left 0.3s ease;
+   }
+   
+  #chat-title-container h2 {
+    font-size: 1.1rem;
   }
 
-  /* LAPTOP Y ESCRITORIO: Sidebar visible y NO corta el contenido */
-  @media (min-width: 1024px) {
-    body {
-      flex-direction: row;
-      align-items: stretch;
-      padding: 0;
-    }
+  .sidebar-open + #main-content #chat-title-container {
+    padding-left: 280px;
+  }
+}
 
-    #sidebar {
-      position: relative;
-      left: auto;
-      top: auto;
-      height: 100vh;
-      width: 68px;
-      background-color: var(--surface);
-      border-right: 1px solid var(--border);
-      transform: none;
-      transition: width 0.3s ease;
-      z-index: 100;
-      flex-shrink: 0;
-    }
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1024px) {
+   #chat-title-container {
+   padding-left: 15px; 
+  }
+   .sidebar-open + #main-content #chat-title-container {
+   padding-left: 0; /* NO empujar en tablet, sidebar es overlay */
+  }
+}
 
-    #sidebar.sidebar-open {
-      width: 280px;
-    }
-
-    #appDiv {
-      flex: 1;
-      width: auto;
-      margin-left: 0 !important;
-      padding: 24px;
-      overflow-x: hidden;
-    }
-
-    .top-bar {
-      padding-left: 0;
-    }
-
-    #chatBox {
-      max-width: 100%;
-    }
+/* Móvil */
+@media (max-width: 767px) {
+  #chat-title-container {
+    display: block !important;
+    width: 100% !important;
+    padding: 15px 0 !important;
+    text-align: center !important; 
+    margin: 0 auto !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
   }
 
-  .app-container {
-    display: flex;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
+   #chat-title-container h2 {
+    font-size: 1rem !important;
+    margin: 0 !important;
+    display: block !important;
+    white-space: normal !important;
   }
 
-  @media (max-width: 1023px) {
-    .app-container {
-      flex-direction: column;
-    }
+  #chat-title-container span {
+    font-size: 0.75rem !important;
+    display: block !important;
+    opacity: 0.7 !important;
   }
 
-  @media (min-width: 1024px) {
-    .app-container {
-      flex-direction: row;
-    }
+  /* NO empujar contenido en móvil */
+  .sidebar-open + #main-content #chat-title-container {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
   }
+}
 
   /* ── LOGIN ── */
   #loginDiv {
@@ -571,95 +627,110 @@
     to   { opacity: 1; transform: translateY(0); }
   }
  
-  #sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    background-color: var(--surface);
-    border-right: 1px solid var(--border);
-    width: 68px;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    flex-direction: column;
-    padding: 12px 8px;
-    z-index: 1000;
-    overflow: hidden;
-  }
+/* EL PADRE: Obliga a que la barra y el chat sean vecinos, no pisos */
+/* FUERZA EL DISEÑO LATERAL */
+.app-container {
+ display: flex; /* Pone la barra y el chat uno al lado del otro */
+ width: 100vw;
+ height: 100vh;
+ overflow: hidden;
+}
 
-  #sidebar.sidebar-open {
-    width: 280px;
-  }
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  min-width: 260px; /* Para que el texto no se amontone */
+  padding: 0 16px;
+  border-radius: 24px; /* Redondeado Gemini */
+  cursor: pointer;
+  color: var(--text);
+  transition: background 0.2s;
+  border: none;
+  background: transparent;
+  margin-bottom: 4px;
+}
 
-  .sidebar-item {
-    display: flex;
-    align-items: center;
-    height: 48px;
-    min-width: 260px;
-    padding: 0 16px;
-    border-radius: 24px;
-    cursor: pointer;
-    color: var(--text);
-    transition: background 0.2s;
-    border: none;
-    background: transparent;
-    margin-bottom: 4px;
-  }
+.sidebar-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
 
-  .sidebar-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
+.sidebar-item.active {
+  background-color: var(--user-bg); /* El azul sutil de tu imagen 6 */
+  color: var(--accent);
+}
 
-  .sidebar-item.active {
-    background-color: var(--user-bg);
-    color: var(--accent);
-  }
+.icon {
+  font-size: 20px;
+  min-width: 32px;
+  display: flex;
+  justify-content: center;
+}
 
-  .icon {
-    font-size: 20px;
-    min-width: 32px;
-    display: flex;
-    justify-content: center;
-  }
+.text {
+  margin-left: 12px;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0; /* Oculto por defecto */
+  transition: opacity 0.2s;
+}
 
-  .text {
-    margin-left: 12px;
-    font-size: 14px;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
+#sidebar.sidebar-open .text {
+  opacity: 1;
+}
 
-  #sidebar.sidebar-open .text {
-    opacity: 1;
-  }
+.sidebar-label {
+  padding: 20px 16px 10px;
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  opacity: 0;
+}
 
-  .sidebar-label {
-    padding: 20px 16px 10px;
-    font-size: 12px;
-    color: var(--muted);
-    text-transform: uppercase;
-    opacity: 0;
-  }
+#sidebar.sidebar-open .sidebar-label {
+  opacity: 1;
+}
 
-  #sidebar.sidebar-open .sidebar-label {
-    opacity: 1;
-  }
+.sidebar-middle {
+  flex: 1;
+  overflow-y: auto;
+}
 
-  .sidebar-middle {
-    flex: 1;
-    overflow-y: auto;
-  }
+#main-content {
+  flex: 1;
+  transition: margin-left 0.3s ease; /* Esto hace que el empuje sea suave como en Gemini */
+  padding: 20px;
+}
 
-  #main-content {
-    flex: 1;
-    transition: margin-left 0.3s ease;
-    padding: 20px;
+/* Botón hamburguesa para móvil */
+.menu-toggle-mobile {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1001;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--text);
+}
+
+@media (max-width: 1023px) {
+  .menu-toggle-mobile {
+    display: block;
   }
+}
+
 </style>
 </head>
 
 <body>
+
+<!-- Botón hamburguesa solo visible en móvil/tablet -->
+<button class="menu-toggle-mobile" onclick="toggleSidebar()">☰</button>
 
 <div id="loginDiv">
   <div class="login-logo">🤖</div>
@@ -705,21 +776,23 @@
     <span>☰</span>
   </div>
 
-  <div class="sidebar-item new-chat" onclick="newChat()">
+  <div class="sidebar-item new-chat">
     <span class="icon">📝</span>
     <span class="text">Nuevo chat</span>
   </div>
 
-  <div class="sidebar-middle">
-    <div class="sidebar-label">Hoy</div>
-    <div id="history-list"></div>
+  <div class="middle-content">
+    <div class="sidebar-item"><span class="icon">⭐</span><span class="text">Mis cosas</span></div>
+    <div class="sidebar-item"><span class="icon">💎</span><span class="text">Gems</span></div>
+    <div class="sidebar-item active"><span class="icon">💬</span><span class="text">Revisión de código</span></div>
   </div>
 
-  <div class="sidebar-item settings" onclick="openSettings()">
+  <div class="sidebar-item settings">
     <span class="icon">⚙️</span>
     <span class="text">Configuración y ayuda</span>
   </div>
 </div>
+  <!-- APP -->
 
 <div id="appDiv"></div>
 
@@ -804,31 +877,33 @@
 </div>
 
 <script type="module">
+// Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
-  import { 
-    getAuth, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    onAuthStateChanged,
-    GoogleAuthProvider,
-    FacebookAuthProvider,
-    OAuthProvider,
-    signInWithPopup,
-    signInAnonymously
-  } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-  import { 
-    getFirestore, 
-    doc, 
-    getDoc, 
-    setDoc,
-    collection,
-    query,
-    where,
-    orderBy,
-    getDocs
-  } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+  // Importaciones para que el navegador entienda el Login
+import { 
+ getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  OAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
+// Importaciones para que el navegador entienda la Base de Datos
+import { 
+  getFirestore, 
+  doc, 
+  getDoc, 
+  setDoc 
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
     apiKey: "AIzaSyBkylBC97yOx9K0CWcxvbyA1hsouygvTXY",
     authDomain: "zettaai-1c02a.firebaseapp.com",
@@ -839,338 +914,341 @@
     measurementId: "G-7NGH4XF7YS"
   };
 
+  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
-  const auth = getAuth(app);
+  const auth = getAuth(app); // <-- Esto activa el sistema de usuarios
   const db = getFirestore(app);
 
-  const BACKEND_URL = "https://zettaai-final-production.up.railway.app";
-  const LIMITE_GRATIS = 15;
+// 🔴 Cambia por tu URL de Railway al publicar
+const BACKEND_URL = "https://zettaai-final-production.up.railway.app";
 
-  const MODOS = {
-    chat:    { emoji: "💬", title: "Chat Rápido",        desc: "Respuestas cortas y directas",      premium: false },
-    resumen: { emoji: "📝", title: "Resumidor Pro",       desc: "Sintetiza cualquier texto",          premium: true  },
-    ideas:   { emoji: "💡", title: "Generador de Ideas",  desc: "Ideas creativas y originales",       premium: true  },
-    tarea:   { emoji: "🎓", title: "Tutor de Tareas",     desc: "Explica conceptos fácilmente",       premium: false  }
-  };
+const LIMITE_GRATIS = 15;
 
-  let currentUser = null;
-  let isPremium   = false;
-  let mode        = "chat";
-  let history     = [];
-  let msgCount    = 0;
+const MODOS = {
+  chat:    { emoji: "💬", title: "Chat Rápido",        desc: "Respuestas cortas y directas",      premium: false },
+  resumen: { emoji: "📝", title: "Resumidor Pro",       desc: "Sintetiza cualquier texto",          premium: true  },
+  ideas:   { emoji: "💡", title: "Generador de Ideas",  desc: "Ideas creativas y originales",       premium: true  },
+  tarea:   { emoji: "🎓", title: "Tutor de Tareas",     desc: "Explica conceptos fácilmente",       premium: false  }
+};
 
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      currentUser = user;
-      document.getElementById("loginDiv").style.display  = "none";
-      const appDiv = document.getElementById("appDiv");
-      appDiv.style.display = "flex";
-      document.getElementById("userEmail").textContent = user.email;
 
-      await refreshPremiumStatus();
+// ── Estado ──────────────────────────────────────────────────────────────────
+let currentUser = null;
+let isPremium   = false;
+let mode        = "chat";
+let history     = [];        // historial de mensajes para contexto (memoria)
+let msgCount    = 0;         // mensajes usados en sesión actual
 
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("success") === "true") {
-        document.getElementById("successBanner").style.display = "block";
-        window.history.replaceState({}, "", window.location.pathname);
-        setTimeout(() => refreshPremiumStatus(), 3000);
-      }
-    } else {
-      currentUser = null;
-      isPremium   = false;
-      document.getElementById("loginDiv").style.display  = "block";
-      document.getElementById("appDiv").style.display    = "none";
+// ── Auth state ───────────────────────────────────────────────────────────────
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUser = user;
+    document.getElementById("loginDiv").style.display  = "none";
+    const appDiv = document.getElementById("appDiv");
+    appDiv.style.display = "flex";
+    document.getElementById("userEmail").textContent = user.email;
+
+    // Verificar si es premium
+    await refreshPremiumStatus();
+
+    // Mostrar banner si viene de pago exitoso
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "true") {
+      document.getElementById("successBanner").style.display = "block";
+      window.history.replaceState({}, "", window.location.pathname);
+      setTimeout(() => refreshPremiumStatus(), 3000); // re-check por si el webhook tardó
     }
-  });
+  } else {
+    currentUser = null;
+    isPremium   = false;
+    document.getElementById("loginDiv").style.display  = "block";
+    document.getElementById("appDiv").style.display    = "none";
+  }
+});
 
-  async function refreshPremiumStatus() {
-    if (!currentUser) return;
-    try {
-      const snap = await getDoc(doc(db, "users", currentUser.uid));
-      isPremium   = snap.exists() && snap.data().premium === true;
-      msgCount    = snap.exists() ? (snap.data().msgCount || 0) : 0;
-    } catch (e) {
-      console.error("Error obteniendo estado:", e);
+async function refreshPremiumStatus() {
+  if (!currentUser) return;
+  try {
+    const snap = await getDoc(doc(db, "users", currentUser.uid));
+    isPremium   = snap.exists() && snap.data().premium === true;
+    msgCount    = snap.exists() ? (snap.data().msgCount || 0) : 0;
+  } catch (e) {
+    console.error("Error obteniendo estado:", e);
+  }
+  updateUI();
+}
+
+function updateUI() {
+  // Badge premium
+  document.getElementById("badgePremium").style.display = isPremium ? "inline-block" : "none";
+
+  // Contador de mensajes
+  const counter = document.getElementById("msgCounter");
+  if (isPremium) {
+    counter.textContent = "✨ Mensajes ilimitados";
+    counter.className   = "msg-counter";
+  } else {
+    const restantes = Math.max(0, LIMITE_GRATIS - msgCount);
+    counter.textContent = `${restantes} mensajes gratis`;
+    counter.className   = "msg-counter" + (restantes <= 3 ? " danger" : restantes <= 6 ? " warning" : "");
+  }
+
+  // Candados en modos premium
+  document.querySelectorAll(".mode-btn .lock").forEach(el => {
+    el.style.display = isPremium ? "none" : "inline";
+  });
+}
+window.handleFile = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    addMessage(`Archivo seleccionado: ${file.name}`, "user", "📎 Archivo listo");
+    // Aquí podrías implementar la subida a Firebase Storage o enviarlo al backend
+    console.log("Archivo listo para procesar:", file);
+  }
+};
+
+// ── FUSIÓN DE SIDEBAR PROFESIONAL Y CARGA DE DATOS ──
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  
+  if (sidebar.classList.contains('sidebar-closed')) {
+    sidebar.classList.remove('sidebar-closed');
+    sidebar.classList.add('sidebar-open');
+    if (typeof loadChatHistory === 'function') loadChatHistory();
+  } else {
+    sidebar.classList.remove('sidebar-open');
+    sidebar.classList.add('sidebar-closed');
+  }
+}
+
+// ── Modo ─────────────────────────────────────────────────────────────────────
+window.setMode = (m) => {
+  // Si intenta modo premium sin serlo → abrir paywall
+  if (MODOS[m].premium && !isPremium) {
+    showPaywall();
+    return;
+  }
+  mode = m;
+  document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("btn-" + m).classList.add("active");
+  document.getElementById("modeEmoji").textContent = MODOS[m].emoji;
+  document.getElementById("modeTitle").textContent = MODOS[m].title;
+  document.getElementById("modeDesc").textContent  = MODOS[m].desc;
+};
+
+// ── Mensajes ──────────────────────────────────────────────────────────────────
+function addMessage(text, role, extra = "") {
+  const div = document.createElement("div");
+  div.className = `msg ${role}`;
+  div.textContent = text;
+  if (extra) {
+    const meta = document.createElement("div");
+    meta.className = "msg-meta";
+    meta.textContent = extra;
+    div.appendChild(meta);
+  }
+  const box = document.getElementById("messages");
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return div;
+}
+async function loadChatHistory() {
+  if (!currentUser) return;
+  
+  const list = document.getElementById("history-list"); 
+  list.innerHTML = "<p style='font-size: 0.8rem; color: var(--muted); padding: 10px;'>Cargando...</p>";
+
+  try {
+    // 1. Tu consulta a Firestore (Mantenla siempre)
+    const q = query(
+      collection(db, "chats"), 
+      where("userId", "==", currentUser.uid), 
+      orderBy("timestamp", "desc")
+    );
+    
+    const querySnapshot = await getDocs(q);
+    list.innerHTML = ""; // Limpiamos el "Cargando..."
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      
+      // 2. Creamos el elemento con el diseño pro
+      const item = document.createElement("div");
+      item.className = "sidebar-item"; 
+      
+      // 3. Forzamos que el clic sea detectable
+      item.style.pointerEvents = "auto"; 
+      item.style.cursor = "pointer";
+
+      // Estructura de Icono + Texto
+      item.innerHTML = `
+        <span class="icon">💬</span>
+        <span class="text">${data.title || "Chat nuevo"}</span>
+      `;
+      
+      // 4. Lógica de carga al hacer clic
+      item.onclick = (e) => {
+          e.stopPropagation(); // Evita que otros elementos interfieran
+          console.log("Cargando chat:", doc.id); 
+          loadSpecificChat(doc.id);
+          
+          // Cerrar sidebar en móviles para mejorar la experiencia
+          if(window.innerWidth < 768) toggleSidebar(); 
+      };
+      
+      list.appendChild(item);
+    });
+  } catch (error) {
+    console.error("Error al cargar historial:", error);
+    list.innerHTML = "<p style='color: var(--danger); padding: 10px;'>Error al cargar</p>";
+  }
+}
+
+// ── Enviar mensaje ────────────────────────────────────────────────────────────
+window.send = async () => {
+  const input   = document.getElementById("input");
+  const sendBtn = document.getElementById("sendBtn");
+  const text    = input.value.trim();
+  if (!text || !currentUser) return;
+
+  // Límite gratis en frontend (también se verifica en backend)
+  if (!isPremium && msgCount >= LIMITE_GRATIS) {
+    showPaywall();
+    return;
+  }
+
+  addMessage(text, "user");
+  input.value   = "";
+  sendBtn.disabled = true;
+
+  // Añadir al historial (memoria)
+  history.push({ role: "user", content: text });
+  if (history.length > 20) history = history.slice(-20); // máx 20 entradas
+
+  const typing = addMessage("IA escribiendo...", "bot typing");
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        mode,
+        uid:     currentUser.uid,     // para verificación premium en backend
+        history: history.slice(-15)   // últimos 10 mensajes como contexto
+      })
+    });
+
+    const data = await res.json();
+    typing.remove();
+
+    if (res.status === 403) {
+      // Backend rechazó por falta de premium
+      addMessage(data.reply, "bot error");
+      showPaywall();
+      return;
+    }
+
+    if (res.status === 429) {
+      // Rate limit
+      addMessage(data.reply, "bot error");
+      return;
+    }
+
+    // Éxito
+    addMessage(data.reply, "bot");
+    history.push({ role: "assistant", content: data.reply });
+
+    // Actualizar contador
+    msgCount++;
+    if (!isPremium) {
+      // Guardar en Firestore para persistir el conteo
+      await setDoc(doc(db, "users", currentUser.uid),
+        { msgCount }, { merge: true });
     }
     updateUI();
+
+  } catch (e) {
+    typing.remove();
+    addMessage("⚠️ Error conectando con el servidor.", "bot error");
+    console.error(e);
+  } finally {
+    sendBtn.disabled = false;
+    input.focus();
   }
+};
 
-  function updateUI() {
-    document.getElementById("badgePremium").style.display = isPremium ? "inline-block" : "none";
+// ── Auth ──────────────────────────────────────────────────────────────────────
+window.register = async () => {
+  const email = document.getElementById("email").value.trim();
+  const pass  = document.getElementById("password").value;
+  if (!email || !pass) return alert("Completa todos los campos.");
 
-    const counter = document.getElementById("msgCounter");
-    if (isPremium) {
-      counter.textContent = "✨ Mensajes ilimitados";
-      counter.className   = "msg-counter";
-    } else {
-      const restantes = Math.max(0, LIMITE_GRATIS - msgCount);
-      counter.textContent = `${restantes} mensajes gratis`;
-      counter.className   = "msg-counter" + (restantes <= 3 ? " danger" : restantes <= 6 ? " warning" : "");
-    }
-
-    document.querySelectorAll(".mode-btn .lock").forEach(el => {
-      el.style.display = isPremium ? "none" : "inline";
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    // Crear documento del usuario en Firestore
+    await setDoc(doc(db, "users", cred.user.uid), {
+      email,
+      premium:  false,
+      msgCount: 0,
+      createdAt: new Date().toISOString()
     });
+  } catch (e) {
+    alert("Error al registrar: " + e.message);
   }
+};
 
-  window.handleFile = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      addMessage(`Archivo seleccionado: ${file.name}`, "user", "📎 Archivo listo");
-      console.log("Archivo listo para procesar:", file);
-    }
-  };
+window.login = async () => {
+  const email = document.getElementById("email").value.trim();
+  const pass  = document.getElementById("password").value;
+  if (!email || !pass) return alert("Completa todos los campos.");
 
-  window.toggleSidebar = function() {
-    const sidebar = document.getElementById('sidebar');
-    
-    if (sidebar.classList.contains('sidebar-closed')) {
-      sidebar.classList.remove('sidebar-closed');
-      sidebar.classList.add('sidebar-open');
-      
-      if (typeof loadChatHistory === 'function' && window.innerWidth >= 1024) {
-        loadChatHistory();
-      }
-    } else {
-      sidebar.classList.remove('sidebar-open');
-      sidebar.classList.add('sidebar-closed');
-    }
-    
-    if (window.innerWidth < 1024) {
-      let overlay = document.getElementById('sidebar-overlay');
-      if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'sidebar-overlay';
-        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999;';
-        overlay.onclick = toggleSidebar;
-        document.body.appendChild(overlay);
-      } else {
-        overlay.remove();
-      }
-    }
-  };
-
-  window.addEventListener('resize', () => {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    
-    if (window.innerWidth >= 1024) {
-      if (overlay) overlay.remove();
-      sidebar.style.transform = '';
-    } else {
-      if (sidebar.classList.contains('sidebar-open')) {
-        sidebar.classList.remove('sidebar-open');
-        sidebar.classList.add('sidebar-closed');
-        if (overlay) overlay.remove();
-      }
-    }
-  });
-
-  window.setMode = (m) => {
-    if (MODOS[m].premium && !isPremium) {
-      showPaywall();
-      return;
-    }
-    mode = m;
-    document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
-    document.getElementById("btn-" + m).classList.add("active");
-    document.getElementById("modeEmoji").textContent = MODOS[m].emoji;
-    document.getElementById("modeTitle").textContent = MODOS[m].title;
-    document.getElementById("modeDesc").textContent  = MODOS[m].desc;
-  };
-
-  function addMessage(text, role, extra = "") {
-    const div = document.createElement("div");
-    div.className = `msg ${role}`;
-    div.textContent = text;
-    if (extra) {
-      const meta = document.createElement("div");
-      meta.className = "msg-meta";
-      meta.textContent = extra;
-      div.appendChild(meta);
-    }
-    const box = document.getElementById("messages");
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
-    return div;
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch (e) {
+    alert("Error al iniciar sesión: " + e.message);
   }
-
-  async function loadChatHistory() {
-    if (!currentUser) return;
-    
-    const list = document.getElementById("history-list"); 
-    list.innerHTML = "<p style='font-size: 0.8rem; color: var(--muted); padding: 10px;'>Cargando...</p>";
-
-    try {
-      const q = query(
-        collection(db, "chats"), 
-        where("userId", "==", currentUser.uid), 
-        orderBy("timestamp", "desc")
-      );
-      
-      const querySnapshot = await getDocs(q);
-      list.innerHTML = "";
-
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        
-        const item = document.createElement("div");
-        item.className = "sidebar-item"; 
-        
-        item.style.pointerEvents = "auto"; 
-        item.style.cursor = "pointer";
-
-        item.innerHTML = `
-          <span class="icon">💬</span>
-          <span class="text">${data.title || "Chat nuevo"}</span>
-        `;
-        
-        item.onclick = (e) => {
-            e.stopPropagation();
-            console.log("Cargando chat:", doc.id); 
-            loadSpecificChat(doc.id);
-            
-            if(window.innerWidth < 768) toggleSidebar(); 
-        };
-        
-        list.appendChild(item);
-      });
-    } catch (error) {
-      console.error("Error al cargar historial:", error);
-      list.innerHTML = "<p style='color: var(--danger); padding: 10px;'>Error al cargar</p>";
-    }
+};
+  // --- LOGIN CON GOOGLE ---
+window.loginGoogle = async () => {
+  const provider = new GoogleAuthProvider();
+  try {
+    const result = await signInWithPopup(auth, provider);
+    console.log("Usuario entró con Google:", result.user.email);
+  } catch (e) {
+    alert("Error con Google: " + e.message);
   }
+};
 
-  window.send = async () => {
-    const input   = document.getElementById("input");
-    const sendBtn = document.getElementById("sendBtn");
-    const text    = input.value.trim();
-    if (!text || !currentUser) return;
+// --- LOGIN CON FACEBOOK ---
+window.loginFacebook = async () => {
+  const provider = new FacebookAuthProvider();
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    alert("Error con Facebook: " + e.message);
+  }
+};
 
-    if (!isPremium && msgCount >= LIMITE_GRATIS) {
-      showPaywall();
-      return;
-    }
+// --- LOGIN CON APPLE ---
+window.loginApple = async () => {
+  const provider = new OAuthProvider('apple.com');
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    alert("Error con Apple: " + e.message);
+  }
+};
 
-    addMessage(text, "user");
-    input.value   = "";
-    sendBtn.disabled = true;
-
-    history.push({ role: "user", content: text });
-    if (history.length > 20) history = history.slice(-20);
-
-    const typing = addMessage("IA escribiendo...", "bot typing");
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: text,
-          mode,
-          uid:     currentUser.uid,
-          history: history.slice(-15)
-        })
-      });
-
-      const data = await res.json();
-      typing.remove();
-
-      if (res.status === 403) {
-        addMessage(data.reply, "bot error");
-        showPaywall();
-        return;
-      }
-
-      if (res.status === 429) {
-        addMessage(data.reply, "bot error");
-        return;
-      }
-
-      addMessage(data.reply, "bot");
-      history.push({ role: "assistant", content: data.reply });
-
-      msgCount++;
-      if (!isPremium) {
-        await setDoc(doc(db, "users", currentUser.uid),
-          { msgCount }, { merge: true });
-      }
-      updateUI();
-
-    } catch (e) {
-      typing.remove();
-      addMessage("⚠️ Error conectando con el servidor.", "bot error");
-      console.error(e);
-    } finally {
-      sendBtn.disabled = false;
-      input.focus();
-    }
-  };
-
-  window.register = async () => {
-    const email = document.getElementById("email").value.trim();
-    const pass  = document.getElementById("password").value;
-    if (!email || !pass) return alert("Completa todos los campos.");
-
-    try {
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      await setDoc(doc(db, "users", cred.user.uid), {
-        email,
-        premium:  false,
-        msgCount: 0,
-        createdAt: new Date().toISOString()
-      });
-    } catch (e) {
-      alert("Error al registrar: " + e.message);
-    }
-  };
-
-  window.login = async () => {
-    const email = document.getElementById("email").value.trim();
-    const pass  = document.getElementById("password").value;
-    if (!email || !pass) return alert("Completa todos los campos.");
-
-    try {
-      await signInWithEmailAndPassword(auth, email, pass);
-    } catch (e) {
-      alert("Error al iniciar sesión: " + e.message);
-    }
-  };
-
-  window.loginGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      console.log("Usuario entró con Google:", result.user.email);
-    } catch (e) {
-      alert("Error con Google: " + e.message);
-    }
-  };
-
-  window.loginFacebook = async () => {
-    const provider = new FacebookAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (e) {
-      alert("Error con Facebook: " + e.message);
-    }
-  };
-
-  window.loginApple = async () => {
-    const provider = new OAuthProvider('apple.com');
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (e) {
-      alert("Error con Apple: " + e.message);
-    }
-  };
-
+// --- LOGIN CON ANONIMO ---
   window.loginAnonimo = function() {
+    const auth = getAuth();
     signInAnonymously(auth)
       .then(() => {
         console.log("Acceso anónimo exitoso");
-        window.location.href = "ia.html";
+        window.location.href = "ia.html"; // Asegúrate que este sea el nombre de tu archivo principal
       })
       .catch((error) => {
         console.error("Error en acceso anónimo:", error.code);
@@ -1178,46 +1256,32 @@
       });
   };
 
-  window.showPaywall  = () => { document.getElementById("paywallModal").classList.add("show"); };
-  window.closePaywall = () => { document.getElementById("paywallModal").classList.remove("show"); };
+// ── Paywall ───────────────────────────────────────────────────────────────────
+window.showPaywall  = () => { document.getElementById("paywallModal").classList.add("show"); };
+window.closePaywall = () => { document.getElementById("paywallModal").classList.remove("show"); };
 
-  window.payPremium = async (plan) => {
-    if (!currentUser) return alert("Inicia sesión primero.");
-    closePaywall();
+window.payPremium = async (plan) => { // <--- Recibe el plan ('go', 'plus', 'ultra')
+  if (!currentUser) return alert("Inicia sesión primero.");
+  closePaywall();
 
-    try {
-      const res = await fetch(`${BACKEND_URL}/create-checkout-session`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          email: currentUser.email, 
-          userId: currentUser.uid, 
-          plan: plan 
-        })
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else alert("Error al iniciar pago: " + (data.error || "desconocido"));
-    } catch (e) {
-      alert("Error conectando con el servidor de pagos.");
-    }
-  };
-
-  window.newChat = function() {
-    history = [];
-    document.getElementById("messages").innerHTML = "";
-    document.getElementById("input").value = "";
-    document.getElementById("input").focus();
-  };
-
-  window.openSettings = function() {
-    alert("Configuración - Próximamente");
-  };
-
-  window.loadSpecificChat = function(chatId) {
-    console.log("Cargando chat específico:", chatId);
-    alert("Cargando chat: " + chatId);
-  };
+  try {
+    const res = await fetch(`${BACKEND_URL}/create-checkout-session`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      // Enviamos el plan al servidor
+      body: JSON.stringify({ 
+        email: currentUser.email, 
+        userId: currentUser.uid, 
+        plan: plan 
+      })
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else alert("Error al iniciar pago: " + (data.error || "desconocido"));
+  } catch (e) {
+    alert("Error conectando con el servidor de pagos.");
+  }
+};
 </script>
 
 </body>
