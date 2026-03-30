@@ -655,34 +655,40 @@
   width: 100%;
 }
 
-/* Ocultar los textos y los elementos intermedios al cerrar */
+/* Sidebar cerrada: 3 iconos visibles (Barras, Nuevo Chat, Configuración) */
+.sidebar-closed {
+  width: 68px !important;
+}
+
+/* OCULTA LOS TEXTOS Y LOS ICONOS DE EN MEDIO */
 .sidebar-closed .text, 
-.sidebar-closed .sidebar-content {
-  display: none !important;
+.sidebar-closed .middle-content {
+  display: none !important; 
 }
 
-/* Mostrar solo los 3 iconos clave cuando está cerrada */
-.sidebar-closed .menu-icon-container,
-.sidebar-closed .new-chat,
-.sidebar-closed .settings {
-  display: flex !important;
-  justify-content: center;
-}
-
-/* Cuando se abre (min-width: 1025px para laptop) */
+/* Sidebar abierta: Muestra los 7 elementos */
 .sidebar-open {
   width: 280px !important;
 }
 
 .sidebar-open .text,
-.sidebar-open .sidebar-content {
+.sidebar-open .middle-content {
   display: flex !important;
 }
 
-.sidebar-open .sidebar-item {
-  justify-content: flex-start !important;
-  padding-left: 20px;
+/* Alineación de los iconos */
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  overflow: hidden; /* Evita que el texto empuje la barra al estar cerrada */
 }
+
+.sidebar-closed .sidebar-item {
+  justify-content: center;
+  padding: 12px 0;
+}
+
 
 </style>
 </head>
