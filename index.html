@@ -32,8 +32,6 @@
     --user-bg:  #0D3A52;
     --bot-bg:   #141920;
     --radius:   14px;
-
-    /* ── AJUSTES DE DISEÑO ESTILO GEMINI ── */
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2); 
   }
 
@@ -41,179 +39,325 @@
 
   body {
     font-family: 'Inter', sans-serif;
-    /* SIN BACKGROUND COLOR FORZADO - hereda del sistema */
     color: var(--text);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 24px 16px;
-}
+  }
 
-/* ============================================================
-   SIDEBAR - VERSIÓN CORREGIDA
-   ============================================================ */
-#sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  height: 100vh;
-  background-color: var(--surface);
-  border-right: 1px solid var(--border);
-  width: 68px;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  flex-direction: column;
-  padding: 12px 8px;
-  z-index: 1000;
-  overflow: hidden;
-}
+  /* ============================================================
+     SIDEBAR ESTILO GEMINI - VERSIÓN FINAL
+     REEMPLAZA desde aquí...
+     ============================================================ */
 
-#sidebar.sidebar-open {
-  width: 280px;
-}
-
-/* ============================================================
-   MÓVIL Y TABLET - SIDEBAR OCULTA (ESTILO GEMINI APP)
-   ============================================================ */
-@media (max-width: 1023px) {
   #sidebar {
-    transform: translateX(-100%);
-    width: 280px;
-    transition: transform 0.3s ease;
-  }
-  
-  #sidebar.sidebar-open {
-    transform: translateX(0);
-    width: 280px;
-  }
-  
-  /* Overlay oscuro cuando sidebar está abierta */
-  #sidebar::before {
-    content: '';
     position: fixed;
+    left: 0;
     top: 0;
-    left: 280px;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
+    height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    width: 60px; /* Ancho colapsado - solo iconos */
+    transition: width 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    overflow: hidden;
+  }
+
+  #sidebar.sidebar-open {
+    width: 300px; /* Ancho expandido */
+  }
+
+  /* ── Header ── */
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    height: 60px;
+    border-bottom: 1px solid transparent;
+  }
+
+  .menu-btn {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+  }
+
+  .menu-btn:hover {
+    background: rgba(255,255,255,0.1);
+  }
+
+  .sidebar-logo {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin-left: 12px;
     opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-    z-index: -1;
+    white-space: nowrap;
+    transition: opacity 0.2s;
   }
-  
-  #sidebar.sidebar-open::before {
+
+  #sidebar.sidebar-open .sidebar-logo {
     opacity: 1;
-    pointer-events: auto;
-  }
-}
-
-/* ============================================================
-   LAPTOP/ESCRITORIO - SIDEBAR VISIBLE, NO CORTA EL CHAT
-   ============================================================ */
-@media (min-width: 1024px) {
-  body {
-    padding-left: 68px; /* Espacio para sidebar cerrada */
-    transition: padding-left 0.3s ease;
-  }
-  
-  body:has(#sidebar.sidebar-open) {
-    padding-left: 280px; /* Espacio para sidebar abierta */
-  }
-  
-  #appDiv {
-    width: 100%;
-    max-width: none;
-    margin: 0;
-    padding: 20px;
-  }
-  
-  /* Asegurar que el chat no se corte */
-  #chatBox {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-  }
-  
-  /* El título "Chat Rápido" siempre visible */
-  .chat-header {
-    width: 100%;
-  }
-}
-
-/* ============================================================
-   BREAKPOINTS ESPECÍFICOS (mantengo tus originales ajustados)
-   ============================================================ */
-
-/* Monitores grandes */
-@media (min-width: 1441px) {
-   #chat-title-container {
-    padding-left: 20px;
-    transition: padding-left 0.3s ease;
   }
 
-  .sidebar-open + #main-content #chat-title-container {
-   padding-left: 280px; 
-  }
-}
-
-/* Laptop */
-@media (min-width: 1000px) and (max-width: 1300px) {
-   #chat-title-container {
-    padding-left: 15px;
-    transition: padding-left 0.3s ease;
-   }
-   
-  #chat-title-container h2 {
-    font-size: 1.1rem;
-  }
-
-  .sidebar-open + #main-content #chat-title-container {
-    padding-left: 280px;
-  }
-}
-
-/* Tablet */
-@media (min-width: 768px) and (max-width: 1024px) {
-   #chat-title-container {
-   padding-left: 15px; 
-  }
-   .sidebar-open + #main-content #chat-title-container {
-   padding-left: 0; /* NO empujar en tablet, sidebar es overlay */
-  }
-}
-
-/* Móvil */
-@media (max-width: 767px) {
-  #chat-title-container {
-    display: block !important;
-    width: 100% !important;
-    padding: 15px 0 !important;
-    text-align: center !important; 
-    margin: 0 auto !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  /* ── Items de navegación ── */
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    margin: 2px 8px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 44px;
+    height: 44px;
   }
 
-   #chat-title-container h2 {
-    font-size: 1rem !important;
-    margin: 0 !important;
-    display: block !important;
-    white-space: normal !important;
+  .sidebar-item:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--text);
   }
 
-  #chat-title-container span {
-    font-size: 0.75rem !important;
-    display: block !important;
-    opacity: 0.7 !important;
+  .sidebar-item.active {
+    background: var(--user-bg);
+    color: var(--accent);
   }
 
-  /* NO empujar contenido en móvil */
-  .sidebar-open + #main-content #chat-title-container {
-    padding-left: 0 !important;
-    margin-left: 0 !important;
+  .sidebar-item .icon {
+    font-size: 18px;
+    min-width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-}
+
+  .sidebar-item .text {
+    margin-left: 12px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s;
+    flex: 1;
+    text-align: left;
+  }
+
+  #sidebar.sidebar-open .sidebar-item .text {
+    opacity: 1;
+  }
+
+  /* Chevron para items con submenú */
+  .sidebar-item .chevron {
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  #sidebar.sidebar-open .sidebar-item .chevron {
+    opacity: 1;
+  }
+
+  /* ── Botón Nuevo Chat (destacado) ── */
+  .new-chat-btn {
+    margin: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+  }
+
+  .new-chat-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: var(--accent);
+  }
+
+  /* ── Secciones ── */
+  .sidebar-section {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+  }
+
+  .section-label {
+    padding: 8px 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  #sidebar.sidebar-open .section-label {
+    opacity: 1;
+  }
+
+  /* ── Lista de chats (scrollable) ── */
+  .chats-section {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .chats-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 0 8px;
+  }
+
+  /* Scrollbar estilizada */
+  .chats-list::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .chats-list::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+  }
+
+  /* Items del historial */
+  .chat-history-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    margin: 2px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chat-history-item:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--text);
+  }
+
+  .chat-history-item::before {
+    content: '💬';
+    margin-right: 12px;
+    font-size: 14px;
+  }
+
+  /* ── Footer ── */
+  .sidebar-footer {
+    border-top: 1px solid var(--border);
+    padding: 8px 0;
+    margin-top: auto;
+  }
+
+  .notification-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-left: auto;
+    opacity: 0;
+  }
+
+  #sidebar.sidebar-open .notification-dot {
+    opacity: 1;
+  }
+
+  /* ============================================================
+     MÓVIL/TABLET - Sidebar como overlay
+     ============================================================ */
+  @media (max-width: 1023px) {
+    #sidebar {
+      transform: translateX(-100%);
+      width: 300px !important;
+    }
+    
+    #sidebar.sidebar-open {
+      transform: translateX(0);
+      box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+    }
+    
+    /* Overlay oscuro */
+    #sidebar::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 300px;
+      width: calc(100vw - 300px);
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    
+    #sidebar.sidebar-open::after {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    /* Botón flotante para móvil */
+    .mobile-menu-btn {
+      display: flex;
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 999;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 18px;
+      color: var(--text);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+    }
+    
+    /* Ocultar botón de menú interno en móvil */
+    .sidebar-header .menu-btn {
+      display: none;
+    }
+  }
+
+  /* ============================================================
+     DESKTOP - Sidebar siempre visible
+     ============================================================ */
+  @media (min-width: 1024px) {
+    .mobile-menu-btn {
+      display: none !important;
+    }
+    
+    /* Ajustar contenido principal */
+    body {
+      padding-left: 60px;
+      transition: padding-left 0.25s ease;
+    }
+    
+    body:has(#sidebar.sidebar-open) {
+      padding-left: 300px;
+    }
+    
+    /* El botón hamburguesa siempre visible para expandir/contraer */
+    .sidebar-header .menu-btn {
+      display: flex;
+    }
+  }
 
   /* ── LOGIN ── */
   #loginDiv {
@@ -771,27 +915,56 @@
 </div>
 </div>
 
+<!-- REEMPLAZA tu sidebar actual por este: -->
 <div id="sidebar" class="sidebar-closed">
-  <div class="menu-icon-container" onclick="toggleSidebar()">
-    <span>☰</span>
+  <!-- Header con menú hamburguesa y logo (solo visible cuando está abierta) -->
+  <div class="sidebar-header">
+    <button class="menu-btn" onclick="toggleSidebar()">
+      <span class="hamburger">☰</span>
+    </button>
+    <span class="sidebar-logo">ZettaxAI</span>
   </div>
 
-  <div class="sidebar-item new-chat">
-    <span class="icon">📝</span>
+  <!-- Botón Nuevo Chat (destacado) -->
+  <button class="sidebar-item new-chat-btn" onclick="newChat()">
+    <span class="icon">✏️</span>
     <span class="text">Nuevo chat</span>
+  </button>
+
+  <!-- Sección de opciones principales -->
+  <div class="sidebar-section">
+    <button class="sidebar-item" onclick="showFavorites()">
+      <span class="icon">⭐</span>
+      <span class="text">Mis cosas</span>
+    </button>
+    <button class="sidebar-item" onclick="showGems()">
+      <span class="icon">💎</span>
+      <span class="text">Gems</span>
+      <span class="chevron">›</span>
+    </button>
   </div>
 
-  <div class="middle-content">
-    <div class="sidebar-item"><span class="icon">⭐</span><span class="text">Mis cosas</span></div>
-    <div class="sidebar-item"><span class="icon">💎</span><span class="text">Gems</span></div>
-    <div class="sidebar-item active"><span class="icon">💬</span><span class="text">Revisión de código</span></div>
+  <!-- Sección de historial de chats (scrollable) -->
+  <div class="sidebar-section chats-section">
+    <div class="section-label">Chats</div>
+    <div id="history-list" class="chats-list">
+      <!-- Los chats se cargan aquí dinámicamente -->
+    </div>
   </div>
 
-  <div class="sidebar-item settings">
-    <span class="icon">⚙️</span>
-    <span class="text">Configuración y ayuda</span>
+  <!-- Footer con configuración -->
+  <div class="sidebar-footer">
+    <button class="sidebar-item" onclick="showSettings()">
+      <span class="icon">⚙️</span>
+      <span class="text">Configuración y ayuda</span>
+      <span class="notification-dot"></span>
+    </button>
   </div>
 </div>
+
+!-- Botón flotante para móvil (solo visible en pantallas pequeñas) -->
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+
   <!-- APP -->
 
 <div id="appDiv"></div>
@@ -800,7 +973,7 @@
   <div class="top-bar">
     <div class="app-name">ZettaxAI<span>PRO</span></div>
     <div class="top-right">
-      
+
       <span class="badge-premium" id="badgePremium">⭐ PREMIUM</span>
       <span class="user-email" id="userEmail"></span>
     </div>
@@ -1017,18 +1190,43 @@ window.handleFile = (event) => {
 
 // ── FUSIÓN DE SIDEBAR PROFESIONAL Y CARGA DE DATOS ──
 
-function toggleSidebar() {
+window.toggleSidebar = function() {
   const sidebar = document.getElementById('sidebar');
   
   if (sidebar.classList.contains('sidebar-closed')) {
     sidebar.classList.remove('sidebar-closed');
     sidebar.classList.add('sidebar-open');
-    if (typeof loadChatHistory === 'function') loadChatHistory();
+    loadChatHistory(); // Cargar historial al abrir
   } else {
     sidebar.classList.remove('sidebar-open');
     sidebar.classList.add('sidebar-closed');
   }
-}
+};
+
+// Función para nuevo chat (vacía el chat actual)
+window.newChat = function() {
+  document.getElementById('messages').innerHTML = '';
+  document.getElementById('input').value = '';
+  history = [];
+  
+  // Cerrar sidebar en móvil
+  if (window.innerWidth < 1024) {
+    toggleSidebar();
+  }
+};
+
+// Funciones placeholder para las otras opciones
+window.showFavorites = function() {
+  console.log('Mostrar favoritos');
+};
+
+window.showGems = function() {
+  console.log('Mostrar Gems');
+};
+
+window.showSettings = function() {
+  console.log('Mostrar configuración');
+};
 
 // ── Modo ─────────────────────────────────────────────────────────────────────
 window.setMode = (m) => {
