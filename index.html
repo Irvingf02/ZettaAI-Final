@@ -1172,12 +1172,44 @@
   padding: 0 !important;
 }
 
+/* ============================================================
+   FIJAR VISIBILIDAD DEL AVATAR
+   ============================================================ */
+
+.user-avatar-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: var(--accent) !important; /* Fondo cyan */
+  border: none !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+/* La imagen de foto */
+#userAvatarImg {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
+/* La letra inicial */
 #userAvatarLetter {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   width: 100% !important;
   height: 100% !important;
+  color: #000 !important; /* Negro para contrastar con fondo cyan */
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
 }
 
 /* Menú posicionado correctamente */
@@ -1493,84 +1525,97 @@ const LIMITE_GRATIS = 15;
   };
 
   function updateUserProfile(user) {
-    if (!user) return;
-    
-    const email = user.email || '';
-    const displayName = user.displayName || email.split('@')[0] || 'Usuario';
-    const photoURL = user.photoURL || '';
-    const initial = email.charAt(0).toUpperCase();
-    
-    const avatarImg = document.getElementById('userAvatarImg');
-    const avatarLetter = document.getElementById('userAvatarLetter');
-    
-    if (photoURL) {
-      avatarImg.src = photoURL;
-      avatarImg.style.display = 'block';
-      avatarLetter.style.display = 'none';
-    } else {
-      avatarImg.style.display = 'none';
-      avatarLetter.style.display = 'flex';
-      avatarLetter.textContent = initial;
-    }
-    
-    const menuImg = document.getElementById('profileMenuImg');
-    const menuLetter = document.getElementById('profileMenuLetter');
-    
-    if (photoURL) {
-      menuImg.src = photoURL;
-      menuImg.style.display = 'block';
-      menuLetter.style.display = 'none';
-    } else {
-      menuImg.style.display = 'none';
-      menuLetter.style.display = 'flex';
-      menuLetter.textContent = initial;
-    }
-    
-    document.getElementById('profileName').textContent = `¡Hola, ${displayName.split(' ')[0]}!`;
-    document.getElementById('profileEmail').textContent = email;
-    
-    const otherImg = document.getElementById('otherAccountImg');
-    const otherLetter = document.getElementById('otherAccountLetter');
-    
-    if (photoURL) {
-      otherImg.src = photoURL;
-      otherImg.style.display = 'block';
-      otherLetter.style.display = 'none';
-    } else {
-      otherImg.style.display = 'none';
+  if (!user) {
+    console.log('No hay usuario');
+    return;
+  }
+  
+  const email = user.email || '';
+  const displayName = user.displayName || email.split('@')[0] || 'Usuario';
+  const photoURL = user.photoURL || '';
+  
+  // Obtener inicial del email (primera letra antes del @)
+  const initial = email.charAt(0).toUpperCase();
+  
+  console.log('Email:', email);
+  console.log('Inicial:', initial);
+  console.log('Foto:', photoURL);
+  
+  // Avatar pequeño (top bar)
+  const avatarImg = document.getElementById('userAvatarImg');
+  const avatarLetter = document.getElementById('userAvatarLetter');
+  
+  if (photoURL && photoURL !== '') {
+    // Si tiene foto, mostrar foto
+    avatarImg.src = photoURL;
+    avatarImg.style.display = 'block';
+    avatarLetter.style.display = 'none';
+    console.log('Mostrando foto');
+  } else {
+    // Si NO tiene foto, mostrar inicial con fondo del tema
+    avatarImg.style.display = 'none';
+    avatarLetter.style.display = 'flex';
+    avatarLetter.textContent = initial;
+    avatarLetter.style.width = '100%';
+    avatarLetter.style.height = '100%';
+    avatarLetter.style.alignItems = 'center';
+    avatarLetter.style.justifyContent = 'center';
+    avatarLetter.style.fontSize = '16px';
+    avatarLetter.style.fontWeight = '600';
+    avatarLetter.style.color = '#000'; // Texto negro sobre fondo accent
+    console.log('Mostrando inicial:', initial);
+  }
+  
+  // Menú de perfil (el grande)
+  const menuImg = document.getElementById('profileMenuImg');
+  const menuLetter = document.getElementById('profileMenuLetter');
+  
+  if (photoURL && photoURL !== '') {
+    menuImg.src = photoURL;
+    menuImg.style.display = 'block';
+    menuLetter.style.display = 'none';
+  } else {
+    menuImg.style.display = 'none';
+    menuLetter.style.display = 'flex';
+    menuLetter.textContent = initial;
+    menuLetter.style.width = '100%';
+    menuLetter.style.height = '100%';
+    menuLetter.style.alignItems = 'center';
+    menuLetter.style.justifyContent = 'center';
+    menuLetter.style.fontSize = '36px';
+    menuLetter.style.fontWeight = '600';
+    menuLetter.style.color = '#000';
+  }
+  
+  // Textos del menú
+  const profileName = document.getElementById('profileName');
+  const profileEmail = document.getElementById('profileEmail');
+  
+  if (profileName) profileName.textContent = `¡Hola, ${displayName.split(' ')[0]}!`;
+  if (profileEmail) profileEmail.textContent = email;
+  
+  // Otra cuenta (mostrar la misma por ahora)
+  const otherImg = document.getElementById('otherAccountImg');
+  const otherLetter = document.getElementById('otherAccountLetter');
+  
+  if (photoURL && photoURL !== '') {
+    otherImg.src = photoURL;
+    otherImg.style.display = 'block';
+    if (otherLetter) otherLetter.style.display = 'none';
+  } else {
+    otherImg.style.display = 'none';
+    if (otherLetter) {
       otherLetter.style.display = 'flex';
       otherLetter.textContent = initial;
     }
-    
-    document.getElementById('otherAccountName').textContent = displayName;
-    document.getElementById('otherAccountEmail').textContent = email;
   }
-
-  window.manageAccount = function() {
-    console.log('Gestionar cuenta');
-  };
-
-  window.addAccount = function() {
-    console.log('Añadir otra cuenta');
-  };
-
-  window.logout = async function() {
-    try {
-      await auth.signOut();
-      toggleProfileMenu();
-      console.log('Sesión cerrada');
-    } catch (e) {
-      console.error('Error al cerrar sesión:', e);
-    }
-  };
-
-  document.addEventListener('click', function(e) {
-    const menu = document.getElementById('profileMenu');
-    const btn = document.querySelector('.user-avatar-btn');
-    if (menu.classList.contains('show') && !menu.contains(e.target) && !btn.contains(e.target)) {
-      menu.classList.remove('show');
-    }
-  });
+  
+  const otherAccountName = document.getElementById('otherAccountName');
+  const otherAccountEmail = document.getElementById('otherAccountEmail');
+  
+  if (otherAccountName) otherAccountName.textContent = displayName;
+  if (otherAccountEmail) otherAccountEmail.textContent = email;
+}
 
 const MODOS = {
   chat:    { emoji: "💬", title: "Chat Rápido",        desc: "Respuestas cortas y directas",      premium: false },
@@ -1591,10 +1636,12 @@ let msgCount    = 0;         // mensajes usados en sesión actual
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
+    console.log('Usuario logueado:', user.email);
+
     document.getElementById("loginDiv").style.display  = "none";
     const appDiv = document.getElementById("appDiv");
     appDiv.style.display = "flex";
-    document.getElementById("userEmail").textContent = user.email;
+    updateUserProfile(user);
 
     // Verificar si es premium
     await refreshPremiumStatus();
