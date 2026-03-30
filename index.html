@@ -140,58 +140,6 @@
   }
 }
 
-/* ============================================================
-   ESTADO CERRADO (Imagen 10): 3 ICONOS VISIBLES
-   ============================================================ */
-.sidebar-closed {
-  width: 68px !important; /* El ancho exacto para los iconos */
-}
-
-/* Ocultamos los textos y la sección del medio */
-.sidebar-closed .text, 
-.sidebar-closed .middle-content {
-  display: none !important;
-}
-
-/* Alineamos los 3 iconos que quedan (Barras, Nuevo Chat y Configuración) */
-.sidebar-closed .menu-icon-container,
-.sidebar-closed .new-chat,
-.sidebar-closed .settings {
-  display: flex !important;
-  justify-content: center;
-  padding: 15px 0;
-}
-
-/* ============================================================
-   ESTADO ABIERTO (Imagen 11): 7 ELEMENTOS VISIBLES
-   ============================================================ */
-.sidebar-open {
-  width: 280px !important;
-}
-
-/* Mostramos todo el contenido */
-.sidebar-open .text,
-.sidebar-open .middle-content {
-  display: block !important;
-}
-
-.sidebar-open .sidebar-item {
-  display: flex !important;
-  align-items: center;
-  padding: 12px 20px;
-}
-
-/* Aseguramos que los iconos tengan espacio del texto al abrir */
-.sidebar-open .icon {
-  margin-right: 15px;
-}
-
-/* Configuración siempre abajo (7mo elemento) */
-.settings {
-  margin-top: auto;
-  margin-bottom: 10px;
-}
-
   /* ── LOGIN ── */
   #loginDiv {
     background: var(--card);
@@ -706,41 +654,6 @@
   margin: 0 auto;
   width: 100%;
 }
-
-/* Sidebar cerrada: 3 iconos visibles (Barras, Nuevo Chat, Configuración) */
-.sidebar-closed {
-  width: 68px !important;
-}
-
-/* OCULTA LOS TEXTOS Y LOS ICONOS DE EN MEDIO */
-.sidebar-closed .text, 
-.sidebar-closed .middle-content {
-  display: none !important; 
-}
-
-/* Sidebar abierta: Muestra los 7 elementos */
-.sidebar-open {
-  width: 280px !important;
-}
-
-.sidebar-open .text,
-.sidebar-open .middle-content {
-  display: flex !important;
-}
-
-/* Alineación de los iconos */
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  overflow: hidden; /* Evita que el texto empuje la barra al estar cerrada */
-}
-
-.sidebar-closed .sidebar-item {
-  justify-content: center;
-  padding: 12px 0;
-}
-
 
 </style>
 </head>
