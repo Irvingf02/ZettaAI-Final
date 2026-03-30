@@ -52,78 +52,86 @@
       radial-gradient(ellipse 60% 40% at 10% 0%, rgba(0,212,255,0.05) 0%, transparent 70%),
       radial-gradient(ellipse 40% 30% at 90% 100%, rgba(245,166,35,0.04) 0%, transparent 60%);
 }
-  
-  
-  /* ============================================================
-   1. DISEÑO PARA COMPUTADORA (Escritorio / Desktopt)
+
+ /* ============================================================
+   1. DISEÑO PARA COMPUTADORA DE ESCRITORIO (Monitores Grandes)
    Referencia: Imagen 5 (Tu diseño actual corregido)
    ============================================================ */
-@media (min-width: 1025px) {
+@media (min-width: 1441px) {
   #chat-title-container {
-    padding-left: 20px; /* Un pequeño aire para que "Chat Rápido" no se pegue */
-    transition: padding-left 0.3s ease; /* Movimiento suave al abrir/cerrar sidebar */
+    padding-left: 20px;
+    transition: padding-left 0.3s ease;
   }
 
-  /* Si la sidebar está abierta (como en Gemini), empujamos el título */
   .sidebar-open + #main-content #chat-title-container {
-    padding-left: 280px; /* Ancho de la sidebar abierta */
-  }
-}
-/* NUEVO: DISEÑO ESPECÍFICO PARA LAPTOP 
-   (Se coloca aquí para que ajuste pantallas medianas sin romper el de arriba) */
-@media (min-width: 1200px) and (max-width: 1440px) {
-  #chat-title-container h2 {
-    font-size: 1.1rem; /* Solo ajustamos el tamaño para que quepa en la lap */
+    padding-left: 280px; 
   }
 }
 
 /* ============================================================
-   2. DISEÑO PARA TABLETA
+   2. DISEÑO PARA LAPTOP (Pantallas Estándar)
+   Evita que el texto se corte en pantallas de 13" o 15"
+   ============================================================ */
+@media (min-width: 1025px) and (max-width: 1440px) {
+  #chat-title-container {
+    padding-left: 15px;
+    transition: padding-left 0.3s ease;
+  }
+
+  /* Ajuste de fuente para que no sea gigante en la lap */
+  #chat-title-container h2 {
+    font-size: 1.1rem;
+  }
+
+  /* Empuje específico para Laptop */
+  .sidebar-open + #main-content #chat-title-container {
+    padding-left: 280px;
+  }
+}
+
+/* ============================================================
+   3. DISEÑO PARA TABLETA
    Un híbrido entre móvil y escritorio
    ============================================================ */
 @media (min-width: 768px) and (max-width: 1024px) {
   #chat-title-container {
-    padding-left: 15px; /* Menor margen que en PC */
+    padding-left: 15px; 
   }
 
-  /* En tableta, la sidebar suele ser colapsable pero más ancha */
   .sidebar-open + #main-content #chat-title-container {
-    padding-left: 200px; /* Ajusta este valor al ancho de tu sidebar en tableta */
+    padding-left: 200px; 
   }
 }
 
 /* ============================================================
-   3. DISEÑO PARA TELÉFONO (Móvil)
+   4. DISEÑO PARA TELÉFONO (Móvil)
    Referencia: Imagen 8 (Gemini Móvil) y tu Imagen 6
    ============================================================ */
 @media (max-width: 767px) {
-  /* Hacemos el contenedor del título más pequeño y centrado */
   #chat-title-container {
     width: 100%;
-    padding: 10px 0; /* Menos espacio arriba/abajo */
-    text-align: center; /* Centramos "Chat Rápido" como en Imagen 8 */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Línea sutil de separación */
+    padding: 10px 0;
+    text-align: center; 
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
   }
 
-  /* Ajustamos el tamaño del texto "Chat Rápido" */
   #chat-title-container h2 {
-    font-size: 1.2rem; /* Más pequeño para que no corte en pantallas chicas */
+    font-size: 1.2rem;
     margin: 0;
-    display: inline-block; /* Para centrarlo bien */
+    display: inline-block; 
   }
 
-  /* Ajustamos el subtítulo "Respuestas cortas y directas" */
   #chat-title-container span {
     font-size: 0.8rem;
-    display: block; /* Va debajo del título */
+    display: block; 
     margin-top: 2px;
   }
 
-  /* IMPORTANTE: En móvil, la sidebar NO debe empujar el chat */
   .sidebar-open + #main-content #chat-title-container {
-    padding-left: 0 !important; /* El chat se queda donde está */
+    padding-left: 0 !important; 
   }
 }
+
   /* ── LOGIN ── */
   #loginDiv {
     background: var(--card);
