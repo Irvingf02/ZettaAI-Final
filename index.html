@@ -1083,6 +1083,8 @@
 .account-details {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-width: 0;
 }
 
 .account-details span:first-child {
@@ -1090,16 +1092,63 @@
   color: var(--text);
   font-weight: 500;
 }
+.account-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
 
+.account-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.account-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+  flex-shrink: 0;
+}
+
+.account-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+
+.account-name {
+  font-size: 0.9rem;
+  color: var(--text);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .account-email {
   font-size: 0.75rem;
   color: var(--muted);
+   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .session-status {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--muted);
+   flex-shrink: 0;
 }
+
 
 .account-actions {
   display: flex;
@@ -1126,25 +1175,33 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
 }
 
-.btn-add-account {
+.btn-add-account,
+.btn-logout {
+  width: 100%;
   background: none;
   border: none;
   color: var(--text);
   font-size: 0.9rem;
   cursor: pointer;
-  padding: 10px;
+  padding: 12px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   gap: 12px;
-  transition: all 0.2s;
   text-align: left;
 }
 
-.btn-add-account:hover {
+.btn-add-account:hover,
+.btn-logout:hover {
   background: rgba(255,255,255,0.05);
+}
+
+.btn-logout {
+  color: var(--danger);
 }
 
 .btn-add-account span {
