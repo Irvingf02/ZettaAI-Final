@@ -1461,7 +1461,6 @@
 }
 
 </style>
-<base target="_blank">
 </head>
 
 <body>
@@ -2144,7 +2143,12 @@ window.send = async () => {
     updateUI();
 
   } catch (e) {
-    // ... (error handling) ...
+    typing.remove();
+    addMessage("⚠️ Error conectando con el servidor.", "bot error");
+    console.error(e);
+  } finally {
+    sendBtn.disabled = false;
+    input.focus();
   }
 };
 // ── Auth ──────────────────────────────────────────────────────────────────────
