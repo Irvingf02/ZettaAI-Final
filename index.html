@@ -1676,6 +1676,8 @@ import {
   FacebookAuthProvider,
   OAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInAnonymously,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
@@ -1785,25 +1787,39 @@ window.login = async () => {
   } catch (e) { alert("Error al iniciar sesión: " + e.message); }
 };
 
-
 window.loginGoogle = async () => {
   const provider = new GoogleAuthProvider();
-  try { await signInWithPopup(auth, provider); }
-  catch (e) { alert("Error con Google: " + e.message); }
+  try {
+    if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+      await signInWithRedirect(auth, provider);
+    } else {
+      await signInWithPopup(auth, provider);
+    }
+  } catch (e) { alert("Error con Google: " + e.message); }
 };
- 
+
 window.loginFacebook = async () => {
   const provider = new FacebookAuthProvider();
-  try { await signInWithPopup(auth, provider); }
-  catch (e) { alert("Error con Facebook: " + e.message); }
+  try {
+    if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+      await signInWithRedirect(auth, provider);
+    } else {
+      await signInWithPopup(auth, provider);
+    }
+  } catch (e) { alert("Error con Facebook: " + e.message); }
 };
- 
+
 window.loginApple = async () => {
   const provider = new OAuthProvider("apple.com");
-  try { await signInWithPopup(auth, provider); }
-  catch (e) { alert("Error con Apple: " + e.message); }
+  try {
+    if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+      await signInWithRedirect(auth, provider);
+    } else {
+      await signInWithPopup(auth, provider);
+    }
+  } catch (e) { alert("Error con Apple: " + e.message); }
 };
- 
+
 window.loginAnonimo = async () => {
   try { await signInAnonymously(auth); }
   catch (e) { alert("No se pudo iniciar sesión como invitado."); }
@@ -1826,6 +1842,9 @@ window.addAccount = () => {
 };
 
 // ── Auth state ──
+// Capturar resultado de redirect (para móvil)
+getRedirectResult(auth).catch(e => console.error("Redirect error:", e));
+
 onAuthStateChanged(auth, async (user) => {
   const sidebar   = document.getElementById("sidebar");
   const mobileBtn = document.querySelector(".menu-toggle-mobile");
