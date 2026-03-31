@@ -1467,10 +1467,12 @@
 </style>
 </head>
 
+
 <body>
 
 <button class="menu-toggle-mobile" onclick="toggleSidebar()">☰</button>
 
+<!-- LOGIN -->
 <div id="loginDiv">
   <div class="login-logo">🤖</div>
   <div class="login-title">ZettaxAI</div>
@@ -1489,44 +1491,34 @@
     <button class="btn btn-primary" onclick="login()">Entrar</button>
   </div>
   <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px; width: 100%;">
-  
-  <button class="btn btn-ghost" onclick="loginGoogle()" style="background: white; color: #000; display: flex; align-items: center; justify-content: center; gap: 10px;">
-    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="16"> 
-    Continuar con Google
-  </button>
-
-  <button class="btn btn-ghost" onclick="loginFacebook()" style="background: #1877F2; color: white;">
-    Continuar con Facebook
-  </button>
-
-  <button class="btn btn-ghost" onclick="loginApple()" style="background: #000; color: white;">
-    Continuar con Apple
-  </button>
-
-  <button class="btn btn-ghost" onclick="loginAnonimo()" style="background: #f4f4f4; color: #333; margin-top: 8px; border: 1px solid #ddd;">
-    ⚡ Probar como invitado (Rápido)
-  </button>
-
-</div>
+    <button class="btn btn-ghost" onclick="loginGoogle()" style="background: white; color: #000; display: flex; align-items: center; justify-content: center; gap: 10px;">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="16"> 
+      Continuar con Google
+    </button>
+    <button class="btn btn-ghost" onclick="loginFacebook()" style="background: #1877F2; color: white;">
+      Continuar con Facebook
+    </button>
+    <button class="btn btn-ghost" onclick="loginApple()" style="background: #000; color: white;">
+      Continuar con Apple
+    </button>
+    <button class="btn btn-ghost" onclick="loginAnonimo()" style="background: #f4f4f4; color: #333; margin-top: 8px; border: 1px solid #ddd;">
+      ⚡ Probar como invitado (Rápido)
+    </button>
+  </div>
 </div>
 
-<!-- REEMPLAZA tu sidebar actual por este: -->
+<!-- SIDEBAR -->
 <div id="sidebar" class="sidebar-closed">
-  <!-- Header con menú hamburguesa y logo (solo visible cuando está abierta) -->
   <div class="sidebar-header">
     <button class="menu-btn" onclick="toggleSidebar()">
       <span class="hamburger">☰</span>
     </button>
     <span class="sidebar-logo">ZettaxAI</span>
   </div>
-
-  <!-- Botón Nuevo Chat (destacado) -->
   <button class="sidebar-item new-chat-btn" onclick="newChat()">
     <span class="icon">✏️</span>
     <span class="text">Nuevo chat</span>
   </button>
-
-  <!-- Sección de opciones principales -->
   <div class="sidebar-section">
     <button class="sidebar-item" onclick="showFavorites()">
       <span class="icon">⭐</span>
@@ -1538,16 +1530,10 @@
       <span class="chevron">›</span>
     </button>
   </div>
-
-  <!-- Sección de historial de chats (scrollable) -->
   <div class="sidebar-section chats-section">
     <div class="section-label">Chats</div>
-    <div id="history-list" class="chats-list">
-      <!-- Los chats se cargan aquí dinámicamente -->
-    </div>
+    <div id="history-list" class="chats-list"></div>
   </div>
-
-  <!-- Footer con configuración -->
   <div class="sidebar-footer">
     <button class="sidebar-item" onclick="showSettings()">
       <span class="icon">⚙️</span>
@@ -1557,68 +1543,64 @@
   </div>
 </div>
 
-<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<!-- APP DIV -->
+<div id="appDiv" style="display:none; flex-direction:column; width:100%; gap:12px;">
 
-  <!-- APP -->
+  <!-- Overlay perfil móvil -->
+  <div id="profileOverlay" class="profile-overlay" onclick="toggleProfileMenu()"></div>
 
-<div id="appDiv"></div>
+  <!-- Menú de perfil -->
+  <div id="profileMenu" class="profile-menu">
+    <div class="profile-header">
+      <button class="close-btn" onclick="toggleProfileMenu()">✕</button>
+    </div>
+    <div class="profile-info">
+      <div class="profile-avatar-large">
+        <img id="profileMenuImg" src="" alt="" style="display: none;">
+        <span id="profileMenuLetter">?</span>
+        <div class="camera-icon">📷</div>
+      </div>
+      <h3 id="profileName">¡Hola!</h3>
+      <p id="profileEmail"></p>
+      <button class="btn-manage-account" onclick="manageAccount()">Gestionar tu cuenta de ZettaxAI</button>
+    </div>
+    <div class="profile-section">
+      <div class="account-item" onclick="logout()">
+        <div class="account-avatar">
+          <img id="accountItemImg" src="" alt="" style="display: none;">
+          <span id="accountItemLetter">?</span>
+        </div>
+        <div class="account-details">
+          <div class="account-name" id="accountItemName">Usuario</div>
+          <div class="account-email" id="accountItemEmail">usuario@email.com</div>
+        </div>
+        <span class="session-status">Cerrar sesión →</span>
+      </div>
+    </div>
+    <div class="profile-footer">
+      <button class="btn-add-account" onclick="addAccount()">
+        <span>+</span> Añadir otra cuenta
+      </button>
+      <button class="btn-logout" onclick="logout()">
+        <span>🚪</span> Cerrar sesión
+      </button>
+    </div>
+  </div>
 
   <!-- TOP BAR -->
   <div class="top-bar">
     <div class="app-name">ZettaxAI<span>PRO</span></div>
-    
     <div class="top-right">
-    <span class="badge-premium" id="badgePremium">⭐ PREMIUM</span>
-      
-       <div class="user-profile-container">
-      <button class="user-avatar-btn" onclick="toggleProfileMenu()">
-        <img id="userAvatarImg" src="" alt="" style="display: none;">
-        <span id="userAvatarLetter">?</span>
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Overlay para móvil -->
-<div id="profileOverlay" class="profile-overlay" onclick="toggleProfileMenu()"></div>
-
-<!-- Menú de perfil (fuera del top-bar para mejor posicionamiento) -->
-<div id="profileMenu" class="profile-menu">
-  <div class="profile-header">
-    <button class="close-btn" onclick="toggleProfileMenu()">✕</button>
-  </div>
-  
-  <div class="profile-info">
-    <div class="profile-avatar-large">
-      <img id="profileMenuImg" src="" alt="" style="display: none;">
-      <span id="profileMenuLetter">?</span>
-      <div class="camera-icon">📷</div>
-    </div>
-    <h3 id="profileName">¡Hola!</h3>
-    <p id="profileEmail"></p>
-    <button class="btn-manage-account" onclick="manageAccount()">Gestionar tu cuenta de ZettaxAI</button>
-  </div>
-  
-  <div class="profile-section">
-    <div class="account-item" onclick="logout()">
-      <div class="account-avatar">
-        <img id="accountItemImg" src="" alt="" style="display: none;">
-        <span id="accountItemLetter">?</span>
+      <span class="badge-premium" id="badgePremium">⭐ PREMIUM</span>
+      <span class="msg-counter" id="msgCounter">15 mensajes gratis</span>
+      <div class="user-profile-container">
+        <button class="user-avatar-btn" onclick="toggleProfileMenu()">
+          <img id="userAvatarImg" src="" alt="" style="display: none;">
+          <span id="userAvatarLetter">?</span>
+        </button>
       </div>
-      <div class="account-details">
-        <div class="account-name" id="accountItemName">Usuario</div>
-        <div class="account-email" id="accountItemEmail">correo@ejemplo.com</div>
-      </div>
-      <span class="session-status">Cerrar sesión →</span>
     </div>
   </div>
-  
-  <div class="profile-footer">
-    <button class="btn-add-account" onclick="addAccount()">
-      <span>+</span> Añadir otra cuenta
-    </button>
-  </div>
-</div>
 
   <!-- BANNER ÉXITO -->
   <div id="successBanner">⭐ ¡Pago exitoso! Ya eres usuario Premium. Recarga si no ves los cambios.</div>
@@ -1628,9 +1610,8 @@
     <button class="mode-btn active" id="btn-chat"    onclick="setMode('chat')">💬 Chat</button>
     <button class="mode-btn"        id="btn-resumen" onclick="setMode('resumen')">📝 Resumir <span class="lock">🔒</span></button>
     <button class="mode-btn"        id="btn-ideas"   onclick="setMode('ideas')">💡 Ideas <span class="lock">🔒</span></button>
-    <button class="mode-btn active"        id="btn-tarea"   onclick="setMode('tarea')">🎓 Tarea</button>
+    <button class="mode-btn"        id="btn-tarea"   onclick="setMode('tarea')">🎓 Tarea</button>
     <button class="btn-pro"         onclick="showPaywall()">✨ Ser PRO</button>
-
   </div>
 
   <!-- CHAT BOX -->
@@ -1638,30 +1619,26 @@
     <div class="chat-header">
       <span id="modeEmoji">💬</span>
       <span class="chat-mode-title" id="modeTitle">Chat Rápido</span>
+      <span class="chat-mode-desc" id="modeDesc">Respuestas cortas y directas</span>
     </div>
-
-
     <div id="messages"></div>
-
     <div class="input-area">
       <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf,.txt" onchange="handleFile(event)">
-  
-  <button class="mode-btn" onclick="document.getElementById('fileInput').click()" style="padding: 10px; font-size: 1.2rem;">+</button>
-
+      <button class="mode-btn" onclick="document.getElementById('fileInput').click()" style="padding: 10px; font-size: 1.2rem;">+</button>
       <input class="chat-input" id="input" placeholder="Escribe un mensaje..."
         onkeypress="if(event.key==='Enter' && !event.shiftKey) send()" />
       <button class="send-btn" id="sendBtn" onclick="send()">Enviar</button>
     </div>
   </div>
 
-</div>
+</div><!-- fin #appDiv -->
 
 <!-- PAYWALL MODAL -->
 <div id="paywallModal">
-  <div class="modal-card" style="max-width: 500px;"> <div class="modal-icon">🚀</div>
+  <div class="modal-card" style="max-width: 500px;">
+    <div class="modal-icon">🚀</div>
     <div class="modal-title">Elige tu Plan ZettaAI</div>
     <div class="modal-desc">Potencia tu productividad con el nivel que necesites.</div>
-    
     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
       <div style="flex: 1; border: 1px solid var(--border); padding: 15px; border-radius: 10px; background: var(--surface);">
         <h4 style="color: var(--accent);">GO</h4>
@@ -1669,7 +1646,6 @@
         <p style="font-size: 0.7rem; color: var(--muted); margin-bottom: 10px;">MXN/mes</p>
         <button class="btn-subscribe" style="padding: 8px; font-size: 0.8rem;" onclick="payPremium('go')">Elegir</button>
       </div>
-
       <div style="flex: 1; border: 2px solid var(--gold); padding: 15px; border-radius: 10px; background: var(--card); position: relative;">
         <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; font-size: 0.6rem; padding: 2px 8px; border-radius: 10px; font-weight: 800;">RECOMENDADO</span>
         <h4 style="color: var(--gold);">PLUS</h4>
@@ -1677,7 +1653,6 @@
         <p style="font-size: 0.7rem; color: var(--muted); margin-bottom: 10px;">MXN/mes</p>
         <button class="btn-subscribe" style="padding: 8px; font-size: 0.8rem;" onclick="payPremium('plus')">Elegir</button>
       </div>
-
       <div style="flex: 1; border: 1px solid var(--border); padding: 15px; border-radius: 10px; background: var(--surface);">
         <h4 style="color: #FF4D6A;">ULTRA</h4>
         <p style="font-size: 1.2rem; font-weight: 800;">$500</p>
@@ -1685,18 +1660,15 @@
         <button class="btn-subscribe" style="padding: 8px; font-size: 0.8rem;" onclick="payPremium('ultra')">Elegir</button>
       </div>
     </div>
-
     <button class="btn-close-modal" onclick="closePaywall()">No por ahora</button>
   </div>
 </div>
 
 <script type="module">
-// Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
-  // Importaciones para que el navegador entienda el Login
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
 import { 
- getAuth, 
+  getAuth, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   onAuthStateChanged,
@@ -1704,199 +1676,181 @@ import {
   FacebookAuthProvider,
   OAuthProvider,
   signInWithPopup,
-  signInAnonymously
+  signInAnonymously,
+  signOut
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-
-// Importaciones para que el navegador entienda la Base de Datos
 import { 
   getFirestore, 
   doc, 
   getDoc, 
   setDoc,
-  collection,    // ← FALTABA ESTA
-    query,         // ← FALTABA ESTA
-    where,         // ← FALTABA ESTA
-    orderBy,       // ← FALTABA ESTA
-    getDocs,       // ← FALTABA ESTA
-    limit,
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+  limit,
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyBkylBC97yOx9K0CWcxvbyA1hsouygvTXY",
-    authDomain: "zettaai-1c02a.firebaseapp.com",
-    projectId: "zettaai-1c02a",
-    storageBucket: "zettaai-1c02a.firebasestorage.app",
-    messagingSenderId: "1085509594306",
-    appId: "1:1085509594306:web:220809252bd2fac5f9df5b",
-    measurementId: "G-7NGH4XF7YS"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyBkylBC97yOx9K0CWcxvbyA1hsouygvTXY",
+  authDomain: "zettaai-1c02a.firebaseapp.com",
+  projectId: "zettaai-1c02a",
+  storageBucket: "zettaai-1c02a.firebasestorage.app",
+  messagingSenderId: "1085509594306",
+  appId: "1:1085509594306:web:220809252bd2fac5f9df5b",
+  measurementId: "G-7NGH4XF7YS"
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const auth = getAuth(app); // <-- Esto activa el sistema de usuarios
-  const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-// 🔴 Cambia por tu URL de Railway al publicar
 const BACKEND_URL = "https://zettaai-final-production.up.railway.app";
-
 const LIMITE_GRATIS = 15;
 
-  // ============================================================
-// FUNCIONES DEL MENÚ DE PERFIL
-// ============================================================
+// ── Estado ──
+let currentUser = null;
+let isPremium   = false;
+let mode        = "chat";
+let chatHistory = [];   // renombrado para no colisionar con window.history
+let msgCount    = 0;
 
+// ── Perfil ──
 window.toggleProfileMenu = function() {
-  const menu = document.getElementById('profileMenu');
-  const overlay = document.getElementById('profileOverlay');
-  
-  if (menu.classList.contains('show')) {
-    menu.classList.remove('show');
-    overlay.classList.remove('show');
-  } else {
-    menu.classList.add('show');
-    overlay.classList.add('show');
-  }
+  const menu = document.getElementById("profileMenu");
+  const overlay = document.getElementById("profileOverlay");
+  menu.classList.toggle("show");
+  overlay.classList.toggle("show");
 };
 
 function updateUserProfile(user) {
   if (!user) return;
-  
-  const email = user.email || '';
-  const displayName = user.displayName || email.split('@')[0] || 'Usuario';
-  const photoURL = user.photoURL || '';
-  const initial = email.charAt(0).toUpperCase() || '?';
-  
-  // Avatar pequeño (botón)
-  const avatarImg = document.getElementById('userAvatarImg');
-  const avatarLetter = document.getElementById('userAvatarLetter');
-  
-  if (avatarImg && avatarLetter) {
-    if (photoURL) {
-      avatarImg.src = photoURL;
-      avatarImg.style.display = 'block';
-      avatarLetter.style.display = 'none';
+  const email = user.email || "";
+  const displayName = user.displayName || email.split("@")[0] || "Usuario";
+  const photoURL = user.photoURL || "";
+  const initial = (user.isAnonymous ? "?" : (email.charAt(0).toUpperCase() || "?"));
+
+  const setAvatar = (imgId, letterId, photo, letter) => {
+    const img = document.getElementById(imgId);
+    const ltr = document.getElementById(letterId);
+    if (!img || !ltr) return;
+    if (photo) {
+      img.src = photo; img.style.display = "block"; ltr.style.display = "none";
     } else {
-      avatarImg.style.display = 'none';
-      avatarLetter.style.display = 'flex';
-      avatarLetter.textContent = initial;
+      img.style.display = "none"; ltr.style.display = "flex"; ltr.textContent = letter;
     }
-  }
-  
-  // Menú de perfil
-  const menuImg = document.getElementById('profileMenuImg');
-  const menuLetter = document.getElementById('profileMenuLetter');
-  const profileName = document.getElementById('profileName');
-  const profileEmail = document.getElementById('profileEmail');
-  
-  if (menuImg && menuLetter) {
-    if (photoURL) {
-      menuImg.src = photoURL;
-      menuImg.style.display = 'block';
-      menuLetter.style.display = 'none';
-    } else {
-      menuImg.style.display = 'none';
-      menuLetter.style.display = 'flex';
-      menuLetter.textContent = initial;
-    }
-  }
-  
-  if (profileName) profileName.textContent = `¡Hola, ${displayName.split(' ')[0]}!`;
-  if (profileEmail) profileEmail.textContent = email;
-  
-  // Cuenta en la lista
-  const accountImg = document.getElementById('accountItemImg');
-  const accountLetter = document.getElementById('accountItemLetter');
-  
-  if (accountImg && accountLetter) {
-    if (photoURL) {
-      accountImg.src = photoURL;
-      accountImg.style.display = 'block';
-      accountLetter.style.display = 'none';
-    } else {
-      accountImg.style.display = 'none';
-      accountLetter.style.display = 'flex';
-      accountLetter.textContent = initial;
-    }
-  }
-  
-  const accountName = document.getElementById('accountItemName');
-  const accountEmail = document.getElementById('accountItemEmail');
-  
-  if (accountName) accountName.textContent = displayName;
-  if (accountEmail) accountEmail.textContent = email;
+  };
+
+  setAvatar("userAvatarImg", "userAvatarLetter", photoURL, initial);
+  setAvatar("profileMenuImg", "profileMenuLetter", photoURL, initial);
+  setAvatar("accountItemImg", "accountItemLetter", photoURL, initial);
+
+  const el = id => document.getElementById(id);
+  if (el("profileName")) el("profileName").textContent = user.isAnonymous ? "¡Hola, Invitado!" : `¡Hola, ${displayName.split(" ")[0]}!`;
+  if (el("profileEmail")) el("profileEmail").textContent = user.isAnonymous ? "Sesión como invitado" : email;
+  if (el("accountItemName")) el("accountItemName").textContent = user.isAnonymous ? "Invitado" : displayName;
+  if (el("accountItemEmail")) el("accountItemEmail").textContent = user.isAnonymous ? "" : email;
 }
 
-const MODOS = {
-  chat:    { emoji: "💬", title: "Chat Rápido",        desc: "Respuestas cortas y directas",      premium: false },
-  resumen: { emoji: "📝", title: "Resumidor Pro",       desc: "Sintetiza cualquier texto",          premium: true  },
-  ideas:   { emoji: "💡", title: "Generador de Ideas",  desc: "Ideas creativas y originales",       premium: true  },
-  tarea:   { emoji: "🎓", title: "Tutor de Tareas",     desc: "Explica conceptos fácilmente",       premium: false  }
+// ── Auth ──
+window.register = async () => {
+  const email = document.getElementById("email").value.trim();
+  const pass  = document.getElementById("password").value;
+  if (!email || !pass) return alert("Completa todos los campos.");
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await setDoc(doc(db, "users", cred.user.uid), {
+      email, premium: false, msgCount: 0, createdAt: new Date().toISOString()
+    });
+  } catch (e) { alert("Error al registrar: " + e.message); }
 };
 
+window.login = async () => {
+  const email = document.getElementById("email").value.trim();
+  const pass  = document.getElementById("password").value;
+  if (!email || !pass) return alert("Completa todos los campos.");
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch (e) { alert("Error al iniciar sesión: " + e.message); }
+};
 
-// ── Estado ──────────────────────────────────────────────────────────────────
-let currentUser = null;
-let isPremium   = false;
-let mode        = "chat";
-let history     = [];        // historial de mensajes para contexto (memoria)
-let msgCount    = 0;         // mensajes usados en sesión actual
+window.loginGoogle = async () => {
+  const provider = new GoogleAuthProvider();
+  try { await signInWithPopup(auth, provider); }
+  catch (e) { alert("Error con Google: " + e.message); }
+};
 
-// ── Auth state ───────────────────────────────────────────────────────────────
+window.loginFacebook = async () => {
+  const provider = new FacebookAuthProvider();
+  try { await signInWithPopup(auth, provider); }
+  catch (e) { alert("Error con Facebook: " + e.message); }
+};
+
+window.loginApple = async () => {
+  const provider = new OAuthProvider("apple.com");
+  try { await signInWithPopup(auth, provider); }
+  catch (e) { alert("Error con Apple: " + e.message); }
+};
+
+window.loginAnonimo = async () => {
+  try { await signInAnonymously(auth); }
+  catch (e) { alert("No se pudo iniciar sesión como invitado."); }
+};
+
+window.logout = async () => {
+  try {
+    await signOut(auth);
+    window.toggleProfileMenu();
+  } catch (e) { alert("Error al cerrar sesión: " + e.message); }
+};
+
+window.manageAccount = () => {
+  alert("Gestión de cuenta: próximamente.");
+};
+
+window.addAccount = () => {
+  window.toggleProfileMenu();
+  alert("Función de múltiples cuentas: próximamente.");
+};
+
+// ── Auth state ──
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
-    document.getElementById("loginDiv").style.display  = "none";
-    document.getElementById("appDiv").style.display = "flex";
-
-    document.querySelector('.top-bar').style.display = 'flex';
-    
-    setTimeout(() => {
-  updateUserProfile(user);
-}, 100);
-
-    // Verificar si es premium
+    document.getElementById("loginDiv").style.display = "none";
+    document.getElementById("appDiv").style.display   = "flex";
+    setTimeout(() => updateUserProfile(user), 100);
     await refreshPremiumStatus();
+    await loadChatHistory();
 
-    // Mostrar banner si viene de pago exitoso
     const params = new URLSearchParams(window.location.search);
     if (params.get("success") === "true") {
       document.getElementById("successBanner").style.display = "block";
       window.history.replaceState({}, "", window.location.pathname);
-      setTimeout(() => refreshPremiumStatus(), 3000); // re-check por si el webhook tardó
+      setTimeout(() => refreshPremiumStatus(), 3000);
     }
   } else {
     currentUser = null;
     isPremium   = false;
-    document.getElementById("loginDiv").style.display  = "block";
-    document.getElementById("appDiv").style.display    = "none";
-
-    document.querySelector('.top-bar').style.display = 'none';
-
+    document.getElementById("loginDiv").style.display = "block";
+    document.getElementById("appDiv").style.display   = "none";
   }
 });
 
 async function refreshPremiumStatus() {
-  if (!currentUser) return;
+  if (!currentUser || currentUser.isAnonymous) return;
   try {
     const snap = await getDoc(doc(db, "users", currentUser.uid));
-    isPremium   = snap.exists() && snap.data().premium === true;
-    msgCount    = snap.exists() ? (snap.data().msgCount || 0) : 0;
-  } catch (e) {
-    console.error("Error obteniendo estado:", e);
-  }
+    isPremium = snap.exists() && snap.data().premium === true;
+    msgCount  = snap.exists() ? (snap.data().msgCount || 0) : 0;
+  } catch (e) { console.error("Error obteniendo estado:", e); }
   updateUI();
 }
 
 function updateUI() {
-  // Badge premium
   document.getElementById("badgePremium").style.display = isPremium ? "inline-block" : "none";
-
-  // Contador de mensajes
   const counter = document.getElementById("msgCounter");
   if (isPremium) {
     counter.textContent = "✨ Mensajes ilimitados";
@@ -1906,69 +1860,93 @@ function updateUI() {
     counter.textContent = `${restantes} mensajes gratis`;
     counter.className   = "msg-counter" + (restantes <= 3 ? " danger" : restantes <= 6 ? " warning" : "");
   }
-
-  // Candados en modos premium
   document.querySelectorAll(".mode-btn .lock").forEach(el => {
     el.style.display = isPremium ? "none" : "inline";
   });
 }
-window.handleFile = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    addMessage(`Archivo seleccionado: ${file.name}`, "user", "📎 Archivo listo");
-    // Aquí podrías implementar la subida a Firebase Storage o enviarlo al backend
-    console.log("Archivo listo para procesar:", file);
-  }
-};
 
-// ── FUSIÓN DE SIDEBAR PROFESIONAL Y CARGA DE DATOS ──
-
+// ── Sidebar ──
 window.toggleSidebar = function() {
-  const sidebar = document.getElementById('sidebar');
-  
-  if (sidebar.classList.contains('sidebar-closed')) {
-    sidebar.classList.remove('sidebar-closed');
-    sidebar.classList.add('sidebar-open');
-    loadChatHistory(); // Cargar historial al abrir
+  const sidebar = document.getElementById("sidebar");
+  if (sidebar.classList.contains("sidebar-closed")) {
+    sidebar.classList.remove("sidebar-closed");
+    sidebar.classList.add("sidebar-open");
+    loadChatHistory();
   } else {
-    sidebar.classList.remove('sidebar-open');
-    sidebar.classList.add('sidebar-closed');
+    sidebar.classList.remove("sidebar-open");
+    sidebar.classList.add("sidebar-closed");
   }
 };
 
-// Función para nuevo chat (vacía el chat actual)
 window.newChat = function() {
-  document.getElementById('messages').innerHTML = '';
-  document.getElementById('input').value = '';
-  history = [];
-  
-  // Cerrar sidebar en móvil
-  if (window.innerWidth < 1024) {
-    toggleSidebar();
+  document.getElementById("messages").innerHTML = "";
+  document.getElementById("input").value = "";
+  chatHistory = [];
+  if (window.innerWidth < 1024) toggleSidebar();
+};
+
+window.showFavorites = function() { console.log("Mostrar favoritos"); };
+window.showGems      = function() { console.log("Mostrar Gems"); };
+window.showSettings  = function() { console.log("Mostrar configuración"); };
+
+// ── Historial ──
+async function loadChatHistory() {
+  if (!currentUser || currentUser.isAnonymous) return;
+  const list = document.getElementById("history-list");
+  if (!list) return;
+  list.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);padding:10px;'>Cargando...</p>";
+  try {
+    const q = query(
+      collection(db, "chats"),
+      where("userId", "==", currentUser.uid),
+      orderBy("timestamp", "desc"),
+      limit(20)
+    );
+    const snap = await getDocs(q);
+    list.innerHTML = "";
+    if (snap.empty) {
+      list.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);padding:10px;'>No hay chats aún</p>";
+      return;
+    }
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      const item = document.createElement("div");
+      item.className = "sidebar-item";
+      item.style.cursor = "pointer";
+      const titulo = (data.title || "Chat nuevo").substring(0, 25) + ((data.title || "").length > 25 ? "..." : "");
+      item.innerHTML = `<span class="icon">💬</span><span class="text">${titulo}</span>`;
+      item.onclick = () => {
+        loadSpecificChat(docSnap.id, data.messages || []);
+        if (window.innerWidth < 1024) toggleSidebar();
+      };
+      list.appendChild(item);
+    });
+  } catch (error) {
+    console.error("Error al cargar historial:", error);
+    list.innerHTML = `<p style='color:var(--danger);padding:10px;font-size:0.8rem;'>Error al cargar</p>`;
   }
+}
+
+function loadSpecificChat(chatId, messages) {
+  const box = document.getElementById("messages");
+  box.innerHTML = "";
+  chatHistory = [];
+  messages.forEach(m => {
+    addMessage(m.content, m.role === "user" ? "user" : "bot");
+    chatHistory.push(m);
+  });
+}
+
+// ── Modo ──
+const MODOS = {
+  chat:    { emoji: "💬", title: "Chat Rápido",       desc: "Respuestas cortas y directas",   premium: false },
+  resumen: { emoji: "📝", title: "Resumidor Pro",      desc: "Sintetiza cualquier texto",       premium: true  },
+  ideas:   { emoji: "💡", title: "Generador de Ideas", desc: "Ideas creativas y originales",    premium: true  },
+  tarea:   { emoji: "🎓", title: "Tutor de Tareas",    desc: "Explica conceptos fácilmente",    premium: false }
 };
 
-// Funciones placeholder para las otras opciones
-window.showFavorites = function() {
-  console.log('Mostrar favoritos');
-};
-
-window.showGems = function() {
-  console.log('Mostrar Gems');
-};
-
-window.showSettings = function() {
-  console.log('Mostrar configuración');
-};
-
-
-// ── Modo ─────────────────────────────────────────────────────────────────────
 window.setMode = (m) => {
-  // Si intenta modo premium sin serlo → abrir paywall
-  if (MODOS[m].premium && !isPremium) {
-    showPaywall();
-    return;
-  }
+  if (MODOS[m].premium && !isPremium) { showPaywall(); return; }
   mode = m;
   document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
   document.getElementById("btn-" + m).classList.add("active");
@@ -1977,7 +1955,7 @@ window.setMode = (m) => {
   document.getElementById("modeDesc").textContent  = MODOS[m].desc;
 };
 
-// ── Mensajes ──────────────────────────────────────────────────────────────────
+// ── Mensajes ──
 function addMessage(text, role, extra = "") {
   const div = document.createElement("div");
   div.className = `msg ${role}`;
@@ -1994,106 +1972,29 @@ function addMessage(text, role, extra = "") {
   return div;
 }
 
-async function loadChatHistory() {
-  if (!currentUser) {
-    console.log("No hay usuario para cargar historial");
-    return;
+window.handleFile = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    addMessage(`Archivo seleccionado: ${file.name}`, "user", "📎 Archivo listo");
+    console.log("Archivo listo para procesar:", file);
   }
-  
-  // Busca o crea el contenedor del historial
-  let list = document.getElementById("history-list");
-  if (!list) {
-    const middleContent = document.querySelector('#sidebar .middle-content');
-    if (middleContent) {
-      list = document.createElement('div');
-      list.id = 'history-list';
-      list.style.marginTop = '10px';
-      middleContent.appendChild(list);
-    } else {
-      console.error("No se encontró .middle-content en el sidebar");
-      return;
-    }
-  }
-  
-  list.innerHTML = "<p style='font-size: 0.8rem; color: var(--muted); padding: 10px;'>Cargando...</p>";
+};
 
-  try {
-    const q = query(
-      collection(db, "chats"), 
-      where("userId", "==", currentUser.uid), 
-      orderBy("timestamp", "desc"),
-      limit(20)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    list.innerHTML = "";
-
-    if (querySnapshot.empty) {
-      list.innerHTML = "<p style='font-size: 0.8rem; color: var(--muted); padding: 10px;'>No hay chats aún</p>";
-      return;
-    }
-
-    querySnapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      
-      const item = document.createElement("div");
-      item.className = "sidebar-item"; 
-      item.style.pointerEvents = "auto"; 
-      item.style.cursor = "pointer";
-      item.style.marginBottom = "4px";
-
-      const titulo = (data.title || "Chat nuevo").substring(0, 25) + ((data.title || "").length > 25 ? "..." : "");
-
-      item.innerHTML = `
-        <span class="icon">💬</span>
-        <span class="text">${titulo}</span>
-      `;
-      
-      item.onclick = (e) => {
-        e.stopPropagation();
-        console.log("Cargando chat:", docSnap.id);
-        
-        // Aquí llamas a tu función para cargar el chat específico
-        if (typeof loadSpecificChat === 'function') {
-          loadSpecificChat(docSnap.id);
-        } else {
-          console.log("loadSpecificChat no está definida aún");
-        }
-        
-        // Cerrar sidebar en móviles/tablets
-        if (window.innerWidth < 1024) {
-          toggleSidebar();
-        }
-      };
-      
-      list.appendChild(item);
-    });
-  } catch (error) {
-    console.error("Error al cargar historial:", error);
-    list.innerHTML = `<p style='color: var(--danger); padding: 10px; font-size: 0.8rem;'>Error al cargar</p>`;
-  }
-}
-
-// ── Enviar mensaje ────────────────────────────────────────────────────────────
+// ── Enviar mensaje ──
 window.send = async () => {
   const input   = document.getElementById("input");
   const sendBtn = document.getElementById("sendBtn");
   const text    = input.value.trim();
   if (!text || !currentUser) return;
 
-  // Límite gratis en frontend (también se verifica en backend)
-  if (!isPremium && msgCount >= LIMITE_GRATIS) {
-    showPaywall();
-    return;
-  }
+  if (!isPremium && msgCount >= LIMITE_GRATIS) { showPaywall(); return; }
 
   addMessage(text, "user");
-  input.value   = "";
+  input.value      = "";
   sendBtn.disabled = true;
 
-  // Añadir al historial (memoria)
-  history.push({ role: "user", content: text });
-  if (history.length > 20) history = history.slice(-20); // máx 20 entradas
+  chatHistory.push({ role: "user", content: text });
+  if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
 
   const typing = addMessage("IA escribiendo...", "bot typing");
 
@@ -2104,52 +2005,37 @@ window.send = async () => {
       body: JSON.stringify({
         message: text,
         mode,
-        uid:     currentUser.uid,     // para verificación premium en backend
-        history: history.slice(-15)   // últimos 10 mensajes como contexto
+        uid:     currentUser.uid,
+        history: chatHistory.slice(-15)
       })
     });
 
     const data = await res.json();
     typing.remove();
 
-    if (res.status === 403) {
-      // Backend rechazó por falta de premium
-      addMessage(data.reply, "bot error");
-      showPaywall();
-      return;
-    }
+    if (res.status === 403) { addMessage(data.reply, "bot error"); showPaywall(); return; }
+    if (res.status === 429) { addMessage(data.reply, "bot error"); return; }
 
-    if (res.status === 429) {
-      // Rate limit
-      addMessage(data.reply, "bot error");
-      return;
-    }
-
-    // Éxito
     addMessage(data.reply, "bot");
-    history.push({ role: "assistant", content: data.reply });
+    chatHistory.push({ role: "assistant", content: data.reply });
 
-    // GUARDAR CHAT EN FIRESTORE (nuevo)
-   try {
-      const chatRef = doc(collection(db, "chats"));
-      await setDoc(chatRef, {
-        userId: currentUser.uid,
-        title: text.substring(0, 50),
-        timestamp: new Date(),
-        messages: history
-      });
-      console.log("Chat guardado:", chatRef.id);
-    } catch (e) {
-      console.error("Error guardando chat:", e);
+    if (!currentUser.isAnonymous) {
+      try {
+        const chatRef = doc(collection(db, "chats"));
+        await setDoc(chatRef, {
+          userId: currentUser.uid,
+          title: text.substring(0, 50),
+          timestamp: new Date(),
+          messages: chatHistory
+        });
+      } catch (e) { console.error("Error guardando chat:", e); }
+
+      msgCount++;
+      if (!isPremium) {
+        await setDoc(doc(db, "users", currentUser.uid), { msgCount }, { merge: true });
+      }
+      updateUI();
     }
-    // ⬆️⬆️⬆️ FIN CÓDIGO NUEVO ⬆️⬆️⬆️
-
-    msgCount++;
-    if (!isPremium) {
-      await setDoc(doc(db, "users", currentUser.uid), { msgCount }, { merge: true });
-    }
-    updateUI();
-
   } catch (e) {
     typing.remove();
     addMessage("⚠️ Error conectando con el servidor.", "bot error");
@@ -2159,109 +2045,28 @@ window.send = async () => {
     input.focus();
   }
 };
-// ── Auth ──────────────────────────────────────────────────────────────────────
-window.register = async () => {
-  const email = document.getElementById("email").value.trim();
-  const pass  = document.getElementById("password").value;
-  if (!email || !pass) return alert("Completa todos los campos.");
 
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    // Crear documento del usuario en Firestore
-    await setDoc(doc(db, "users", cred.user.uid), {
-      email,
-      premium:  false,
-      msgCount: 0,
-      createdAt: new Date().toISOString()
-    });
-  } catch (e) {
-    alert("Error al registrar: " + e.message);
-  }
-};
-
-window.login = async () => {
-  const email = document.getElementById("email").value.trim();
-  const pass  = document.getElementById("password").value;
-  if (!email || !pass) return alert("Completa todos los campos.");
-
-  try {
-    await signInWithEmailAndPassword(auth, email, pass);
-  } catch (e) {
-    alert("Error al iniciar sesión: " + e.message);
-  }
-};
-  // --- LOGIN CON GOOGLE ---
-window.loginGoogle = async () => {
-  const provider = new GoogleAuthProvider();
-  try {
-    const result = await signInWithPopup(auth, provider);
-    console.log("Usuario entró con Google:", result.user.email);
-  } catch (e) {
-    alert("Error con Google: " + e.message);
-  }
-};
-
-// --- LOGIN CON FACEBOOK ---
-window.loginFacebook = async () => {
-  const provider = new FacebookAuthProvider();
-  try {
-    await signInWithPopup(auth, provider);
-  } catch (e) {
-    alert("Error con Facebook: " + e.message);
-  }
-};
-
-// --- LOGIN CON APPLE ---
-window.loginApple = async () => {
-  const provider = new OAuthProvider('apple.com');
-  try {
-    await signInWithPopup(auth, provider);
-  } catch (e) {
-    alert("Error con Apple: " + e.message);
-  }
-};
-
-// --- LOGIN CON ANONIMO ---
-  window.loginAnonimo = function() {
-    const auth = getAuth();
-    signInAnonymously(auth)
-      .then(() => {
-        console.log("Acceso anónimo exitoso");
-        window.location.href = "ia.html"; // Asegúrate que este sea el nombre de tu archivo principal
-      })
-      .catch((error) => {
-        console.error("Error en acceso anónimo:", error.code);
-        alert("No se pudo iniciar sesión como invitado.");
-      });
-  };
-
-// ── Paywall ───────────────────────────────────────────────────────────────────
+// ── Paywall ──
 window.showPaywall  = () => { document.getElementById("paywallModal").classList.add("show"); };
 window.closePaywall = () => { document.getElementById("paywallModal").classList.remove("show"); };
 
-window.payPremium = async (plan) => { // <--- Recibe el plan ('go', 'plus', 'ultra')
+window.payPremium = async (plan) => {
   if (!currentUser) return alert("Inicia sesión primero.");
   closePaywall();
-
   try {
     const res = await fetch(`${BACKEND_URL}/create-checkout-session`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      // Enviamos el plan al servidor
-      body: JSON.stringify({ 
-        email: currentUser.email, 
-        userId: currentUser.uid, 
-        plan: plan 
-      })
+      body: JSON.stringify({ email: currentUser.email, userId: currentUser.uid, plan })
     });
     const data = await res.json();
     if (data.url) window.location.href = data.url;
-    else alert("Error al iniciar pago: " + (data.error || "desconocido"));
+    else alert("Error al crear sesión de pago.");
   } catch (e) {
-    alert("Error conectando con el servidor de pagos.");
+    alert("Error al procesar el pago: " + e.message);
   }
 };
-</script>
 
+</script>
 </body>
 </html>
