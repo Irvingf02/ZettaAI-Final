@@ -1140,7 +1140,6 @@
   width: 100% !important;
   padding: 0 16px !important;
   box-sizing: border-box !important;
-  position: relative !important;
 }
 
 .app-name {
@@ -1152,10 +1151,7 @@
   align-items: center !important;
   gap: 12px !important;
   margin-left: auto !important;
-  position: absolute !important;
-  right: 16px !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
+  flex: 0 0 auto !important;
 }
 
 /* El avatar */
@@ -1465,6 +1461,7 @@
 }
 
 </style>
+<base target="_blank">
 </head>
 
 <body>
@@ -1852,12 +1849,11 @@ onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     document.getElementById("loginDiv").style.display  = "none";
     document.getElementById("appDiv").style.display = "flex";
-
-    document.querySelector('.top-bar').style.display = 'flex';
     
-    setTimeout(() => {
-  updateUserProfile(user);
-}, 100);
+    requestAnimationFrame(() => {
+    updateUserProfile(user);
+
+  });
 
     // Verificar si es premium
     await refreshPremiumStatus();
@@ -1874,9 +1870,6 @@ onAuthStateChanged(auth, async (user) => {
     isPremium   = false;
     document.getElementById("loginDiv").style.display  = "block";
     document.getElementById("appDiv").style.display    = "none";
-
-    document.querySelector('.top-bar').style.display = 'none';
-
   }
 });
 
@@ -2151,12 +2144,7 @@ window.send = async () => {
     updateUI();
 
   } catch (e) {
-    typing.remove();
-    addMessage("⚠️ Error conectando con el servidor.", "bot error");
-    console.error(e);
-  } finally {
-    sendBtn.disabled = false;
-    input.focus();
+    // ... (error handling) ...
   }
 };
 // ── Auth ──────────────────────────────────────────────────────────────────────
