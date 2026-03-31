@@ -1543,10 +1543,23 @@ function updateUserProfile(user) {
   if (!user) return;
   
   const email = user.email || '';
-  const displayName = user.displayName || email.split('@')[0] || 'Usuario';
+  const displayName = user.displayName || '';
   const photoURL = user.photoURL || '';
-  // Toma la primera letra del email o nombre
-  const initial = (displayName.charAt(0) || email.charAt(0) || '?').toUpperCase();
+  
+  // Obtener la letra inicial correcta (prioridad: displayName > email)
+  let initial = '?';
+  if (displayName && displayName.length > 0) {
+    initial = displayName.charAt(0).toUpperCase();
+  } else if (email && email.length > 0) {
+    initial = email.charAt(0).toUpperCase();
+  }
+  
+  // Nombre para mostrar en el menú
+  let displayNameForMenu = displayName;
+  if (!displayNameForMenu && email) {
+    displayNameForMenu = email.split('@')[0];
+  }
+  if (!displayNameForMenu) displayNameForMenu = 'Usuario';
   
   // Avatar pequeño (botón)
   const avatarBtn = document.querySelector('.user-avatar-btn');
@@ -1555,18 +1568,14 @@ function updateUserProfile(user) {
   
   if (avatarImg && avatarLetter) {
     if (photoURL && photoURL !== '') {
-      // Si tiene foto de perfil, mostrarla
       avatarImg.src = photoURL;
       avatarImg.style.display = 'block';
       avatarLetter.style.display = 'none';
-      // Asegurar que el botón tenga el color correcto
       if (avatarBtn) avatarBtn.style.background = 'transparent';
     } else {
-      // Si NO tiene foto, mostrar la letra
       avatarImg.style.display = 'none';
       avatarLetter.style.display = 'flex';
       avatarLetter.textContent = initial;
-      // Restaurar el gradiente
       if (avatarBtn) avatarBtn.style.background = 'linear-gradient(135deg, var(--accent), var(--accent2))';
     }
   }
@@ -1589,7 +1598,7 @@ function updateUserProfile(user) {
     }
   }
   
-  if (profileName) profileName.textContent = `¡Hola, ${displayName.split(' ')[0]}!`;
+  if (profileName) profileName.textContent = `¡Hola, ${displayNameForMenu.split(' ')[0]}!`;
   if (profileEmail) profileEmail.textContent = email;
   
   // Cuenta en la lista del menú
@@ -1611,7 +1620,7 @@ function updateUserProfile(user) {
   const accountName = document.getElementById('accountItemName');
   const accountEmail = document.getElementById('accountItemEmail');
   
-  if (accountName) accountName.textContent = displayName;
+  if (accountName) accountName.textContent = displayNameForMenu;
   if (accountEmail) accountEmail.textContent = email;
 }
 
