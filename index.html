@@ -1785,27 +1785,47 @@ window.login = async () => {
   } catch (e) { alert("Error al iniciar sesión: " + e.message); }
 };
 
+const googleProvider = new GoogleAuthProvider();
+const facebookProvider = new FacebookAuthProvider();
+const appleProvider = new OAuthProvider('apple.com');
+
 window.loginGoogle = async () => {
-  const provider = new GoogleAuthProvider();
-  try { await signInWithPopup(auth, provider); }
-  catch (e) { alert("Error con Google: " + e.message); }
+  try {
+    await signInWithPopup(auth, googleProvider);
+    alert("¡Bienvenido a ZettaAI!");
+  } catch (error) {
+    console.error(error);
+    alert("Error en Google: " + error.message);
+  }
 };
 
 window.loginFacebook = async () => {
-  const provider = new FacebookAuthProvider();
-  try { await signInWithPopup(auth, provider); }
-  catch (e) { alert("Error con Facebook: " + e.message); }
+  try {
+    await signInWithPopup(auth, facebookProvider);
+    alert("¡Sesión iniciada con Facebook!");
+  } catch (error) {
+    console.error(error);
+    alert("Error en Facebook: " + error.message);
+  }
 };
 
 window.loginApple = async () => {
-  const provider = new OAuthProvider("apple.com");
-  try { await signInWithPopup(auth, provider); }
-  catch (e) { alert("Error con Apple: " + e.message); }
+  try { 
+    const await signInWithPopup(auth, provider);
+    console.log("¡Entraste con Apple!", result.user);
+    alert("Sesión iniciada con Apple"); 
+}catch (e) { 
+  console.error("Error en Apple:", error.code);
+  alert("Error con Apple: " + e.message);
+}
 };
 
 window.loginAnonimo = async () => {
-  try { await signInAnonymously(auth); }
-  catch (e) { alert("No se pudo iniciar sesión como invitado."); }
+  try { 
+    const { signInAnonymously } = await import("https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js");
+    await signInAnonymously(auth); 
+    alert("Entrando como invitado...");
+  }catch (e) { alert("No se pudo iniciar sesión como invitado."); }
 };
 
 window.logout = async () => {
