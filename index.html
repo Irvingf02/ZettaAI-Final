@@ -1556,8 +1556,8 @@
     </div>
     <div class="profile-info">
       <div class="profile-avatar-large">
-        <img id="profileMenuImg" src="" alt="" style="display: none;">
-        <span id="profileMenuLetter">?</span>
+        <img id="profileMenuImg" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;">
+        <span id="profileMenuLetter" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:36px;font-weight:700;line-height:1;">?</span>
         <div class="camera-icon">📷</div>
       </div>
       <h3 id="profileName">¡Hola!</h3>
@@ -1567,12 +1567,12 @@
     <div class="profile-section">
       <div class="account-item" onclick="logout()">
         <div class="account-avatar">
-          <img id="accountItemImg" src="" alt="" style="display: none;">
-          <span id="accountItemLetter">?</span>
+          <img id="accountItemImg" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;">
+          <span id="accountItemLetter" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:14px;font-weight:700;line-height:1;">?</span>
         </div>
         <div class="account-details">
           <div class="account-name" id="accountItemName">Usuario</div>
-          <div class="account-email" id="accountItemEmail">usuario@email.com</div>
+          <div class="account-email" id="accountItemEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c3b6b0b6a2b1aaac83a6aea2aaafeda0acae">[email&#160;protected]</a></div>
         </div>
         <span class="session-status">Cerrar sesión →</span>
       </div>
@@ -1595,8 +1595,8 @@
       <span class="msg-counter" id="msgCounter">15 mensajes gratis</span>
       <div class="user-profile-container">
         <button class="user-avatar-btn" onclick="toggleProfileMenu()">
-          <img id="userAvatarImg" src="" alt="" style="display: none;">
-          <span id="userAvatarLetter">?</span>
+          <img id="userAvatarImg" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;">
+          <span id="userAvatarLetter" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:16px;font-weight:700;line-height:1;">?</span>
         </button>
       </div>
     </div>
@@ -1664,7 +1664,7 @@
   </div>
 </div>
 
-<script type="module">
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
 import { 
@@ -1727,31 +1727,40 @@ window.toggleProfileMenu = function() {
 
 function updateUserProfile(user) {
   if (!user) return;
-  const email = user.email || "";
+  const email       = user.email || "";
   const displayName = user.displayName || email.split("@")[0] || "Usuario";
-  const photoURL = user.photoURL || "";
-  const initial = (user.isAnonymous ? "?" : (email.charAt(0).toUpperCase() || "?"));
+  const photoURL    = user.photoURL || "";
+  // Inicial: primera letra del email en mayúscula, o "?" si es anónimo
+  const initial     = user.isAnonymous ? "?" : (email.charAt(0).toUpperCase() || "?");
 
+  // Aplica foto o letra a cualquier par (img, span)
   const setAvatar = (imgId, letterId, photo, letter) => {
     const img = document.getElementById(imgId);
     const ltr = document.getElementById(letterId);
     if (!img || !ltr) return;
     if (photo) {
-      img.src = photo; img.style.display = "block"; ltr.style.display = "none";
+      img.src = photo;
+      img.style.display = "block";
+      ltr.style.display = "none";
     } else {
-      img.style.display = "none"; ltr.style.display = "flex"; ltr.textContent = letter;
+      img.style.display = "none";
+      ltr.style.display = "flex";
+      ltr.textContent   = letter;
     }
   };
 
+  // Avatar pequeño del botón (top-bar)
   setAvatar("userAvatarImg", "userAvatarLetter", photoURL, initial);
+  // Avatar grande dentro del menú de perfil
   setAvatar("profileMenuImg", "profileMenuLetter", photoURL, initial);
+  // Avatar en la lista de cuentas
   setAvatar("accountItemImg", "accountItemLetter", photoURL, initial);
 
   const el = id => document.getElementById(id);
-  if (el("profileName")) el("profileName").textContent = user.isAnonymous ? "¡Hola, Invitado!" : `¡Hola, ${displayName.split(" ")[0]}!`;
-  if (el("profileEmail")) el("profileEmail").textContent = user.isAnonymous ? "Sesión como invitado" : email;
+  if (el("profileName"))     el("profileName").textContent     = user.isAnonymous ? "¡Hola, Invitado!" : `¡Hola, ${displayName.split(" ")[0]}!`;
+  if (el("profileEmail"))    el("profileEmail").textContent    = user.isAnonymous ? "Sesión como invitado" : email;
   if (el("accountItemName")) el("accountItemName").textContent = user.isAnonymous ? "Invitado" : displayName;
-  if (el("accountItemEmail")) el("accountItemEmail").textContent = user.isAnonymous ? "" : email;
+  if (el("accountItemEmail"))el("accountItemEmail").textContent= user.isAnonymous ? "" : email;
 }
 
 // ── Auth ──
