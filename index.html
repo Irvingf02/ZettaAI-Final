@@ -1550,27 +1550,45 @@ window.toggleProfileMenu = function() {
 };
 
 function updateUserProfile(user) {
-  if (!user)return; 
+  if (!user) {
+    console.log("No hay usuario");
+    return;
+  }
   
   const email = user.email || '';
   const photoURL = user.photoURL || '';
-   // ✅ Tomar la letra del EMAIL, no del displayName
-  const initial = email.charAt(0).toUpperCase() || '?';
+  
+  // Tomar la PRIMERA LETRA DEL EMAIL
+  let initial = '?';
+  if (email && email.length > 0) {
+    initial = email.charAt(0).toUpperCase();
+  }
+  
+  console.log("Email:", email);
+  console.log("Letra a mostrar:", initial);
+  console.log("Tiene foto?", photoURL ? "Sí" : "No");
   
   // Elementos del avatar
   const avatarImg = document.getElementById('userAvatarImg');
   const avatarLetter = document.getElementById('userAvatarLetter');
   
- if (avatarImg && avatarLetter) {
-    if (photoURL) {
-      avatarImg.src = photoURL;
-      avatarImg.style.display = 'block';
-      avatarLetter.style.display = 'none';
-    } else {
-      avatarImg.style.display = 'none';
-      avatarLetter.style.display = 'flex';
-      avatarLetter.textContent = initial;
-    }
+  if (!avatarImg || !avatarLetter) {
+    console.error("NO se encontraron los elementos del avatar en el DOM");
+    return;
+  }
+  
+  if (photoURL && photoURL !== '') {
+    // Mostrar foto
+    avatarImg.src = photoURL;
+    avatarImg.style.display = 'block';
+    avatarLetter.style.display = 'none';
+    console.log("Mostrando foto");
+  } else {
+    // Mostrar letra
+    avatarImg.style.display = 'none';
+    avatarLetter.style.display = 'flex';
+    avatarLetter.textContent = initial;
+    console.log("Mostrando letra:", initial);
   }
 }
 
@@ -1601,7 +1619,7 @@ onAuthStateChanged(auth, async (user) => {
     // Esperar a que el DOM cargue
     setTimeout(() => {
       updateUserProfile(user);
-    }, 100);
+    }, 500);
     
     await refreshPremiumStatus();
     
