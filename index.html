@@ -1335,7 +1335,6 @@
   </div>
 </div>
 
-<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
 
   <!-- APP -->
 
@@ -1545,31 +1544,23 @@ function updateUserProfile(user) {
   if (!user) return;
   
   const email = user.email || '';
-  const displayName = user.displayName || email.split('@')[0] || '';
+  const displayName = user.displayName || email.split('@')[0] || 'Usuario';
   const photoURL = user.photoURL || '';
-  // Toma la primera letra del email o nombre
-  const initial = (displayName.charAt(0) || email.charAt(0) || '?').toUpperCase();
+  const initial = email.charAt(0).toUpperCase() || '?';
   
   // Avatar pequeño (botón)
-  const avatarBtn = document.querySelector('.user-avatar-btn');
   const avatarImg = document.getElementById('userAvatarImg');
   const avatarLetter = document.getElementById('userAvatarLetter');
   
   if (avatarImg && avatarLetter) {
-    if (photoURL && photoURL !== '') {
-      // Si tiene foto de perfil, mostrarla
+    if (photoURL) {
       avatarImg.src = photoURL;
       avatarImg.style.display = 'block';
       avatarLetter.style.display = 'none';
-      // Asegurar que el botón tenga el color correcto
-      if (avatarBtn) avatarBtn.style.background = 'transparent';
     } else {
-      // Si NO tiene foto, mostrar la letra
       avatarImg.style.display = 'none';
       avatarLetter.style.display = 'flex';
       avatarLetter.textContent = initial;
-      // Restaurar el gradiente
-      if (avatarBtn) avatarBtn.style.background = 'linear-gradient(135deg, var(--accent), var(--accent2))';
     }
   }
   
@@ -1580,7 +1571,7 @@ function updateUserProfile(user) {
   const profileEmail = document.getElementById('profileEmail');
   
   if (menuImg && menuLetter) {
-    if (photoURL && photoURL !== '') {
+    if (photoURL) {
       menuImg.src = photoURL;
       menuImg.style.display = 'block';
       menuLetter.style.display = 'none';
@@ -1594,12 +1585,12 @@ function updateUserProfile(user) {
   if (profileName) profileName.textContent = `¡Hola, ${displayName.split(' ')[0]}!`;
   if (profileEmail) profileEmail.textContent = email;
   
-  // Cuenta en la lista del menú
+  // Cuenta en la lista
   const accountImg = document.getElementById('accountItemImg');
   const accountLetter = document.getElementById('accountItemLetter');
   
   if (accountImg && accountLetter) {
-    if (photoURL && photoURL !== '') {
+    if (photoURL) {
       accountImg.src = photoURL;
       accountImg.style.display = 'block';
       accountLetter.style.display = 'none';
@@ -1616,7 +1607,6 @@ function updateUserProfile(user) {
   if (accountName) accountName.textContent = displayName;
   if (accountEmail) accountEmail.textContent = email;
 }
-
 
 const MODOS = {
   chat:    { emoji: "💬", title: "Chat Rápido",        desc: "Respuestas cortas y directas",      premium: false },
