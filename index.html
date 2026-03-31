@@ -1550,47 +1550,30 @@ window.toggleProfileMenu = function() {
 };
 
 function updateUserProfile(user) {
-  if (!user) {
-    console.log("No hay usuario");
-    return;
-  }
+  if (!user)return; 
   
   const email = user.email || '';
   const photoURL = user.photoURL || '';
-  
-  // Tomar la PRIMERA LETRA DEL EMAIL
-  let initial = '?';
-  if (email && email.length > 0) {
-    initial = email.charAt(0).toUpperCase();
-  }
-  
-  console.log("Email:", email);
-  console.log("Letra a mostrar:", initial);
-  console.log("Tiene foto?", photoURL ? "Sí" : "No");
+   // ✅ Tomar la letra del EMAIL, no del displayName
+  const initial = email.charAt(0).toUpperCase() || '?';
   
   // Elementos del avatar
   const avatarImg = document.getElementById('userAvatarImg');
   const avatarLetter = document.getElementById('userAvatarLetter');
   
-  if (!avatarImg || !avatarLetter) {
-    console.error("NO se encontraron los elementos del avatar en el DOM");
-    return;
-  }
-  
-  if (photoURL && photoURL !== '') {
-    // Mostrar foto
-    avatarImg.src = photoURL;
-    avatarImg.style.display = 'block';
-    avatarLetter.style.display = 'none';
-    console.log("Mostrando foto");
-  } else {
-    // Mostrar letra
-    avatarImg.style.display = 'none';
-    avatarLetter.style.display = 'flex';
-    avatarLetter.textContent = initial;
-    console.log("Mostrando letra:", initial);
+ if (avatarImg && avatarLetter) {
+    if (photoURL) {
+      avatarImg.src = photoURL;
+      avatarImg.style.display = 'block';
+      avatarLetter.style.display = 'none';
+    } else {
+      avatarImg.style.display = 'none';
+      avatarLetter.style.display = 'flex';
+      avatarLetter.textContent = initial;
+    }
   }
 }
+
 
 const MODOS = {
   chat:    { emoji: "💬", title: "Chat Rápido",        desc: "Respuestas cortas y directas",      premium: false },
@@ -1618,7 +1601,7 @@ onAuthStateChanged(auth, async (user) => {
     // Esperar a que el DOM cargue
     setTimeout(() => {
       updateUserProfile(user);
-    }, 500);
+    }, 100);
     
     await refreshPremiumStatus();
     
