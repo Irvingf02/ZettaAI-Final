@@ -887,9 +887,6 @@
   height: 36px !important;
   border-radius: 50% !important;
   background: linear-gradient(135deg, var(--accent), var(--accent2)) !important;
-  color: #000 !important;
-  font-size: 16px !important;
-  font-weight: 600 !important;
   border: none !important;
   cursor: pointer !important;
   display: flex !important;
@@ -897,18 +894,31 @@
   justify-content: center !important;
   overflow: hidden !important;
   padding: 0 !important;
-  transition: transform 0.2s ease;
+  margin: 0 !important;
 }
 
 .user-avatar-btn:hover {
   transform: scale(1.05);
 }
 
+#userAvatarLetter {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #000 !important;
+}
+
 .user-avatar-btn img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: none; /* Oculto por defecto */
+  #userAvatarImg {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: none !important;
+}
 }
 
 .user-avatar-btn span {
@@ -1347,9 +1357,9 @@
     <span class="badge-premium" id="badgePremium">⭐ PREMIUM</span>
       
        <div class="user-profile-container">
-      <button class="user-avatar-btn" onclick="toggleProfileMenu()">
+      <button class="user-avatar-btn" id="avatarButton" onclick="toggleProfileMenu()">
         <img id="userAvatarImg" src="" alt="" style="display: none;">
-        <span id="userAvatarLetter">?</span>
+        <span id="userAvatarLetter" style="display: flex;">?</span>
       </button>
     </div>
   </div>
@@ -1540,102 +1550,46 @@ window.toggleProfileMenu = function() {
 };
 
 function updateUserProfile(user) {
-  console.log("Actualizando perfil para:", user?.email); // Para depurar
-  
-  if (!user) return;
+  if (!user) {
+    console.log("No hay usuario");
+    return;
+  }
   
   const email = user.email || '';
-  const displayName = user.displayName || '';
   const photoURL = user.photoURL || '';
   
-  // Obtener la letra inicial del EMAIL (no del displayName)
+  // Tomar la PRIMERA LETRA DEL EMAIL
   let initial = '?';
   if (email && email.length > 0) {
     initial = email.charAt(0).toUpperCase();
   }
   
-  // Nombre para mostrar
-  let displayNameForMenu = displayName;
-  if (!displayNameForMenu && email) {
-    displayNameForMenu = email.split('@')[0];
-  }
-  if (!displayNameForMenu) displayNameForMenu = 'Usuario';
+  console.log("Email:", email);
+  console.log("Letra a mostrar:", initial);
+  console.log("Tiene foto?", photoURL ? "Sí" : "No");
   
-  // Buscar los elementos del avatar
+  // Elementos del avatar
   const avatarImg = document.getElementById('userAvatarImg');
   const avatarLetter = document.getElementById('userAvatarLetter');
-  const avatarBtn = document.querySelector('.user-avatar-btn');
   
-  console.log("Elementos encontrados:", { avatarImg, avatarLetter }); // Para depurar
+  if (!avatarImg || !avatarLetter) {
+    console.error("NO se encontraron los elementos del avatar en el DOM");
+    return;
+  }
   
-  if (avatarImg && avatarLetter) {
-    if (photoURL && photoURL !== '') {
-      // Tiene foto
-      avatarImg.src = photoURL;
-      avatarImg.style.display = 'block';
-      avatarImg.style.width = '100%';
-      avatarImg.style.height = '100%';
-      avatarImg.style.borderRadius = '50%';
-      avatarLetter.style.display = 'none';
-      if (avatarBtn) avatarBtn.style.background = 'transparent';
-      console.log("Mostrando foto de perfil");
-    } else {
-      // No tiene foto - mostrar letra del EMAIL
-      avatarImg.style.display = 'none';
-      avatarLetter.style.display = 'flex';
-      avatarLetter.textContent = initial;
-      avatarLetter.style.alignItems = 'center';
-      avatarLetter.style.justifyContent = 'center';
-      avatarLetter.style.width = '100%';
-      avatarLetter.style.height = '100%';
-      if (avatarBtn) avatarBtn.style.background = 'linear-gradient(135deg, var(--accent), var(--accent2))';
-      console.log("Mostrando letra inicial:", initial);
-    }
+  if (photoURL && photoURL !== '') {
+    // Mostrar foto
+    avatarImg.src = photoURL;
+    avatarImg.style.display = 'block';
+    avatarLetter.style.display = 'none';
+    console.log("Mostrando foto");
   } else {
-    console.error("No se encontraron los elementos del avatar en el DOM");
+    // Mostrar letra
+    avatarImg.style.display = 'none';
+    avatarLetter.style.display = 'flex';
+    avatarLetter.textContent = initial;
+    console.log("Mostrando letra:", initial);
   }
-  
-  // Resto del código para el menú...
-  const menuImg = document.getElementById('profileMenuImg');
-  const menuLetter = document.getElementById('profileMenuLetter');
-  const profileName = document.getElementById('profileName');
-  const profileEmail = document.getElementById('profileEmail');
-  
-  if (menuImg && menuLetter) {
-    if (photoURL && photoURL !== '') {
-      menuImg.src = photoURL;
-      menuImg.style.display = 'block';
-      menuLetter.style.display = 'none';
-    } else {
-      menuImg.style.display = 'none';
-      menuLetter.style.display = 'flex';
-      menuLetter.textContent = initial;
-    }
-  }
-  
-  if (profileName) profileName.textContent = `¡Hola, ${displayNameForMenu.split(' ')[0]}!`;
-  if (profileEmail) profileEmail.textContent = email;
-  
-  const accountImg = document.getElementById('accountItemImg');
-  const accountLetter = document.getElementById('accountItemLetter');
-  
-  if (accountImg && accountLetter) {
-    if (photoURL && photoURL !== '') {
-      accountImg.src = photoURL;
-      accountImg.style.display = 'block';
-      accountLetter.style.display = 'none';
-    } else {
-      accountImg.style.display = 'none';
-      accountLetter.style.display = 'flex';
-      accountLetter.textContent = initial;
-    }
-  }
-  
-  const accountName = document.getElementById('accountItemName');
-  const accountEmail = document.getElementById('accountItemEmail');
-  
-  if (accountName) accountName.textContent = displayNameForMenu;
-  if (accountEmail) accountEmail.textContent = email;
 }
 
 const MODOS = {
@@ -1661,33 +1615,13 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("appDiv").style.display = "flex";
     document.querySelector('.top-bar').style.display = 'flex';
     
-    // ✅ ESPERAR a que el DOM esté listo y los elementos existan
+    // Esperar a que el DOM cargue
     setTimeout(() => {
-      // Verificar que los elementos existen antes de actualizar
-      const avatarImg = document.getElementById('userAvatarImg');
-      const avatarLetter = document.getElementById('userAvatarLetter');
-      
-      if (avatarImg && avatarLetter) {
-        updateUserProfile(user);
-      } else {
-        // Si no existen, esperar otro momento
-        console.log("Elementos del avatar no encontrados, reintentando...");
-        setTimeout(() => {
-          updateUserProfile(user);
-        }, 100);
-      }
-    }, 200);
-
-    // Verificar si es premium
+      updateUserProfile(user);
+    }, 500);
+    
     await refreshPremiumStatus();
-
-    // Mostrar banner si viene de pago exitoso
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("success") === "true") {
-      document.getElementById("successBanner").style.display = "block";
-      window.history.replaceState({}, "", window.location.pathname);
-      setTimeout(() => refreshPremiumStatus(), 3000);
-    }
+    
   } else {
     currentUser = null;
     isPremium   = false;
