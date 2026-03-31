@@ -1851,10 +1851,9 @@ onAuthStateChanged(auth, async (user) => {
 
     document.querySelector('.top-bar').style.display = 'flex';
     
-    requestAnimationFrame(() => {
-    updateUserProfile(user);
-
-  });
+    setTimeout(() => {
+  updateUserProfile(user);
+}, 100);
 
     // Verificar si es premium
     await refreshPremiumStatus();
@@ -1873,7 +1872,7 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("appDiv").style.display    = "none";
 
     document.querySelector('.top-bar').style.display = 'none';
-    
+
   }
 });
 
