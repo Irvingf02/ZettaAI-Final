@@ -873,7 +873,7 @@
 }
 
 /* ============================================================
-   MENÚ DE PERFIL - VERSIÓN CORREGIDA
+   MENÚ DE PERFIL ESTILO GOOGLE
    ============================================================ */
 
 .user-profile-container {
@@ -882,20 +882,24 @@
 }
 
 .user-avatar-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
-  background: var(--accent);
-  color: #000;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  padding: 0;
+   width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: var(--accent) !important;
+  color: #000 !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+.user-avatar-btn:hover {
+  transform: scale(1.05);
 }
 
 .user-avatar-btn img {
@@ -912,7 +916,6 @@
   height: 100%;
 }
 
-/* Menú desplegable */
 .profile-menu {
   display: none;
   position: fixed;
@@ -925,8 +928,9 @@
   padding: 20px;
   width: 320px;
   max-width: 90vw;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
   z-index: 2000;
+  animation: fadeUp 0.3s ease;
 }
 
 .profile-menu.show {
@@ -946,7 +950,17 @@
   display: block;
 }
 
-/* Header */
+.profile-menu::before {
+  content: '';
+  position: fixed;
+  top: -100vh;
+  left: -100vw;
+  right: -100vw;
+  bottom: -100vh;
+  background: rgba(0,0,0,0.6);
+  z-index: -1;
+}
+
 .profile-header {
   display: flex;
   justify-content: flex-end;
@@ -959,12 +973,14 @@
   color: var(--muted);
   font-size: 20px;
   cursor: pointer;
+  padding: 4px;
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+  transition: all 0.2s;
 }
 
 .close-btn:hover {
@@ -972,7 +988,6 @@
   color: var(--text);
 }
 
-/* Info del usuario */
 .profile-info {
   text-align: center;
   margin-bottom: 20px;
@@ -1038,128 +1053,132 @@
   font-size: 0.85rem;
   cursor: pointer;
   width: 100%;
+  transition: all 0.2s;
 }
 
 .btn-manage-account:hover {
   background: rgba(0,212,255,0.1);
 }
 
-/* Sección de cuenta */
 .profile-section {
   border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   padding: 16px 0;
   margin: 16px 0;
 }
 
-.account-item {
+.account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.account-info {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.account-item:hover {
-  background: rgba(255,255,255,0.05);
-}
-
-.account-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 600;
-  color: #000;
-  flex-shrink: 0;
-}
-
-.account-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
 }
 
 .account-details {
-  flex: 1;
-  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-.account-name {
+.account-details span:first-child {
   font-size: 0.9rem;
   color: var(--text);
   font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .account-email {
   font-size: 0.75rem;
   color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .session-status {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--muted);
-  flex-shrink: 0;
 }
 
-/* Footer */
+.account-actions {
+  display: flex;
+  gap: 12px;
+  margin-left: 44px;
+}
+
+.btn-text {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 6px 16px;
+  color: var(--accent);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-text:hover {
+  background: rgba(0,212,255,0.1);
+}
+
 .profile-footer {
-  border-top: 1px solid var(--border);
-  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.btn-add-account,
-.btn-logout {
-  width: 100%;
+.btn-add-account {
   background: none;
   border: none;
   color: var(--text);
   font-size: 0.9rem;
   cursor: pointer;
-  padding: 12px;
+  padding: 10px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   gap: 12px;
+  transition: all 0.2s;
   text-align: left;
 }
 
-.btn-add-account:hover,
-.btn-logout:hover {
+.btn-add-account:hover {
   background: rgba(255,255,255,0.05);
 }
 
-.btn-logout {
-  color: var(--danger);
+.btn-add-account span {
+  font-size: 1.2rem;
 }
 
-/* Desktop: menú como dropdown */
-@media (min-width: 768px) {
-  .profile-menu {
-    position: absolute;
-    top: 50px;
-    right: 0;
-    left: auto;
-    transform: none;
-    width: 360px;
-  }
-  
-  .profile-overlay {
-    display: none !important;
-  }
+/* ============================================================
+   ALINEAR AVATAR A LA DERECHA SIN MSGCOUNTER
+   ============================================================ */
+
+.top-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
 }
 
+.app-name {
+  flex: 0 0 auto !important;
+}
+
+.top-right {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-left: auto !important;
+  position: absolute !important;
+  right: 16px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
 </style>
 </head>
 
