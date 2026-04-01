@@ -700,7 +700,8 @@
     z-index: 100;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 12px;
+    overflow-y: auto;
   }
 
   #paywallModal.show { display: flex; }
@@ -709,11 +710,69 @@
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 20px;
-    padding: 32px;
-    max-width: 380px;
+    padding: 24px 16px;
+    max-width: 600px;
     width: 100%;
     text-align: center;
     animation: fadeUp 0.3s ease;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+
+  /* Tarjetas de planes en móvil: scroll horizontal tipo swipe */
+  .planes-wrapper {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+  }
+
+  .planes-wrapper::-webkit-scrollbar { height: 3px; }
+  .planes-wrapper::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .plan-card {
+    flex: 0 0 220px;
+    scroll-snap-align: start;
+    border-radius: 12px;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: left;
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .plan-card .plan-name  { font-size: 1.1rem; font-weight: 800; }
+  .plan-card .plan-price { font-size: 1.4rem; font-weight: 900; color: var(--text); }
+  .plan-card .plan-price span { font-size: 0.7rem; font-weight: 400; color: var(--muted); }
+  .plan-card .plan-features { flex: 1; }
+
+  /* Indicador de scroll en móvil */
+  .scroll-hint {
+    display: none;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    .scroll-hint { display: block; }
+    .plan-card { flex: 0 0 80vw; }
+    .modal-card { padding: 20px 12px; }
+  }
+
+  @media (min-width: 601px) {
+    .planes-wrapper {
+      overflow-x: visible;
+      flex-wrap: wrap;
+    }
+    .plan-card { flex: 1; min-width: 160px; }
   }
 
   .modal-icon { font-size: 2.5rem; margin-bottom: 12px; }
@@ -1637,18 +1696,19 @@
 
 <!-- PAYWALL MODAL -->
 <div id="paywallModal">
-  <div class="modal-card" style="max-width:560px; padding:28px 24px;">
+  <div class="modal-card" style="max-width:620px; padding:24px 16px;">
     <div class="modal-icon">🚀</div>
     <div class="modal-title">Elige tu Plan ZettaxAI</div>
     <div class="modal-desc">Límite alcanzado. Sube de plan y desbloquea todo sin restricciones.</div>
+    <div class="scroll-hint">← Desliza para ver todos los planes →</div>
 
-    <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+    <div class="planes-wrapper">
 
       <!-- GO -->
-      <div style="flex:1; min-width:140px; border:1px solid var(--accent); padding:16px 12px; border-radius:12px; background:var(--surface); display:flex; flex-direction:column; gap:6px;">
-        <div style="font-size:1.1rem; font-weight:800; color:var(--accent);">⚡ GO</div>
-        <div style="font-size:1.4rem; font-weight:900;">$100<span style="font-size:0.7rem; font-weight:400; color:var(--muted);">/mes</span></div>
-        <div style="font-size:0.72rem; color:var(--muted); line-height:1.6; flex:1;">
+      <div class="plan-card" style="border:1px solid var(--accent); background:var(--surface);">
+        <div class="plan-name" style="color:var(--accent);">⚡ GO</div>
+        <div class="plan-price">$100<span>/mes</span></div>
+        <div class="plan-features">
           ✅ Mensajes ilimitados<br>
           ✅ Resúmenes ilimitados<br>
           ✅ Ideas ilimitadas<br>
@@ -1664,11 +1724,11 @@
       </div>
 
       <!-- PLUS (recomendado) -->
-      <div style="flex:1; min-width:140px; border:2px solid var(--gold); padding:16px 12px; border-radius:12px; background:var(--card); display:flex; flex-direction:column; gap:6px; position:relative;">
+      <div class="plan-card" style="border:2px solid var(--gold); background:var(--card); position:relative;">
         <span style="position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:var(--gold); color:#000; font-size:0.6rem; padding:3px 10px; border-radius:10px; font-weight:800; white-space:nowrap;">⭐ MÁS POPULAR</span>
-        <div style="font-size:1.1rem; font-weight:800; color:var(--gold);">🌟 PLUS</div>
-        <div style="font-size:1.4rem; font-weight:900;">$250<span style="font-size:0.7rem; font-weight:400; color:var(--muted);">/mes</span></div>
-        <div style="font-size:0.72rem; color:var(--muted); line-height:1.6; flex:1;">
+        <div class="plan-name" style="color:var(--gold);">🌟 PLUS</div>
+        <div class="plan-price">$250<span>/mes</span></div>
+        <div class="plan-features">
           ✅ Todo de GO incluido<br>
           ✅ 50 imágenes/día<br>
           ✅ 💻 35 consultas de código/día<br>
@@ -1684,10 +1744,10 @@
       </div>
 
       <!-- ULTRA -->
-      <div style="flex:1; min-width:140px; border:1px solid #FF4D6A; padding:16px 12px; border-radius:12px; background:var(--surface); display:flex; flex-direction:column; gap:6px;">
-        <div style="font-size:1.1rem; font-weight:800; color:#FF4D6A;">🔥 ULTRA</div>
-        <div style="font-size:1.4rem; font-weight:900;">$500<span style="font-size:0.7rem; font-weight:400; color:var(--muted);">/mes</span></div>
-        <div style="font-size:0.72rem; color:var(--muted); line-height:1.6; flex:1;">
+      <div class="plan-card" style="border:1px solid #FF4D6A; background:var(--surface);">
+        <div class="plan-name" style="color:#FF4D6A;">🔥 ULTRA</div>
+        <div class="plan-price">$500<span>/mes</span></div>
+        <div class="plan-features">
           ✅ Todo de PLUS incluido<br>
           ✅ Imágenes ilimitadas<br>
           ✅ 💻 50 consultas de código/día<br>
