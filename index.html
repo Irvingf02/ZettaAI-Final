@@ -1589,7 +1589,7 @@
 
   <!-- TOP BAR -->
   <div class="top-bar">
-    <div class="app-name">ZettaxAI<span>PRO</span></div>
+    <div class="app-name" id="appName">ZettaxAI</div>
     <div class="top-right">
       <span class="badge-premium" id="badgePremium">⭐ PREMIUM</span>
       <span class="msg-counter" id="msgCounter">15 mensajes gratis</span>
@@ -1756,6 +1756,7 @@ const LIMITES = {
 // ── Estado ──
 let currentUser = null;
 let isPremium   = false;
+let userPlan    = "free";   // "free" | "go" | "plus" | "ultra"
 let mode        = "chat";
 let chatHistory = [];   // renombrado para no colisionar con window.history
 let contadores  = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0 };
@@ -1910,6 +1911,7 @@ onAuthStateChanged(auth, async (user) => {
   } else {
     currentUser = null;
     isPremium   = false;
+    userPlan    = "free";
     document.getElementById("loginDiv").style.display = "block";
     document.getElementById("appDiv").style.display   = "none";
     sidebar.style.display   = "none";
@@ -1924,6 +1926,7 @@ async function refreshPremiumStatus() {
     if (snap.exists()) {
       const data = snap.data();
       isPremium = data.premium === true;
+      userPlan  = data.plan || (isPremium ? "go" : "free");
       // Cargar contadores del día actual
       const savedDate = data.fecha || "";
       if (savedDate === fechaHoy) {
@@ -1977,6 +1980,18 @@ function updateUI() {
     const unidad    = mode === "imagen" ? "imágenes" : mode === "resumen" ? "resúmenes" : mode === "tarea" ? "tareas" : "mensajes";
     counter.textContent = `${restantes}/${limite} ${unidad} hoy`;
     counter.className   = "msg-counter" + (restantes === 0 ? " danger" : restantes <= 2 ? " warning" : "");
+  }
+
+  // Nombre de la app según plan
+  const appName = document.getElementById("appName");
+  if (appName) {
+    const nombres = {
+      free:  'ZettaxAI',
+      go:    'ZettaxAI<span style="color:var(--accent);">Go</span>',
+      plus:  'ZettaxAI<span style="color:var(--gold);">Plus</span>',
+      ultra: 'ZettaxAI<span style="color:#FF4D6A;">Ultra</span>'
+    };
+    appName.innerHTML = nombres[userPlan] || nombres.free;
   }
 }
 
