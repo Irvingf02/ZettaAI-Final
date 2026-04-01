@@ -31,7 +31,8 @@ const PLAN_CONFIG = {
     memory:       4,            // turnos de historial
     imgQuality:   "standard",
     imgSize:      "1024x1024",
-    systemSuffix: "Sé conciso. Máximo 3 oraciones por respuesta."
+    systemSuffix: "Sé conciso. Máximo 3 oraciones por respuesta.",
+    codeSuffix:   "Genera código funcional y breve. Sin comentarios extensos. Máximo 50 líneas."
   },
   go: {
     model:        "gpt-4o-mini",
@@ -40,7 +41,8 @@ const PLAN_CONFIG = {
     memory:       8,
     imgQuality:   "standard",
     imgSize:      "1024x1024",
-    systemSuffix: "Da respuestas completas y bien estructuradas. Usa ejemplos cuando ayuden."
+    systemSuffix: "Da respuestas completas y bien estructuradas. Usa ejemplos cuando ayuden.",
+    codeSuffix:   "Genera código limpio con comentarios claros en cada función. Incluye un ejemplo de uso. Máximo 150 líneas."
   },
   plus: {
     model:        "gpt-4o",
@@ -49,7 +51,8 @@ const PLAN_CONFIG = {
     memory:       14,
     imgQuality:   "hd",
     imgSize:      "1024x1024",
-    systemSuffix: "Da respuestas detalladas, bien organizadas y con ejemplos prácticos. Usa listas y estructura cuando sea útil."
+    systemSuffix: "Da respuestas detalladas, bien organizadas y con ejemplos prácticos. Usa listas y estructura cuando sea útil.",
+    codeSuffix:   "Genera código profesional con comentarios detallados, manejo de errores, buenas prácticas y pruebas básicas. Explica decisiones de diseño. Máximo 300 líneas."
   },
   ultra: {
     model:        "gpt-4o",
@@ -58,7 +61,8 @@ const PLAN_CONFIG = {
     memory:       20,
     imgQuality:   "hd",
     imgSize:      "1792x1024",
-    systemSuffix: "Eres la versión más avanzada de ZettaxAI. Da respuestas exhaustivas, profundas y de máxima calidad. Usa estructura clara, ejemplos reales, y agrega valor más allá de lo que se pide."
+    systemSuffix: "Eres la versión más avanzada de ZettaxAI. Da respuestas exhaustivas, profundas y de máxima calidad. Usa estructura clara, ejemplos reales, y agrega valor más allá de lo que se pide.",
+    codeSuffix:   "Genera código de arquitectura profesional: modular, escalable, con patrones de diseño, manejo de errores robusto, pruebas unitarias, documentación JSDoc/docstring y optimización de rendimiento. Explica cada decisión técnica. Sin límite de líneas."
   }
 };
 
@@ -75,6 +79,9 @@ const MODOS_IA = {
   },
   tarea: {
     system: "Eres ZettaxAI tutor educativo. Explica conceptos con analogías simples, ejemplos cotidianos y pasos claros. Adapta tu lenguaje al nivel del estudiante."
+  },
+  codigo: {
+    system: "Eres ZettaxAI experto en programación. Escribe código limpio, bien comentado y funcional. Explica brevemente qué hace el código. Si hay errores, corrígelos y explica por qué. Usa el lenguaje que el usuario indique o el más adecuado."
   }
 };
 
@@ -221,7 +228,9 @@ app.post("/chat", async (req, res) => {
   }
 
   // Combinar prompt del modo + sufijo de calidad del plan
-  const systemPrompt = `${modoCfg.system} ${planCfg.systemSuffix}`;
+  // En modo código se usa codeSuffix para instrucciones específicas de calidad
+  const suffix = (mode === "codigo" && planCfg.codeSuffix) ? planCfg.codeSuffix : planCfg.systemSuffix;
+  const systemPrompt = `${modoCfg.system} ${suffix}`;
 
   const messages = [{ role: "system", content: systemPrompt }];
 
@@ -336,7 +345,7 @@ app.post("/create-checkout-session", async (req, res) => {
       cancel_url:     `${process.env.FRONTEND_URL}?cancel=true`
     });
 
-    if (session.customer) {
+  if (session.customer) {
       await db.collection("users").doc(userId).set(
         { stripeCustomerId: session.customer },
         { merge: true }
