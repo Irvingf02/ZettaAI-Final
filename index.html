@@ -1694,7 +1694,7 @@
         </div>
         <div class="account-details">
           <div class="account-name" id="accountItemName">Usuario</div>
-          <div class="account-email" id="accountItemEmail">usuario@email.com</div>
+          <div class="account-email" id="accountItemEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e19492948093888ea1848c80888dcf828e8c">[email&#160;protected]</a></div>
         </div>
         <span class="session-status">Cerrar sesión →</span>
       </div>
@@ -1879,7 +1879,7 @@
   </button>
 </div>
 
-<script type="module">
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
 import { 
@@ -2564,21 +2564,42 @@ window.closePaywall = () => { document.getElementById("paywallModal").classList.
 
 window.payPremium = async (plan) => {
   if (!currentUser) return alert("Inicia sesión primero.");
+
+  // Usuario anónimo no puede pagar
+  if (currentUser.isAnonymous) {
+    alert("Debes crear una cuenta con email para suscribirte. Ve a Ajustes → Crear cuenta.");
+    return;
+  }
+
   closePaywall();
+
+  // Mostrar indicador de carga
+  const loadingMsg = document.createElement("div");
+  loadingMsg.id = "payLoading";
+  loadingMsg.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;";
+  loadingMsg.innerHTML = `<div style="color:#fff;font-size:1.1rem;font-weight:700;">⏳ Preparando tu pago...</div><div style="color:var(--muted);font-size:0.8rem;">Serás redirigido a Stripe</div>`;
+  document.body.appendChild(loadingMsg);
+
   try {
     const res = await fetch(`${BACKEND_URL}/create-checkout-session`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: currentUser.email, userId: currentUser.uid, plan })
     });
+
     const data = await res.json();
-    if (data.url) window.location.href = data.url;
-    else alert("Error al crear sesión de pago.");
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      document.body.removeChild(loadingMsg);
+      alert("❌ Error al crear la sesión de pago: " + (data.error || "intenta de nuevo."));
+    }
   } catch (e) {
-    alert("Error al procesar el pago: " + e.message);
+    document.body.removeChild(loadingMsg);
+    alert("❌ Error de conexión al procesar el pago: " + e.message);
   }
 };
-
 </script>
 </body>
 </html>
