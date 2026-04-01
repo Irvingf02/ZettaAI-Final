@@ -1751,7 +1751,16 @@ const LIMITES = {
   resumen: 10,   // 10 resúmenes/día
   ideas:   20,   // ideas usa el mismo contador que chat
   tarea:   15,   // 15 tareas/día
-  imagen:  5     // 5 imágenes/día
+  imagen:  5,    // 5 imágenes/día
+  codigo:  10    // 10 consultas de código/día (plan free)
+};
+
+// Límites de código por plan: { consultas/día, líneas máximas de código }
+const LIMITES_CODIGO = {
+  free:  { consultas: 10, lineas: 50  },
+  go:    { consultas: 20, lineas: 150 },
+  plus:  { consultas: 35, lineas: 300 },
+  ultra: { consultas: 50, lineas: 600 }
 };
 
 // ── Estado ──
@@ -1760,7 +1769,7 @@ let isPremium   = false;
 let userPlan    = "free";   // "free" | "go" | "plus" | "ultra"
 let mode        = "chat";
 let chatHistory = [];   // renombrado para no colisionar con window.history
-let contadores  = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0 };
+let contadores  = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0, codigo: 0 };
 let fechaHoy    = new Date().toISOString().slice(0, 10); // "2026-03-31"
 
 // ── Perfil ──
@@ -1936,11 +1945,12 @@ async function refreshPremiumStatus() {
           resumen: data.cnt_resumen || 0,
           ideas:   data.cnt_ideas   || 0,
           tarea:   data.cnt_tarea   || 0,
-          imagen:  data.cnt_imagen  || 0
+          imagen:  data.cnt_imagen  || 0,
+          codigo:  data.cnt_codigo  || 0
         };
       } else {
         // Nuevo día — resetear contadores
-        contadores = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0 };
+        contadores = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0, codigo: 0 };
       }
     }
   } catch (e) { console.error("Error obteniendo estado:", e); }
@@ -1957,14 +1967,26 @@ async function incrementarContador(modo) {
       cnt_resumen: contadores.resumen,
       cnt_ideas:   contadores.ideas,
       cnt_tarea:   contadores.tarea,
-      cnt_imagen:  contadores.imagen
+      cnt_imagen:  contadores.imagen,
+      cnt_codigo:  contadores.codigo
     }, { merge: true });
   } catch (e) { console.error("Error guardando contador:", e); }
   updateUI();
 }
 
 function limiteAlcanzado(modo) {
-  if (isPremium) return false;
+  if (isPremium) {
+    // Para código, los planes premium también tienen límite de consultas
+    if (modo === "codigo") {
+      const cfg = LIMITES_CODIGO[userPlan] || LIMITES_CODIGO.free;
+      return (contadores.codigo || 0) >= cfg.consultas;
+    }
+    return false;
+  }
+  if (modo === "codigo") {
+    const cfg = LIMITES_CODIGO[userPlan] || LIMITES_CODIGO.free;
+    return (contadores.codigo || 0) >= cfg.consultas;
+  }
   return (contadores[modo] || 0) >= LIMITES[modo];
 }
 
@@ -1975,10 +1997,18 @@ function updateUI() {
     counter.textContent = "✨ Ilimitado";
     counter.className   = "msg-counter";
   } else {
-    const limite    = LIMITES[mode] || 20;
-    const usado     = contadores[mode] || 0;
+    let limite, usado, unidad;
+    if (mode === "codigo") {
+      const cfg = LIMITES_CODIGO[userPlan] || LIMITES_CODIGO.free;
+      limite = cfg.consultas;
+      usado  = contadores.codigo || 0;
+      unidad = "consultas";
+    } else {
+      limite = LIMITES[mode] || 20;
+      usado  = contadores[mode] || 0;
+      unidad = mode === "imagen" ? "imágenes" : mode === "resumen" ? "resúmenes" : mode === "tarea" ? "tareas" : "mensajes";
+    }
     const restantes = Math.max(0, limite - usado);
-    const unidad    = mode === "imagen" ? "imágenes" : mode === "resumen" ? "resúmenes" : mode === "tarea" ? "tareas" : "mensajes";
     counter.textContent = `${restantes}/${limite} ${unidad} hoy`;
     counter.className   = "msg-counter" + (restantes === 0 ? " danger" : restantes <= 2 ? " warning" : "");
   }
@@ -2164,7 +2194,17 @@ window.send = async () => {
     },
     imagen: () => true,
     codigo: (t) => {
-      if (t.split(" ").length < 3) { addMessage("💻 Describe mejor lo que necesitas, por ejemplo: 'función en Python que ordene una lista'.", "bot error"); return false; }
+      if (t.split(" ").length < 3) {
+        addMessage("💻 Describe mejor lo que necesitas, por ejemplo: 'función en Python que ordene una lista'.", "bot error");
+        return false;
+      }
+      // Validar límite de líneas si el usuario pegó código
+      const lineas = t.split("\n").length;
+      const cfg    = LIMITES_CODIGO[userPlan] || LIMITES_CODIGO.free;
+      if (lineas > cfg.lineas) {
+        addMessage(`💻 Tu código tiene ${lineas} líneas pero tu plan ${userPlan.toUpperCase()} permite máximo ${cfg.lineas} líneas. Divide el código en partes o actualiza tu plan.`, "bot error");
+        return false;
+      }
       return true;
     },
     chat: () => true
