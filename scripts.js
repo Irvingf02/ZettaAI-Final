@@ -144,7 +144,11 @@ setInterval(() => {
 
 // ── 7. EXPRESS ────────────────────────────────────────────────────────────────
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ['https://zettax-ai-pnhu.vercel.app', 'http://localhost:3000', 'http://localhost:5500'],
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // ── 8. WEBHOOK STRIPE (antes de express.json) ─────────────────────────────────
 app.post("/webhook", bodyParser.raw({ type: "application/json" }), async (req, res) => {
