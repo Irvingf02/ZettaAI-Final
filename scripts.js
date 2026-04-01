@@ -145,27 +145,23 @@ setInterval(() => {
 // ── 7. EXPRESS ────────────────────────────────────────────────────────────────
 const app = express();
 
-const allowedOrigins = [
-  'https://zettax-ai-pnhu.vercel.app',
-  'http://localhost:3000',
-  'http://localhost:5500'
-];
-
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('CORS bloqueado: ' + origin));
-    }
-  },
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
-
-// Responder preflight OPTIONS en todas las rutas
-app.options('*', cors());
+// ── CORS manual ───────────────────────────────────────────────────────────────
+app.use((req, res, next) => {
+  const allowed = [
+    "https://zettax-ai-pnhu.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5500"
+  ];
+  const origin = req.headers.origin;
+  if (!origin || allowed.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin || "*");
+  }
+  res.setHeader("Access-Control-Allow-Methods",     "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers",     "Content-Type, Authorization, stripe-signature");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  if (req.method === "OPTIONS") return res.sendStatus(204);
+  next();
+});
 
 // ── 8. WEBHOOK STRIPE (antes de express.json) ─────────────────────────────────
 app.post("/webhook", bodyParser.raw({ type: "application/json" }), async (req, res) => {
