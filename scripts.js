@@ -22,13 +22,12 @@ const db = admin.firestore();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ── 3. CALIDAD POR PLAN ───────────────────────────────────────────────────────
-// Cada plan usa diferente modelo, tokens, memoria e imágenes
 const PLAN_CONFIG = {
   free: {
     model:        "gpt-4o-mini",
     maxTokens:    300,
     temp:         0.6,
-    memory:       4,            // turnos de historial
+    memory:       4,
     imgQuality:   "standard",
     imgSize:      "1024x1024",
     systemSuffix: "Sé conciso. Máximo 3 oraciones por respuesta.",
@@ -92,7 +91,6 @@ async function getUserPlan(uid) {
     const snap = await db.collection("users").doc(uid).get();
     if (!snap.exists) return { isPremium: false, plan: "free" };
     const data = snap.data();
-    // Compatibilidad con campo 'premium' antiguo
     const plan = data.plan || (data.premium === true ? "go" : "free");
     return { isPremium: plan !== "free", plan };
   } catch (e) {
@@ -103,7 +101,7 @@ async function getUserPlan(uid) {
 
 // ── 6. RATE LIMITER ───────────────────────────────────────────────────────────
 const rateLimitMap = new Map();
-const RATE_WINDOW  = 60 * 60 * 1000; // 1 hora en ms
+const RATE_WINDOW  = 60 * 60 * 1000;
 
 const RATE_LIMITS = {
   free:  30,
@@ -134,7 +132,6 @@ function checkRateLimit(key, plan) {
   return { allowed: true, remaining: limit - entry.count };
 }
 
-// Limpiar mapa cada hora para evitar memory leak
 setInterval(() => {
   const now = Date.now();
   for (const [key, val] of rateLimitMap.entries()) {
@@ -163,7 +160,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ── 8. WEBHOOK STRIPE (antes de express.json) ─────────────────────────────────
+// ── 8. WEBHOOK STRIPE (CORREGIDO) ─────────────────────────────────────────────
 app.post("/webhook", bodyParser.raw({ type: "application/json" }), async (req, res) => {
   const sig = req.headers["stripe-signature"];
   let event;
@@ -175,40 +172,106 @@ app.post("/webhook", bodyParser.raw({ type: "application/json" }), async (req, r
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Pago exitoso → activar plan correspondiente
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
-    const userId  = session.metadata.userId;
-    const plan    = session.metadata.plan || "go";
-    const email   = session.customer_email;
+  console.log(`📩 Webhook recibido: ${event.type}`);
 
-    try {
-      await db.collection("users").doc(userId).set(
-        { premium: true, plan, email, premiumSince: new Date().toISOString() },
-        { merge: true }
-      );
-      console.log(`⭐ Plan [${plan}] activado: ${email}`);
-    } catch (err) {
-      console.error("❌ Error Firestore:", err.message);
+  try {
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object;
+        
+        const userId = session.metadata?.userId || session.metadata?.firebaseUID;
+        const plan = session.metadata?.plan || 'go';
+
+        if (!userId) {
+          console.error("❌ No se encontró userId en metadata");
+          return res.status(400).json({ error: "No userId in metadata" });
+        }
+
+        const subscriptionId = session.subscription;
+        const subscriptionData = {
+          premium: true,
+          plan: plan,
+          stripeCustomerId: session.customer,
+          stripeSubscriptionId: subscriptionId,
+          email: session.customer_email,
+          premiumSince: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        if (subscriptionId) {
+          try {
+            const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+            subscriptionData.currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+          } catch (subErr) {
+            console.warn("⚠️ No se pudo obtener detalles de suscripción:", subErr.message);
+          }
+        }
+
+        await db.collection("users").doc(userId).set(subscriptionData, { merge: true });
+        console.log(`⭐ Plan [${plan}] activado para: ${userId}`);
+        break;
+      }
+
+      case "customer.subscription.updated": {
+        const subscription = event.data.object;
+        const customerId = subscription.customer;
+        
+        const usersSnap = await db.collection("users")
+          .where("stripeCustomerId", "==", customerId)
+          .limit(1)
+          .get();
+          
+        if (!usersSnap.empty) {
+          const userDoc = usersSnap.docs[0];
+          const priceId = subscription.items.data[0]?.price.id;
+          
+          let plan = 'go';
+          if (priceId === process.env.STRIPE_PRICE_ID_PLUS) plan = 'plus';
+          else if (priceId === process.env.STRIPE_PRICE_ID_ULTRA) plan = 'ultra';
+          
+          await userDoc.ref.update({
+            plan: plan,
+            subscriptionStatus: subscription.status,
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+            updatedAt: new Date().toISOString()
+          });
+          console.log(`🔄 Plan actualizado a [${plan}]`);
+        }
+        break;
+      }
+
+      case "customer.subscription.deleted": {
+        const subscription = event.data.object;
+        const customerId = subscription.customer;
+        
+        const snap = await db.collection("users")
+          .where("stripeCustomerId", "==", customerId)
+          .get();
+          
+        const batch = db.batch();
+        snap.forEach(d => {
+          batch.update(d.ref, { 
+            premium: false, 
+            plan: "free",
+            subscriptionStatus: 'canceled',
+            canceledAt: new Date().toISOString()
+          });
+        });
+        
+        await batch.commit();
+        console.log(`🚫 Plan removido: ${customerId}`);
+        break;
+      }
+
+      default:
+        console.log(`ℹ️ Evento no manejado: ${event.type}`);
     }
-  }
 
-  // Suscripción cancelada → bajar a free
-  if (event.type === "customer.subscription.deleted") {
-    const customerId = event.data.object.customer;
-    try {
-      const snap = await db.collection("users")
-        .where("stripeCustomerId", "==", customerId).get();
-      const batch = db.batch();
-      snap.forEach(d => batch.update(d.ref, { premium: false, plan: "free" }));
-      await batch.commit();
-      console.log(`🚫 Plan removido: ${customerId}`);
-    } catch (err) {
-      console.error("❌ Error removiendo plan:", err.message);
-    }
+    res.json({ received: true });
+  } catch (err) {
+    console.error("❌ Error procesando webhook:", err);
+    res.status(500).json({ error: err.message });
   }
-
-  res.json({ received: true });
 });
 
 // ── 9. JSON MIDDLEWARE ────────────────────────────────────────────────────────
@@ -229,12 +292,10 @@ app.post("/chat", async (req, res) => {
 
   const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
 
-  // Obtener plan real del usuario desde Firestore
   const { isPremium, plan } = await getUserPlan(uid);
   const planCfg = PLAN_CONFIG[plan] || PLAN_CONFIG.free;
   const modoCfg = MODOS_IA[mode]    || MODOS_IA.chat;
 
-  // Rate limit por plan
   const rateKey = getRateKey(ip, uid);
   const rate    = checkRateLimit(rateKey, plan);
   if (!rate.allowed) {
@@ -244,14 +305,11 @@ app.post("/chat", async (req, res) => {
     });
   }
 
-  // Combinar prompt del modo + sufijo de calidad del plan
-  // En modo código se usa codeSuffix para instrucciones específicas de calidad
   const suffix = (mode === "codigo" && planCfg.codeSuffix) ? planCfg.codeSuffix : planCfg.systemSuffix;
   const systemPrompt = `${modoCfg.system} ${suffix}`;
 
   const messages = [{ role: "system", content: systemPrompt }];
 
-  // Historial con memoria según plan (más plan = más contexto = mejor conversación)
   if (Array.isArray(history) && history.length > 0) {
     const recent = history.slice(-(planCfg.memory * 2));
     messages.push(...recent);
@@ -259,7 +317,6 @@ app.post("/chat", async (req, res) => {
 
   messages.push({ role: "user", content: message });
 
-  // Llamada a OpenAI con modelo y parámetros según plan
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -315,8 +372,8 @@ app.post("/imagen", async (req, res) => {
         model:   "dall-e-3",
         prompt,
         n:       1,
-        size:    planCfg.imgSize,      // 1024x1024 gratis/go/plus | 1792x1024 ultra
-        quality: planCfg.imgQuality    // "standard" gratis/go | "hd" plus/ultra
+        size:    planCfg.imgSize,
+        quality: planCfg.imgQuality
       })
     });
 
@@ -338,7 +395,7 @@ app.post("/imagen", async (req, res) => {
   }
 });
 
-// ── 13. CREAR SESIÓN DE PAGO ──────────────────────────────────────────────────
+// ── 13. CREAR SESIÓN DE PAGO (CORREGIDO) ──────────────────────────────────────
 app.post("/create-checkout-session", async (req, res) => {
   const { email, userId, plan } = req.body;
 
@@ -346,33 +403,67 @@ app.post("/create-checkout-session", async (req, res) => {
     return res.status(400).json({ error: "Se requiere email y userId." });
   }
 
+  const validPlans = ['go', 'plus', 'ultra'];
+  const selectedPlan = validPlans.includes(plan) ? plan : 'go';
+
   let priceId;
-  if (plan === "plus")       priceId = process.env.STRIPE_PRICE_ID_PLUS;
-  else if (plan === "ultra") priceId = process.env.STRIPE_PRICE_ID_ULTRA;
-  else                       priceId = process.env.STRIPE_PRICE_ID_GO;
+  if (selectedPlan === "plus")       priceId = process.env.STRIPE_PRICE_ID_PLUS;
+  else if (selectedPlan === "ultra") priceId = process.env.STRIPE_PRICE_ID_ULTRA;
+  else                               priceId = process.env.STRIPE_PRICE_ID_GO;
+
+  if (!priceId) {
+    return res.status(500).json({ error: "Price ID no configurado." });
+  }
 
   try {
+    let customer;
+    const existingCustomers = await stripe.customers.list({ email, limit: 1 });
+    
+    if (existingCustomers.data.length > 0) {
+      customer = existingCustomers.data[0];
+      await stripe.customers.update(customer.id, {
+        metadata: { firebaseUID: userId, plan: selectedPlan }
+      });
+    } else {
+      customer = await stripe.customers.create({
+        email,
+        metadata: { firebaseUID: userId, plan: selectedPlan }
+      });
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      mode:           "subscription",
-      customer_email: email,
-      line_items:     [{ price: priceId, quantity: 1 }],
-      metadata:       { userId, plan },   // plan guardado en metadata para el webhook
-      success_url:    `${process.env.FRONTEND_URL}?success=true`,
-      cancel_url:     `${process.env.FRONTEND_URL}?cancel=true`
+      mode: "subscription",
+      customer: customer.id,
+      line_items: [{ price: priceId, quantity: 1 }],
+      metadata: { 
+        userId: userId, 
+        plan: selectedPlan,
+        firebaseUID: userId 
+      },
+      subscription_data: {
+        metadata: {
+          userId: userId,
+          plan: selectedPlan,
+          firebaseUID: userId
+        }
+      },
+      success_url: `${process.env.FRONTEND_URL}?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL}?cancel=true`
     });
 
-  if (session.customer) {
-      await db.collection("users").doc(userId).set(
-        { stripeCustomerId: session.customer },
-        { merge: true }
-      );
-    }
+    await db.collection("users").doc(userId).set(
+      { 
+        stripeCustomerId: customer.id,
+        updatedAt: new Date().toISOString()
+      },
+      { merge: true }
+    );
 
     res.json({ url: session.url });
 
   } catch (e) {
-    console.error("❌ Error pago:", e.message);
+    console.error("❌ Error creando sesión:", e.message);
     res.status(500).json({ error: e.message });
   }
 });
@@ -383,7 +474,11 @@ app.get("/user-status/:userId", async (req, res) => {
     const snap = await db.collection("users").doc(req.params.userId).get();
     if (!snap.exists) return res.json({ premium: false, plan: "free" });
     const data = snap.data();
-    res.json({ premium: data.premium || false, plan: data.plan || "free" });
+    res.json({ 
+      premium: data.premium || false, 
+      plan: data.plan || "free",
+      status: data.subscriptionStatus || 'inactive'
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

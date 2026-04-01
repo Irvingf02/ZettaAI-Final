@@ -38,7 +38,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
    body {
-    font-family: 'Inter', sans-serif; /* Cambiamos la fuente aquí */
+    font-family: 'Inter', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -51,11 +51,6 @@
       radial-gradient(ellipse 40% 30% at 90% 100%, rgba(245,166,35,0.04) 0%, transparent 60%);
 }
 
-  /* ============================================================
-     SIDEBAR ESTILO GEMINI - VERSIÓN FINAL
-     REEMPLAZA desde aquí...
-     ============================================================ */
-
   #sidebar {
     position: fixed;
     left: 0;
@@ -63,7 +58,7 @@
     height: 100vh;
     background: var(--surface);
     border-right: 1px solid var(--border);
-    width: 60px; /* Ancho colapsado - solo iconos */
+    width: 60px;
     transition: width 0.25s ease;
     display: flex;
     flex-direction: column;
@@ -72,10 +67,9 @@
   }
 
   #sidebar.sidebar-open {
-    width: 300px; /* Ancho expandido */
+    width: 300px;
   }
 
-  /* ── Header ── */
   .sidebar-header {
     display: flex;
     align-items: center;
@@ -117,7 +111,6 @@
     opacity: 1;
   }
 
-  /* ── Items de navegación ── */
   .sidebar-item {
     display: flex;
     align-items: center;
@@ -165,7 +158,6 @@
     opacity: 1;
   }
 
-  /* Chevron para items con submenú */
   .sidebar-item .chevron {
     margin-left: auto;
     opacity: 0;
@@ -176,7 +168,6 @@
     opacity: 1;
   }
 
-  /* ── Botón Nuevo Chat (destacado) ── */
   .new-chat-btn {
     margin: 8px;
     border: 1px solid var(--border);
@@ -188,7 +179,6 @@
     border-color: var(--accent);
   }
 
-  /* ── Secciones ── */
   .sidebar-section {
     display: flex;
     flex-direction: column;
@@ -210,7 +200,6 @@
     opacity: 1;
   }
 
-  /* ── Lista de chats (scrollable) ── */
   .chats-section {
     flex: 1;
     overflow: hidden;
@@ -224,7 +213,6 @@
     padding: 0 8px;
   }
 
-  /* Scrollbar estilizada */
   .chats-list::-webkit-scrollbar {
     width: 4px;
   }
@@ -234,7 +222,6 @@
     border-radius: 2px;
   }
 
-  /* Items del historial */
   .chat-history-item {
     display: flex;
     align-items: center;
@@ -260,7 +247,6 @@
     font-size: 14px;
   }
 
-  /* ── Footer ── */
   .sidebar-footer {
     border-top: 1px solid var(--border);
     padding: 8px 0;
@@ -280,9 +266,6 @@
     opacity: 1;
   }
 
-  /* ============================================================
-     MÓVIL/TABLET - Sidebar como overlay
-     ============================================================ */
   @media (max-width: 1023px) {
     #sidebar {
       transform: translateX(-100%);
@@ -294,7 +277,6 @@
       box-shadow: 4px 0 24px rgba(0,0,0,0.5);
     }
     
-    /* Overlay oscuro */
     #sidebar::after {
       content: '';
       position: fixed;
@@ -313,7 +295,6 @@
       pointer-events: auto;
     }
     
-    /* Botón flotante para móvil */
     .mobile-menu-btn {
       display: flex;
       position: fixed;
@@ -333,21 +314,16 @@
       height: 44px;
     }
     
-    /* Ocultar botón de menú interno en móvil */
     .sidebar-header .menu-btn {
       display: none;
     }
   }
 
-  /* ============================================================
-     DESKTOP - Sidebar siempre visible
-     ============================================================ */
   @media (min-width: 1024px) {
     .mobile-menu-btn {
       display: none !important;
     }
     
-    /* Ajustar contenido principal */
     body {
       padding-left: 60px;
       transition: padding-left 0.25s ease;
@@ -357,13 +333,11 @@
       padding-left: 300px;
     }
     
-    /* El botón hamburguesa siempre visible para expandir/contraer */
     .sidebar-header .menu-btn {
       display: flex;
     }
   }
 
-  /* ── LOGIN ── */
   #loginDiv {
     background: var(--card);
     border: 1px solid var(--border);
@@ -444,7 +418,7 @@
   }
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); 
   }
-  /* ── TOP BAR ── */
+
   .top-bar {
     display: flex;
     align-items: center;
@@ -495,7 +469,6 @@
     color: var(--muted);
   }
 
-  /* ── BANNER ÉXITO ── */
   #successBanner {
     display: none;
     background: rgba(0,196,140,0.1);
@@ -507,7 +480,6 @@
     text-align: center;
   }
 
-  /* ── MODOS ── */
   .mode-bar {
     display: flex;
     gap: 6px;
@@ -562,7 +534,6 @@
 
   .btn-pro:hover { background: rgba(245,166,35,0.2); }
 
-  /* ── CHAT BOX ── */
   #chatBox {
     background: transparent; 
     border: none;            
@@ -651,8 +622,7 @@
     text-align: right;
   }
 
-  /* ── INPUT ── */
-   .input-area {
+  .input-area {
    background: transparent; 
     border: none;
     padding: 20px 0; 
@@ -690,7 +660,6 @@
   .send-btn:hover { background: #33DDFF; transform: translateY(-1px); }
   .send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
-  /* ── PAYWALL MODAL ── */
   #paywallModal {
     display: none;
     position: fixed;
@@ -719,7 +688,6 @@
     overflow-y: auto;
   }
 
-  /* Tarjetas de planes en móvil: scroll horizontal tipo swipe */
   .planes-wrapper {
     display: flex;
     gap: 10px;
@@ -752,7 +720,6 @@
   .plan-card .plan-price span { font-size: 0.7rem; font-weight: 400; color: var(--muted); }
   .plan-card .plan-features { flex: 1; }
 
-  /* Indicador de scroll en móvil */
   .scroll-hint {
     display: none;
     font-size: 0.65rem;
@@ -834,10 +801,8 @@
     to   { opacity: 1; transform: translateY(0); }
   }
  
-/* EL PADRE: Obliga a que la barra y el chat sean vecinos, no pisos */
-/* FUERZA EL DISEÑO LATERAL */
 .app-container {
- display: flex; /* Pone la barra y el chat uno al lado del otro */
+ display: flex;
  width: 100vw;
  height: 100vh;
  overflow: hidden;
@@ -847,9 +812,9 @@
   display: flex;
   align-items: center;
   height: 48px;
-  min-width: 260px; /* Para que el texto no se amontone */
+  min-width: 260px;
   padding: 0 16px;
-  border-radius: 24px; /* Redondeado Gemini */
+  border-radius: 24px;
   cursor: pointer;
   color: var(--text);
   transition: background 0.2s;
@@ -863,7 +828,7 @@
 }
 
 .sidebar-item.active {
-  background-color: var(--user-bg); /* El azul sutil de tu imagen 6 */
+  background-color: var(--user-bg);
   color: var(--accent);
 }
 
@@ -878,7 +843,7 @@
   margin-left: 12px;
   font-size: 14px;
   white-space: nowrap;
-  opacity: 0; /* Oculto por defecto */
+  opacity: 0;
   transition: opacity 0.2s;
 }
 
@@ -905,11 +870,10 @@
 
 #main-content {
   flex: 1;
-  transition: margin-left 0.3s ease; /* Esto hace que el empuje sea suave como en Gemini */
+  transition: margin-left 0.3s ease;
   padding: 20px;
 }
 
-/* Botón hamburguesa para móvil */
 .menu-toggle-mobile {
   display: none;
   position: fixed;
@@ -930,10 +894,6 @@
     display: block;
   }
 }
-
-/* ============================================================
-   MENÚ DE PERFIL ESTILO GOOGLE
-   ============================================================ */
 
 .user-profile-container {
   position: relative;
@@ -1188,10 +1148,6 @@
   font-size: 1.2rem;
 }
 
-/* ============================================================
-   ALINEAR AVATAR A LA DERECHA SIN MSGCOUNTER
-   ============================================================ */
-
 .top-bar {
   display: flex !important;
   align-items: center !important;
@@ -1217,7 +1173,6 @@
   transform: translateY(-50%) !important;
 }
 
-/* El avatar */
 .user-avatar-btn {
   width: 36px !important;
   height: 36px !important;
@@ -1234,10 +1189,6 @@
   overflow: hidden !important;
   padding: 0 !important;
 }
-
-/* ============================================================
-   MENÚ DE PERFIL - VERSIÓN CORREGIDA
-   ============================================================ */
 
 .user-profile-container {
   position: relative;
@@ -1275,7 +1226,6 @@
   height: 100%;
 }
 
-/* Menú desplegable */
 .profile-menu {
   display: none;
   position: fixed;
@@ -1296,7 +1246,6 @@
   display: block;
 }
 
-/* Overlay para móvil */
 .profile-overlay {
   display: none;
   position: fixed;
@@ -1309,7 +1258,6 @@
   display: block;
 }
 
-/* Header */
 .profile-header {
   display: flex;
   justify-content: flex-end;
@@ -1335,7 +1283,6 @@
   color: var(--text);
 }
 
-/* Info del usuario */
 .profile-info {
   text-align: center;
   margin-bottom: 20px;
@@ -1361,6 +1308,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
 }
 
 .camera-icon {
@@ -1407,7 +1355,6 @@
   background: rgba(0,212,255,0.1);
 }
 
-/* Sección de cuenta */
 .profile-section {
   border-top: 1px solid var(--border);
   padding: 16px 0;
@@ -1476,7 +1423,6 @@
   flex-shrink: 0;
 }
 
-/* Footer */
 .profile-footer {
   border-top: 1px solid var(--border);
   padding-top: 12px;
@@ -1507,7 +1453,6 @@
   color: var(--danger);
 }
 
-/* Desktop: menú como dropdown */
 @media (min-width: 768px) {
   .profile-menu {
     position: absolute;
@@ -1523,8 +1468,6 @@
   }
 }
 
-
-/* ── MENÚ DE CONFIGURACIÓN ── */
 #settingsOverlay {
   display: none;
   position: fixed;
@@ -1926,17 +1869,15 @@ const db = getFirestore(app);
 
 const BACKEND_URL = "https://zettaai-final-production.up.railway.app";
 
-// Límites diarios por modo (usuarios gratuitos)
 const LIMITES = {
-  chat:    20,   // 20 mensajes/día
-  resumen: 10,   // 10 resúmenes/día
-  ideas:   20,   // ideas usa el mismo contador que chat
-  tarea:   15,   // 15 tareas/día
-  imagen:  5,    // 5 imágenes/día
-  codigo:  10    // 10 consultas de código/día (plan free)
+  chat:    20,
+  resumen: 10,
+  ideas:   20,
+  tarea:   15,
+  imagen:  5,
+  codigo:  10
 };
 
-// Límites de código por plan: { consultas/día, líneas máximas de código }
 const LIMITES_CODIGO = {
   free:  { consultas: 10, lineas: 50  },
   go:    { consultas: 20, lineas: 150 },
@@ -1944,16 +1885,14 @@ const LIMITES_CODIGO = {
   ultra: { consultas: 50, lineas: 600 }
 };
 
-// ── Estado ──
 let currentUser = null;
 let isPremium   = false;
-let userPlan    = "free";   // "free" | "go" | "plus" | "ultra"
+let userPlan    = "free";
 let mode        = "chat";
-let chatHistory = [];   // renombrado para no colisionar con window.history
+let chatHistory = [];
 let contadores  = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0, codigo: 0 };
-let fechaHoy    = new Date().toISOString().slice(0, 10); // "2026-03-31"
+let fechaHoy    = new Date().toISOString().slice(0, 10);
 
-// ── Perfil ──
 window.toggleProfileMenu = function() {
   const menu = document.getElementById("profileMenu");
   const overlay = document.getElementById("profileOverlay");
@@ -1966,10 +1905,8 @@ function updateUserProfile(user) {
   const email       = user.email || "";
   const displayName = user.displayName || email.split("@")[0] || "Usuario";
   const photoURL    = user.photoURL || "";
-  // Inicial: primera letra del email en mayúscula, o "?" si es anónimo
   const initial     = user.isAnonymous ? "?" : (email.charAt(0).toUpperCase() || "?");
 
-  // Aplica foto o letra a cualquier par (img, span)
   const setAvatar = (imgId, letterId, photo, letter) => {
     const img = document.getElementById(imgId);
     const ltr = document.getElementById(letterId);
@@ -1985,11 +1922,8 @@ function updateUserProfile(user) {
     }
   };
 
-  // Avatar pequeño del botón (top-bar)
   setAvatar("userAvatarImg", "userAvatarLetter", photoURL, initial);
-  // Avatar grande dentro del menú de perfil
   setAvatar("profileMenuImg", "profileMenuLetter", photoURL, initial);
-  // Avatar en la lista de cuentas
   setAvatar("accountItemImg", "accountItemLetter", photoURL, initial);
 
   const el = id => document.getElementById(id);
@@ -1999,7 +1933,6 @@ function updateUserProfile(user) {
   if (el("accountItemEmail"))el("accountItemEmail").textContent= user.isAnonymous ? "" : email;
 }
 
-// ── Auth ──
 window.register = async () => {
   const email = document.getElementById("email").value.trim();
   const pass  = document.getElementById("password").value;
@@ -2075,8 +2008,6 @@ window.addAccount = () => {
   alert("Función de múltiples cuentas: próximamente.");
 };
 
-// ── Auth state ──
-// Capturar resultado de redirect (para móvil)
 getRedirectResult(auth).catch(e => console.error("Redirect error:", e));
 
 onAuthStateChanged(auth, async (user) => {
@@ -2088,17 +2019,26 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("loginDiv").style.display = "none";
     document.getElementById("appDiv").style.display   = "flex";
     sidebar.style.display   = "flex";
-    mobileBtn.style.removeProperty("display"); // CSS controla visibilidad según breakpoint
+    mobileBtn.style.removeProperty("display");
     setTimeout(() => updateUserProfile(user), 100);
-    await refreshPremiumStatus();
-    await loadChatHistory();
-
+    
+    // CORRECCIÓN: Verificar parámetros de éxito primero
     const params = new URLSearchParams(window.location.search);
+    
     if (params.get("success") === "true") {
       document.getElementById("successBanner").style.display = "block";
       window.history.replaceState({}, "", window.location.pathname);
-      setTimeout(() => refreshPremiumStatus(), 3000);
+      setTimeout(async () => {
+        await refreshPremiumStatus();
+        setTimeout(() => {
+          document.getElementById("successBanner").style.display = "none";
+        }, 5000);
+      }, 2000);
+    } else {
+      await refreshPremiumStatus();
     }
+    
+    await loadChatHistory();
   } else {
     currentUser = null;
     isPremium   = false;
@@ -2111,14 +2051,40 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 async function refreshPremiumStatus() {
-  if (!currentUser || currentUser.isAnonymous) return;
+  if (!currentUser) return;
+  
+  if (currentUser.isAnonymous) {
+    isPremium = false;
+    userPlan = "free";
+    updateUI();
+    return;
+  }
+  
   try {
-    const snap = await getDoc(doc(db, "users", currentUser.uid));
-    if (snap.exists()) {
-      const data = snap.data();
-      isPremium = data.premium === true;
-      userPlan  = data.plan || (isPremium ? "go" : "free");
-      // Cargar contadores del día actual
+    const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+    
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      userPlan = data.plan || (data.premium === true ? "go" : "free");
+      isPremium = userPlan !== "free" && data.premium === true;
+      
+      if (data.currentPeriodEnd) {
+        const now = new Date();
+        const periodEnd = new Date(data.currentPeriodEnd);
+        
+        if (periodEnd < now && data.subscriptionStatus !== 'canceled') {
+          await setDoc(doc(db, "users", currentUser.uid), {
+            premium: false,
+            plan: "free",
+            subscriptionStatus: 'expired',
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
+          
+          isPremium = false;
+          userPlan = "free";
+        }
+      }
+      
       const savedDate = data.fecha || "";
       if (savedDate === fechaHoy) {
         contadores = {
@@ -2130,11 +2096,24 @@ async function refreshPremiumStatus() {
           codigo:  data.cnt_codigo  || 0
         };
       } else {
-        // Nuevo día — resetear contadores
         contadores = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0, codigo: 0 };
       }
+    } else {
+      await setDoc(doc(db, "users", currentUser.uid), {
+        email: currentUser.email,
+        premium: false,
+        plan: "free",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      isPremium = false;
+      userPlan = "free";
     }
-  } catch (e) { console.error("Error obteniendo estado:", e); }
+  } catch (e) { 
+    console.error("Error obteniendo estado:", e);
+    isPremium = false;
+    userPlan = "free";
+  }
   updateUI();
 }
 
@@ -2157,7 +2136,6 @@ async function incrementarContador(modo) {
 
 function limiteAlcanzado(modo) {
   if (isPremium) {
-    // Para código, los planes premium también tienen límite de consultas
     if (modo === "codigo") {
       const cfg = LIMITES_CODIGO[userPlan] || LIMITES_CODIGO.free;
       return (contadores.codigo || 0) >= cfg.consultas;
@@ -2194,7 +2172,6 @@ function updateUI() {
     counter.className   = "msg-counter" + (restantes === 0 ? " danger" : restantes <= 2 ? " warning" : "");
   }
 
-  // Nombre de la app según plan
   const appName = document.getElementById("appName");
   if (appName) {
     const nombres = {
@@ -2207,7 +2184,6 @@ function updateUI() {
   }
 }
 
-// ── Sidebar ──
 window.toggleSidebar = function() {
   const sidebar = document.getElementById("sidebar");
   if (sidebar.classList.contains("sidebar-closed")) {
@@ -2299,7 +2275,6 @@ window.showHelp = function() {
   alert('❓ Ayuda ZettaxAI\n\n💬 Chat — Preguntas y consultas generales\n📝 Resumir — Pega textos para resumirlos\n💡 Ideas — Genera ideas creativas\n🎓 Tarea — Ayuda con tareas académicas\n🎨 Imagen — Crea imágenes con IA\n💻 Código — Escribe y depura código\n\n📧 Soporte: soporte@zettaxai.com');
 };
 
-// ── Historial ──
 async function loadChatHistory() {
   if (!currentUser || currentUser.isAnonymous) return;
   const list = document.getElementById("history-list");
@@ -2347,7 +2322,6 @@ function loadSpecificChat(chatId, messages) {
   });
 }
 
-// ── Modo ──
 const MODOS = {
   chat:    { emoji: "💬", title: "Chat Rápido",        desc: "Respuestas cortas y directas",   premium: false },
   resumen: { emoji: "📝", title: "Resumidor Pro",       desc: "Sintetiza cualquier texto",       premium: false },
@@ -2365,9 +2339,7 @@ window.setMode = (m) => {
   document.getElementById("modeEmoji").textContent = MODOS[m].emoji;
   document.getElementById("modeTitle").textContent = MODOS[m].title;
   document.getElementById("modeDesc").textContent  = MODOS[m].desc;
-  // Actualizar contador al cambiar modo
   updateUI();
-  // Cambiar placeholder según modo
   const placeholders = {
     chat: "Escribe un mensaje...",
     resumen: "Pega el texto que quieres resumir...",
@@ -2379,7 +2351,6 @@ window.setMode = (m) => {
   document.getElementById("input").placeholder = placeholders[m] || "Escribe un mensaje...";
 };
 
-// ── Mensajes ──
 function addMessage(text, role, extra = "") {
   const div = document.createElement("div");
   div.className = `msg ${role}`;
@@ -2404,21 +2375,17 @@ window.handleFile = (event) => {
   }
 };
 
-// ── Enviar mensaje ──
 window.send = async () => {
   const input   = document.getElementById("input");
   const sendBtn = document.getElementById("sendBtn");
   const text    = input.value.trim();
   if (!text || !currentUser) return;
 
-  // Verificar límite del modo actual
   if (limiteAlcanzado(mode)) {
     showPaywall();
     return;
   }
 
-
-  // ── VALIDACIÓN DE MODO ──
   const restricciones = {
     tarea:   { palabrasProhibidas: [], mensaje: "🎓 Este apartado es solo para tareas y conceptos educativos. Usa 💬 Chat para otras consultas." },
     resumen: { palabrasProhibidas: [], mensaje: "📝 Este apartado es solo para resumir textos. Pega el texto que quieres resumir." },
@@ -2447,7 +2414,6 @@ window.send = async () => {
         addMessage("💻 Describe mejor lo que necesitas, por ejemplo: 'función en Python que ordene una lista'.", "bot error");
         return false;
       }
-      // Validar límite de líneas si el usuario pegó código
       const lineas = t.split("\n").length;
       const cfg    = LIMITES_CODIGO[userPlan] || LIMITES_CODIGO.free;
       if (lineas > cfg.lineas) {
@@ -2461,12 +2427,10 @@ window.send = async () => {
 
   if (validaciones[mode] && !validaciones[mode](text)) return;
 
-  // ── A PARTIR DE AQUÍ va lo que ya tenías ──
   addMessage(text, "user");
   input.value      = "";
   sendBtn.disabled = true;
 
-  // ── MODO IMAGEN ──
   if (mode === "imagen") {
     const typing = addMessage("🎨 Generando imagen...", "bot typing");
     try {
@@ -2479,7 +2443,6 @@ window.send = async () => {
       typing.remove();
 
       if (data.imageUrl) {
-        // Mostrar imagen en el chat
         const div = document.createElement("div");
         div.className = "msg bot";
         const img = document.createElement("img");
@@ -2508,7 +2471,6 @@ window.send = async () => {
     return;
   }
 
-  // ── MODO TEXTO (chat, resumen, ideas, tarea) ──
   chatHistory.push({ role: "user", content: text });
   if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
 
@@ -2558,46 +2520,59 @@ window.send = async () => {
   }
 };
 
-// ── Paywall ──
 window.showPaywall  = () => { document.getElementById("paywallModal").classList.add("show"); };
 window.closePaywall = () => { document.getElementById("paywallModal").classList.remove("show"); };
 
+// CORRECCIÓN: Función payPremium mejorada
 window.payPremium = async (plan) => {
   if (!currentUser) return alert("Inicia sesión primero.");
 
-  // Usuario anónimo no puede pagar
   if (currentUser.isAnonymous) {
-    alert("Debes crear una cuenta con email para suscribirte. Ve a Ajustes → Crear cuenta.");
+    alert("Debes crear una cuenta con email para suscribirte.");
+    return;
+  }
+
+  if (!currentUser.email) {
+    alert("Se requiere un correo electrónico para procesar el pago.");
     return;
   }
 
   closePaywall();
 
-  // Mostrar indicador de carga
   const loadingMsg = document.createElement("div");
   loadingMsg.id = "payLoading";
-  loadingMsg.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;";
-  loadingMsg.innerHTML = `<div style="color:#fff;font-size:1.1rem;font-weight:700;">⏳ Preparando tu pago...</div><div style="color:var(--muted);font-size:0.8rem;">Serás redirigido a Stripe</div>`;
+  loadingMsg.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;";
+  loadingMsg.innerHTML = `<div style="color:#fff;font-size:1.1rem;font-weight:700;">⏳ Conectando con Stripe...</div>`;
   document.body.appendChild(loadingMsg);
 
   try {
     const res = await fetch(`${BACKEND_URL}/create-checkout-session`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: currentUser.email, userId: currentUser.uid, plan })
+      headers: { 
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({ 
+        email: currentUser.email, 
+        userId: currentUser.uid, 
+        plan: plan 
+      })
     });
 
-    const data = await res.json();
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Error al crear sesión");
+    }
 
+    const data = await res.json();
     if (data.url) {
       window.location.href = data.url;
     } else {
-      document.body.removeChild(loadingMsg);
-      alert("❌ Error al crear la sesión de pago: " + (data.error || "intenta de nuevo."));
+      throw new Error("No se recibió URL de checkout");
     }
   } catch (e) {
     document.body.removeChild(loadingMsg);
-    alert("❌ Error de conexión al procesar el pago: " + e.message);
+    alert("❌ Error: " + e.message);
   }
 };
 </script>
