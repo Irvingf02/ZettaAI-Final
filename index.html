@@ -1524,7 +1524,7 @@
 }
 
 
-/* ── MENÚ DE CONFIGURACIÓN ESTILO GEMINI ── */
+/* ── MENÚ DE CONFIGURACIÓN ── */
 #settingsOverlay {
   display: none;
   position: fixed;
@@ -1539,7 +1539,7 @@
   position: fixed;
   bottom: 70px;
   left: 12px;
-  width: 280px;
+  width: 270px;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -1551,14 +1551,8 @@
 #settingsMenu.show { display: block; }
 
 @media (min-width: 1024px) {
-  #settingsMenu {
-    left: 68px;
-    bottom: 60px;
-  }
-  #sidebar.sidebar-open ~ * #settingsMenu,
-  body:has(#sidebar.sidebar-open) #settingsMenu {
-    left: 308px;
-  }
+  #settingsMenu { left: 68px; bottom: 60px; }
+  body:has(#sidebar.sidebar-open) #settingsMenu { left: 308px; }
 }
 
 .settings-item {
@@ -1574,35 +1568,17 @@
   background: none;
   width: 100%;
   text-align: left;
-  position: relative;
 }
-.settings-item:hover { background: rgba(255,255,255,0.05); }
-.settings-item .s-icon { font-size: 1.1rem; min-width: 24px; }
-.settings-item .s-badge {
-  font-size: 0.6rem;
-  background: var(--accent);
-  color: #000;
-  padding: 2px 7px;
-  border-radius: 10px;
-  font-weight: 700;
-  margin-left: auto;
-}
+.settings-item:hover { background: rgba(255,255,255,0.06); }
+.settings-item .s-icon { font-size: 1.05rem; min-width: 22px; }
 .settings-item .s-dot {
   width: 7px; height: 7px;
   background: var(--accent);
   border-radius: 50%;
   margin-left: auto;
 }
-.settings-item .s-arrow {
-  margin-left: auto;
-  color: var(--muted);
-  font-size: 0.8rem;
-}
-.settings-divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 6px 0;
-}
+.settings-item .s-arrow { margin-left: auto; color: var(--muted); font-size: 0.8rem; }
+.settings-divider { border: none; border-top: 1px solid var(--border); margin: 6px 0; }
 .settings-section-label {
   padding: 6px 20px 2px;
   font-size: 0.68rem;
@@ -1854,66 +1830,53 @@
   </div>
 </div>
 
+
 <!-- OVERLAY CONFIGURACIÓN -->
 <div id="settingsOverlay" onclick="closeSettings()"></div>
 
 <!-- MENÚ DE CONFIGURACIÓN -->
 <div id="settingsMenu">
-
-  <!-- Mi plan -->
   <div class="settings-section-label">Mi cuenta</div>
-  <button class="settings-item" onclick="closeSettings(); showPaywall();">
-    <span class="s-icon">⭐</span>
-    <span>Ver suscripciones</span>
+  <button class="settings-item" onclick="closeSettings();showPaywall();">
+    <span class="s-icon">⭐</span><span>Ver suscripciones</span>
   </button>
-  <button class="settings-item" onclick="closeSettings(); manageAccount();">
-    <span class="s-icon">👤</span>
-    <span>Contexto personal</span>
+  <button class="settings-item" onclick="closeSettings();manageAccount();">
+    <span class="s-icon">👤</span><span>Contexto personal</span>
     <span class="s-dot"></span>
   </button>
 
   <hr class="settings-divider">
 
-  <!-- Actividad -->
   <div class="settings-section-label">Datos</div>
-  <button class="settings-item" onclick="closeSettings(); showActivity();">
-    <span class="s-icon">📊</span>
-    <span>Actividad</span>
+  <button class="settings-item" onclick="closeSettings();showActivity();">
+    <span class="s-icon">📊</span><span>Actividad</span>
   </button>
-  <button class="settings-item" onclick="closeSettings(); showConnectedApps();">
-    <span class="s-icon">🔗</span>
-    <span>Aplicaciones conectadas</span>
+  <button class="settings-item" onclick="closeSettings();showConnectedApps();">
+    <span class="s-icon">🔗</span><span>Aplicaciones conectadas</span>
     <span class="s-dot"></span>
   </button>
 
   <hr class="settings-divider">
 
-  <!-- Preferencias -->
   <div class="settings-section-label">Preferencias</div>
-  <button class="settings-item" onclick="closeSettings(); toggleTheme();">
-    <span class="s-icon">🎨</span>
-    <span>Tema</span>
+  <button class="settings-item" onclick="closeSettings();toggleTheme();">
+    <span class="s-icon">🎨</span><span>Tema</span>
     <span class="s-arrow">›</span>
   </button>
-  <button class="settings-item" onclick="closeSettings(); showPublicLinks();">
-    <span class="s-icon">🔒</span>
-    <span>Tus enlaces públicos</span>
+  <button class="settings-item" onclick="closeSettings();showPublicLinks();">
+    <span class="s-icon">🔒</span><span>Tus enlaces públicos</span>
   </button>
 
   <hr class="settings-divider">
 
-  <!-- Ayuda -->
   <div class="settings-section-label">Ayuda</div>
-  <button class="settings-item" onclick="closeSettings(); sendFeedback();">
-    <span class="s-icon">💬</span>
-    <span>Enviar comentarios</span>
+  <button class="settings-item" onclick="closeSettings();sendFeedback();">
+    <span class="s-icon">💬</span><span>Enviar comentarios</span>
   </button>
-  <button class="settings-item" onclick="closeSettings(); showHelp();">
-    <span class="s-icon">❓</span>
-    <span>Ayuda</span>
+  <button class="settings-item" onclick="closeSettings();showHelp();">
+    <span class="s-icon">❓</span><span>Ayuda</span>
     <span class="s-arrow">›</span>
   </button>
-
 </div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
@@ -2267,94 +2230,73 @@ window.newChat = function() {
 window.showFavorites = function() { console.log("Mostrar favoritos"); };
 window.showGems      = function() { console.log("Mostrar Gems"); };
 window.showSettings = function() {
-  const menu    = document.getElementById("settingsMenu");
-  const overlay = document.getElementById("settingsOverlay");
-  menu.classList.toggle("show");
-  overlay.classList.toggle("show");
+  const menu    = document.getElementById('settingsMenu');
+  const overlay = document.getElementById('settingsOverlay');
+  menu.classList.toggle('show');
+  overlay.classList.toggle('show');
 };
 
 window.closeSettings = function() {
-  document.getElementById("settingsMenu").classList.remove("show");
-  document.getElementById("settingsOverlay").classList.remove("show");
+  document.getElementById('settingsMenu').classList.remove('show');
+  document.getElementById('settingsOverlay').classList.remove('show');
 };
 
 window.showActivity = function() {
-  // Mostrar resumen de uso del día
-  const lines = [
-    `📊 Tu actividad de hoy (${fechaHoy}):`,
-    `💬 Chat: ${contadores.chat || 0} mensajes`,
-    `📝 Resúmenes: ${contadores.resumen || 0}`,
-    `💡 Ideas: ${contadores.ideas || 0}`,
-    `🎓 Tareas: ${contadores.tarea || 0}`,
-    `🎨 Imágenes: ${contadores.imagen || 0}`,
-    `💻 Código: ${contadores.codigo || 0}`,
-    `
-Plan actual: ${userPlan.toUpperCase()}`
-  ].join("");
-  alert(lines);
+  const msg = [
+    '📊 Tu actividad de hoy (' + fechaHoy + '):',
+    '💬 Chat: ' + (contadores.chat || 0) + ' mensajes',
+    '📝 Resúmenes: ' + (contadores.resumen || 0),
+    '💡 Ideas: ' + (contadores.ideas || 0),
+    '🎓 Tareas: ' + (contadores.tarea || 0),
+    '🎨 Imágenes: ' + (contadores.imagen || 0),
+    '💻 Código: ' + (contadores.codigo || 0),
+    '',
+    'Plan actual: ' + userPlan.toUpperCase()
+  ].join('\n');
+  alert(msg);
 };
 
 window.showConnectedApps = function() {
-  alert("🔗 Aplicaciones conectadas:");
-
-✅ Firebase Auth
-✅ OpenAI GPT-4
-✅ DALL-E 3
-✅ Stripe Pagos
-
-("Próximamente: Google Drive, Notion, Slack");
+  alert('🔗 Aplicaciones conectadas:\n\n✅ Firebase Auth\n✅ OpenAI GPT-4\n✅ DALL-E 3\n✅ Stripe Pagos\n\nPróximamente: Google Drive, Notion, Slack');
 };
 
 window.toggleTheme = function() {
-  const root = document.documentElement;
-  const isDark = getComputedStyle(root).getPropertyValue("--bg").trim() === "#080B0F";
+  const root   = document.documentElement;
+  const isDark = root.style.getPropertyValue('--bg') !== '#F5F7FA';
   if (isDark) {
-    root.style.setProperty("--bg",      "#F5F7FA");
-    root.style.setProperty("--surface", "#FFFFFF");
-    root.style.setProperty("--card",    "#EAECF0");
-    root.style.setProperty("--border",  "#D1D5DB");
-    root.style.setProperty("--text",    "#111827");
-    root.style.setProperty("--muted",   "#6B7280");
-    root.style.setProperty("--user-bg", "#DBEAFE");
-    root.style.setProperty("--bot-bg",  "#F3F4F6");
+    root.style.setProperty('--bg',      '#F5F7FA');
+    root.style.setProperty('--surface', '#FFFFFF');
+    root.style.setProperty('--card',    '#EAECF0');
+    root.style.setProperty('--border',  '#D1D5DB');
+    root.style.setProperty('--text',    '#111827');
+    root.style.setProperty('--muted',   '#6B7280');
+    root.style.setProperty('--user-bg', '#DBEAFE');
+    root.style.setProperty('--bot-bg',  '#F3F4F6');
   } else {
-    root.style.setProperty("--bg",      "#080B0F");
-    root.style.setProperty("--surface", "#0E1117");
-    root.style.setProperty("--card",    "#141920");
-    root.style.setProperty("--border",  "#1E2530");
-    root.style.setProperty("--text",    "#DCE4EF");
-    root.style.setProperty("--muted",   "#5A6A7A");
-    root.style.setProperty("--user-bg", "#0D3A52");
-    root.style.setProperty("--bot-bg",  "#141920");
+    root.style.setProperty('--bg',      '#080B0F');
+    root.style.setProperty('--surface', '#0E1117');
+    root.style.setProperty('--card',    '#141920');
+    root.style.setProperty('--border',  '#1E2530');
+    root.style.setProperty('--text',    '#DCE4EF');
+    root.style.setProperty('--muted',   '#5A6A7A');
+    root.style.setProperty('--user-bg', '#0D3A52');
+    root.style.setProperty('--bot-bg',  '#141920');
   }
 };
 
 window.showPublicLinks = function() {
-  alert("🔒 Tus enlaces públicos");
-
-Esta función estará disponible próximamente.
-("Podrás compartir conversaciones públicamente con un link.");
+  alert('🔒 Tus enlaces públicos\n\nPodrás compartir conversaciones con un link. Próximamente.');
 };
 
 window.sendFeedback = function() {
-  const fb = prompt("💬 ¿Qué piensas de ZettaxAI? Tu opinión nos ayuda a mejorar:");
+  const fb = prompt('💬 ¿Qué piensas de ZettaxAI? Tu opinión nos ayuda a mejorar:');
   if (fb && fb.trim()) {
-    alert("¡Gracias por tu comentario! Lo hemos recibido. 🙏");
-    // Aquí puedes enviar el feedback a Firestore si quieres
+    alert('¡Gracias por tu comentario! Lo hemos recibido. 🙏');
   }
 };
 
 window.showHelp = function() {
-  alert("❓ Ayuda ZettaxAI");
-
-💬 Chat — Preguntas y consultas generales
-📝 Resumir — Pega textos para resumirlos
-💡 Ideas — Genera ideas creativas
-🎓 Tarea — Ayuda con tareas académicas
-🎨 Imagen — Crea imágenes con IA
-💻 Código — Escribe y depura código
-
-("📧 Soporte: soporte@zettaxai.com");
+  alert('❓ Ayuda ZettaxAI\n\n💬 Chat — Preguntas y consultas generales\n📝 Resumir — Pega textos para resumirlos\n💡 Ideas — Genera ideas creativas\n🎓 Tarea — Ayuda con tareas académicas\n🎨 Imagen — Crea imágenes con IA\n💻 Código — Escribe y depura código\n\n📧 Soporte: soporte@zettaxai.com');
 };
 
 // ── Historial ──
