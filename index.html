@@ -2135,6 +2135,37 @@ window.send = async () => {
     return;
   }
 
+
+  // ── VALIDACIÓN DE MODO ──
+  const restricciones = {
+    tarea:   { palabrasProhibidas: [], mensaje: "🎓 Este apartado es solo para tareas y conceptos educativos. Usa 💬 Chat para otras consultas." },
+    resumen: { palabrasProhibidas: [], mensaje: "📝 Este apartado es solo para resumir textos. Pega el texto que quieres resumir." },
+    ideas:   { palabrasProhibidas: [], mensaje: "💡 Este apartado es solo para generar ideas. Escribe un tema sobre el que quieras ideas." },
+    imagen:  { palabrasProhibidas: [], mensaje: "🎨 Este apartado es solo para crear imágenes. Describe visualmente lo que quieres." },
+    chat:    { palabrasProhibidas: [], mensaje: "💬 Para tareas, resúmenes, ideas o imágenes usa el apartado correspondiente." }
+  };
+
+  const validaciones = {
+    tarea: (t) => {
+      const esConsultaGeneral = /^(hola|qué tal|cómo estás|cuánto cuesta|precio|ayuda genérica)/i.test(t);
+      if (esConsultaGeneral) { addMessage("🎓 Este apartado es para tareas educativas. Usa 💬 Chat para otras consultas.", "bot error"); return false; }
+      return true;
+    },
+    resumen: (t) => {
+      if (t.split(" ").length < 15) { addMessage("📝 Para resumir necesitas pegar un texto más largo. ¿Tienes el texto que quieres resumir?", "bot error"); return false; }
+      return true;
+    },
+    ideas: (t) => {
+      if (t.split(" ").length > 60) { addMessage("💡 Para ideas, escribe solo el tema (ej: 'ideas para un negocio de comida'). No pegues textos largos.", "bot error"); return false; }
+      return true;
+    },
+    imagen: () => true,
+    chat: () => true
+  };
+
+  if (validaciones[mode] && !validaciones[mode](text)) return;
+
+  // ── A PARTIR DE AQUÍ va lo que ya tenías ──
   addMessage(text, "user");
   input.value      = "";
   sendBtn.disabled = true;
