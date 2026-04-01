@@ -1608,9 +1608,10 @@
   <!-- MODOS -->
   <div class="mode-bar">
     <button class="mode-btn active" id="btn-chat"    onclick="setMode('chat')">💬 Chat</button>
-    <button class="mode-btn"        id="btn-resumen" onclick="setMode('resumen')">📝 Resumir <span class="lock">🔒</span></button>
-    <button class="mode-btn"        id="btn-ideas"   onclick="setMode('ideas')">💡 Ideas <span class="lock">🔒</span></button>
+    <button class="mode-btn"        id="btn-resumen" onclick="setMode('resumen')">📝 Resumir</button>
+    <button class="mode-btn"        id="btn-ideas"   onclick="setMode('ideas')">💡 Ideas</button>
     <button class="mode-btn"        id="btn-tarea"   onclick="setMode('tarea')">🎓 Tarea</button>
+    <button class="mode-btn"        id="btn-imagen"  onclick="setMode('imagen')">🎨 Imagen</button>
     <button class="btn-pro"         onclick="showPaywall()">✨ Ser PRO</button>
   </div>
 
@@ -1975,10 +1976,11 @@ function loadSpecificChat(chatId, messages) {
 
 // ── Modo ──
 const MODOS = {
-  chat:    { emoji: "💬", title: "Chat Rápido",       desc: "Respuestas cortas y directas",   premium: false },
-  resumen: { emoji: "📝", title: "Resumidor Pro",      desc: "Sintetiza cualquier texto",       premium: true  },
-  ideas:   { emoji: "💡", title: "Generador de Ideas", desc: "Ideas creativas y originales",    premium: true  },
-  tarea:   { emoji: "🎓", title: "Tutor de Tareas",    desc: "Explica conceptos fácilmente",    premium: false }
+  chat:    { emoji: "💬", title: "Chat Rápido",        desc: "Respuestas cortas y directas",   premium: false },
+  resumen: { emoji: "📝", title: "Resumidor Pro",       desc: "Sintetiza cualquier texto",       premium: false },
+  ideas:   { emoji: "💡", title: "Generador de Ideas",  desc: "Ideas creativas y originales",    premium: false },
+  tarea:   { emoji: "🎓", title: "Tutor de Tareas",     desc: "Explica conceptos fácilmente",    premium: false },
+  imagen:  { emoji: "🎨", title: "Crear Imagen",        desc: "Genera imágenes con IA",          premium: false }
 };
 
 window.setMode = (m) => {
@@ -2029,6 +2031,55 @@ window.send = async () => {
   input.value      = "";
   sendBtn.disabled = true;
 
+  // ── MODO IMAGEN ──
+  if (mode === "imagen") {
+    const typing = addMessage("🎨 Generando imagen...", "bot typing");
+    try {
+      const res = await fetch(`${BACKEND_URL}/imagen`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: text, uid: currentUser.uid })
+      });
+      const data = await res.json();
+      typing.remove();
+
+      if (data.imageUrl) {
+        // Mostrar imagen en el chat
+        const div = document.createElement("div");
+        div.className = "msg bot";
+        const img = document.createElement("img");
+        img.src = data.imageUrl;
+        img.style.cssText = "max-width:100%; border-radius:10px; margin-top:6px; display:block;";
+        img.alt = text;
+        const caption = document.createElement("div");
+        caption.className = "msg-meta";
+        caption.textContent = "🎨 " + text.substring(0, 60);
+        div.appendChild(img);
+        div.appendChild(caption);
+        document.getElementById("messages").appendChild(div);
+        document.getElementById("messages").scrollTop = 9999;
+      } else {
+        addMessage(data.reply || "⚠️ No se pudo generar la imagen.", "bot error");
+      }
+
+      if (!currentUser.isAnonymous) {
+        msgCount++;
+        if (!isPremium) {
+          await setDoc(doc(db, "users", currentUser.uid), { msgCount }, { merge: true });
+        }
+        updateUI();
+      }
+    } catch (e) {
+      document.querySelector(".typing") && document.querySelector(".typing").remove();
+      addMessage("⚠️ Error generando imagen.", "bot error");
+    } finally {
+      sendBtn.disabled = false;
+      input.focus();
+    }
+    return;
+  }
+
+  // ── MODO TEXTO (chat, resumen, ideas, tarea) ──
   chatHistory.push({ role: "user", content: text });
   if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
 
