@@ -1612,6 +1612,7 @@
     <button class="mode-btn"        id="btn-ideas"   onclick="setMode('ideas')">💡 Ideas</button>
     <button class="mode-btn"        id="btn-tarea"   onclick="setMode('tarea')">🎓 Tarea</button>
     <button class="mode-btn"        id="btn-imagen"  onclick="setMode('imagen')">🎨 Imagen</button>
+    <button class="mode-btn"        id="btn-codigo"  onclick="setMode('codigo')">💻 Código</button>
     <button class="btn-pro"         onclick="showPaywall()">✨ Ser PRO</button>
   </div>
 
@@ -2073,7 +2074,8 @@ const MODOS = {
   resumen: { emoji: "📝", title: "Resumidor Pro",       desc: "Sintetiza cualquier texto",       premium: false },
   ideas:   { emoji: "💡", title: "Generador de Ideas",  desc: "Ideas creativas y originales",    premium: false },
   tarea:   { emoji: "🎓", title: "Tutor de Tareas",     desc: "Explica conceptos fácilmente",    premium: false },
-  imagen:  { emoji: "🎨", title: "Crear Imagen",        desc: "Genera imágenes con IA",          premium: false }
+  imagen:  { emoji: "🎨", title: "Crear Imagen",        desc: "Genera imágenes con IA",          premium: false },
+  codigo:  { emoji: "💻", title: "Asistente de Código", desc: "Escribe, explica y depura código", premium: false }
 };
 
 window.setMode = (m) => {
@@ -2092,7 +2094,8 @@ window.setMode = (m) => {
     resumen: "Pega el texto que quieres resumir...",
     ideas: "¿Sobre qué tema quieres ideas?",
     tarea: "¿Qué tema o tarea necesitas explicar?",
-    imagen: "Describe la imagen que quieres crear..."
+    imagen: "Describe la imagen que quieres crear...",
+    codigo: "¿Qué código necesitas? Describe o pega tu código aquí..."
   };
   document.getElementById("input").placeholder = placeholders[m] || "Escribe un mensaje...";
 };
@@ -2160,6 +2163,10 @@ window.send = async () => {
       return true;
     },
     imagen: () => true,
+    codigo: (t) => {
+      if (t.split(" ").length < 3) { addMessage("💻 Describe mejor lo que necesitas, por ejemplo: 'función en Python que ordene una lista'.", "bot error"); return false; }
+      return true;
+    },
     chat: () => true
   };
 
