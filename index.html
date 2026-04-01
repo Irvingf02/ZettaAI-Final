@@ -1899,7 +1899,6 @@ onAuthStateChanged(auth, async (user) => {
     sidebar.style.display   = "flex";
     mobileBtn.style.removeProperty("display"); // CSS controla visibilidad según breakpoint
     setTimeout(() => updateUserProfile(user), 100);
-    setTimeout(() => mostrarHintModo(mode), 300);
     await refreshPremiumStatus();
     await loadChatHistory();
 
@@ -2070,48 +2069,12 @@ function loadSpecificChat(chatId, messages) {
 
 // ── Modo ──
 const MODOS = {
-  chat:    { emoji: "💬", title: "Chat",             desc: "Consultas generales y preguntas",    premium: false },
-  resumen: { emoji: "📝", title: "Resumir",          desc: "Pega un texto y lo resumimos",       premium: false },
-  ideas:   { emoji: "💡", title: "Ideas",            desc: "Pide ideas sobre cualquier tema",    premium: false },
-  tarea:   { emoji: "🎓", title: "Tareas",           desc: "Explica temas o resuelve tareas",    premium: false },
-  imagen:  { emoji: "🎨", title: "Crear Imagen",     desc: "Describe y generamos tu imagen",     premium: false }
+  chat:    { emoji: "💬", title: "Chat Rápido",        desc: "Respuestas cortas y directas",   premium: false },
+  resumen: { emoji: "📝", title: "Resumidor Pro",       desc: "Sintetiza cualquier texto",       premium: false },
+  ideas:   { emoji: "💡", title: "Generador de Ideas",  desc: "Ideas creativas y originales",    premium: false },
+  tarea:   { emoji: "🎓", title: "Tutor de Tareas",     desc: "Explica conceptos fácilmente",    premium: false },
+  imagen:  { emoji: "🎨", title: "Crear Imagen",        desc: "Genera imágenes con IA",          premium: false }
 };
-
-// Mensajes de guía y validación por modo
-const MODO_HINTS = {
-  chat:    { placeholder: "Escríbeme tu consulta o pregunta...",              hint: "💬 Este modo es para consultas generales. Para resumir textos usa 📝 Resumir, para ideas usa 💡 Ideas, para tareas usa 🎓 Tareas." },
-  resumen: { placeholder: "Pega aquí el texto que quieres resumir...",        hint: "📝 Este modo es solo para resumir textos. Para consultas usa 💬 Chat, para tareas usa 🎓 Tareas." },
-  ideas:   { placeholder: "¿Sobre qué tema quieres ideas o lluvia de ideas?", hint: "💡 Este modo es para generar ideas. Para consultas usa 💬 Chat, para resumir usa 📝 Resumir." },
-  tarea:   { placeholder: "Escribe tu tarea, pregunta escolar o tema...",     hint: "🎓 Este modo es para tareas y estudios. Para consultas generales usa 💬 Chat." },
-  imagen:  { placeholder: "Describe la imagen que quieres crear...",          hint: "🎨 Este modo crea imágenes. Para texto usa los otros modos." }
-};
-
-// Validación por modo en el frontend
-const MODO_VALIDACION = {
-  resumen: { minLen: 80, errorMsg: "📝 Para resumir necesito que pegues el texto completo aquí (mínimo 80 caracteres). ¿Ya tienes el texto listo?" },
-  imagen:  { minLen: 5,  errorMsg: null }
-};
-
-// Detecta si el mensaje pertenece a otro modo y avisa al usuario
-function detectarModoIncorrecto(texto, modoActual) {
-  const t = texto.toLowerCase();
-
-  const esResumen   = /resumi|sintetiz|resume|puntos clave|de qué trata/.test(t) && t.length < 80;
-  const esIdea      = /dame ideas|genera ideas|ideas para|lluvia de ideas|qué ideas/.test(t);
-  const esTarea     = /explica|tarea|materia|escuela|universidad|clase|examen|teorema|fórmula|biología|historia|matemática/.test(t);
-  const esImagen    = /crea.*imagen|genera.*imagen|dibuja|ilustra|foto de|imagen de/.test(t);
-
-  if (modoActual !== "resumen" && esResumen)
-    return `📝 Parece que quieres resumir algo. Cambia al modo <b>Resumir</b> y pega el texto completo ahí.`;
-  if (modoActual !== "ideas" && esIdea)
-    return `💡 Parece que quieres ideas. Cambia al modo <b>Ideas</b> para obtener mejores resultados.`;
-  if (modoActual !== "tarea" && esTarea && modoActual !== "chat")
-    return `🎓 Parece que es una pregunta académica. Cambia al modo <b>Tarea</b> para una explicación más completa.`;
-  if (modoActual !== "imagen" && esImagen)
-    return `🎨 Parece que quieres crear una imagen. Cambia al modo <b>Imagen</b> para generarla.`;
-
-  return null; // sin conflicto
-}
 
 window.setMode = (m) => {
   if (MODOS[m].premium && !isPremium) { showPaywall(); return; }
@@ -2123,68 +2086,16 @@ window.setMode = (m) => {
   document.getElementById("modeDesc").textContent  = MODOS[m].desc;
   // Actualizar contador al cambiar modo
   updateUI();
-  // Cambiar placeholder y limpiar chat al cambiar modo
-  const hint = MODO_HINTS[m];
-  if (hint) {
-    document.getElementById("input").placeholder = hint.placeholder;
-  }
-  // Mostrar tarjeta de ayuda del modo
-  mostrarHintModo(m);
-};
-
-// ── Hint de modo ──
-function mostrarHintModo(m) {
-  // Quitar hint anterior si existe
-  const prev = document.getElementById("modeHintCard");
-  if (prev) prev.remove();
-
-  const hint = MODO_HINTS[m];
-  if (!hint) return;
-
-  const iconos = { chat: "💬", resumen: "📝", ideas: "💡", tarea: "🎓", imagen: "🎨" };
-  const titulos = { chat: "Consultas generales", resumen: "Resumir textos", ideas: "Generar ideas", tarea: "Resolver tareas", imagen: "Crear imágenes" };
-  const ejemplos = {
-    chat:    ["¿Qué es la inteligencia artificial?", "¿Cómo funciona el internet?", "Explícame la economía"],
-    resumen: ["[Pega aquí cualquier artículo, documento o texto largo]"],
-    ideas:   ["Ideas para un negocio de ropa", "Ideas para mi canal de YouTube", "Ideas para decorar mi cuarto"],
-    tarea:   ["Explícame la Segunda Guerra Mundial", "¿Cómo se resuelve una ecuación?", "Resúmeme el libro de Romeo y Julieta"],
-    imagen:  ["Un gato astronauta en el espacio", "Ciudad futurista al atardecer", "Logo minimalista de una cafetería"]
+  // Cambiar placeholder según modo
+  const placeholders = {
+    chat: "Escribe un mensaje...",
+    resumen: "Pega el texto que quieres resumir...",
+    ideas: "¿Sobre qué tema quieres ideas?",
+    tarea: "¿Qué tema o tarea necesitas explicar?",
+    imagen: "Describe la imagen que quieres crear..."
   };
-
-  const card = document.createElement("div");
-  card.id = "modeHintCard";
-  card.style.cssText = `
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin: 8px 0;
-    animation: fadeUp 0.3s ease;
-  `;
-
-  const ejs = (ejemplos[m] || []).map(e =>
-    `<span onclick="document.getElementById('input').value='${e.replace(/'/g,"\'")}'; document.getElementById('input').focus();"
-      style="display:inline-block; background:var(--surface); border:1px solid var(--border); border-radius:20px;
-             padding:5px 12px; font-size:0.72rem; color:var(--muted); cursor:pointer; margin:3px 4px 3px 0;
-             transition:all 0.2s;"
-      onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
-      onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'"
-    >${e}</span>`
-  ).join("");
-
-  card.innerHTML = `
-    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-      <span style="font-size:1.2rem;">${iconos[m]}</span>
-      <span style="font-size:0.85rem; font-weight:600; color:var(--text);">${titulos[m]}</span>
-    </div>
-    <div style="font-size:0.75rem; color:var(--muted); margin-bottom:8px;">${hint.hint}</div>
-    ${ejs ? `<div style="font-size:0.72rem; color:var(--muted); margin-bottom:4px;">Ejemplos (click para usar):</div>${ejs}` : ""}
-  `;
-
-  const messages = document.getElementById("messages");
-  messages.innerHTML = "";  // limpiar mensajes al cambiar modo
-  messages.appendChild(card);
-}
+  document.getElementById("input").placeholder = placeholders[m] || "Escribe un mensaje...";
+};
 
 // ── Mensajes ──
 function addMessage(text, role, extra = "") {
@@ -2221,27 +2132,6 @@ window.send = async () => {
   // Verificar límite del modo actual
   if (limiteAlcanzado(mode)) {
     showPaywall();
-    return;
-  }
-
-  // Validación de contenido por modo
-  const validacion = MODO_VALIDACION[mode];
-  if (validacion && validacion.errorMsg && text.length < validacion.minLen) {
-    addMessage(validacion.errorMsg, "bot");
-    sendBtn.disabled = false;
-    return;
-  }
-
-  // Detectar si el mensaje pertenece a otro modo
-  const avisoModo = detectarModoIncorrecto(text, mode);
-  if (avisoModo) {
-    const div = document.createElement("div");
-    div.className = "msg bot";
-    div.style.borderStyle = "dashed";
-    div.innerHTML = avisoModo;
-    document.getElementById("messages").appendChild(div);
-    document.getElementById("messages").scrollTop = 9999;
-    input.value = text; // devolver el texto al input
     return;
   }
 
