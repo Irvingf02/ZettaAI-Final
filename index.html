@@ -2280,7 +2280,7 @@ window.payPremium = async (plan) => {
   };
 
   try {
-    const res = await fetch(`${BACKEND_URL}/play`, {
+    const res = await fetch(`${BACKEND_URL}/pay`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",

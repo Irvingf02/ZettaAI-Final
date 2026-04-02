@@ -397,7 +397,7 @@ app.post("/imagen", async (req, res) => {
 });
 
 // ── 13. CREAR SESIÓN DE PAGO ──────────────────────────────────────────────────
-app.post("/play", async (req, res) => {
+app.post("/pay", async (req, res) => {
   const { email, userId, plan } = req.body;
 
   if (!email || !userId) {
