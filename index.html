@@ -1530,6 +1530,136 @@
     cursor: pointer;
   }
   .feedback-send-btn.ready:hover { background: #33DDFF; transform: translateY(-1px); }
+
+  /* ── MODAL AYUDA ─────────────────────────────────────────────────────────── */
+  #helpModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  #helpModal.show { display: flex; }
+
+  .help-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    animation: fadeUp 0.25s ease;
+    overflow: hidden;
+  }
+
+  .help-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .help-top h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .help-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.15s;
+  }
+  .help-close:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+  .help-body {
+    overflow-y: auto;
+    flex: 1;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .help-section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    margin-top: 4px;
+  }
+
+  .help-article {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    color: var(--text);
+  }
+  .help-article:hover { background: rgba(255,255,255,0.05); }
+
+  .help-article-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--accent);
+  }
+
+  .help-article-text {
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .help-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 8px 0;
+  }
+
+  .help-feedback-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    color: var(--text);
+    font-size: 0.88rem;
+  }
+  .help-feedback-btn:hover { background: rgba(255,255,255,0.05); }
+  .help-feedback-btn .hf-icon { font-size: 1rem; color: var(--muted); flex-shrink: 0; }
 </style>
 
 
@@ -1728,6 +1858,56 @@
   </div>
 </div>
 
+<!-- MODAL AYUDA -->
+<div id="helpModal">
+  <div class="help-card">
+    <div class="help-top">
+      <h3>Ayuda</h3>
+      <button class="help-close" onclick="closeHelp()">✕</button>
+    </div>
+    <div class="help-body">
+      <div class="help-section-title">Recursos de ayuda populares</div>
+
+      <button class="help-article" onclick="helpArticle('modos')">
+        <span class="help-article-icon">📄</span>
+        <span class="help-article-text">Cómo usar los modos de ZettaxAI (Chat, Resumir, Ideas, Tarea, Imagen, Código)</span>
+      </button>
+
+      <button class="help-article" onclick="helpArticle('limites')">
+        <span class="help-article-icon">📄</span>
+        <span class="help-article-text">Límites de mensajes por día y cómo funcionan los planes</span>
+      </button>
+
+      <button class="help-article" onclick="helpArticle('historial')">
+        <span class="help-article-icon">📄</span>
+        <span class="help-article-text">Cómo administrar y borrar tu historial de conversaciones</span>
+      </button>
+
+      <button class="help-article" onclick="helpArticle('cuenta')">
+        <span class="help-article-icon">📄</span>
+        <span class="help-article-text">Cómo crear una cuenta, iniciar sesión y gestionar tu perfil</span>
+      </button>
+
+      <button class="help-article" onclick="helpArticle('premium')">
+        <span class="help-article-icon">📄</span>
+        <span class="help-article-text">Diferencias entre el plan gratuito y los planes GO, PLUS y ULTRA</span>
+      </button>
+
+      <hr class="help-divider">
+
+      <button class="help-feedback-btn" onclick="closeHelp(); sendFeedback();">
+        <span class="hf-icon">💬</span>
+        Enviar comentarios
+      </button>
+
+      <button class="help-feedback-btn" onclick="helpArticle('privacidad')">
+        <span class="hf-icon">🔒</span>
+        Privacidad
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL FEEDBACK -->
 <div id="feedbackModal">
   <div class="feedback-card">
@@ -1888,9 +2068,6 @@
   <hr class="settings-divider">
 
   <div class="settings-section-label">Ayuda</div>
-  <button class="settings-item" onclick="closeSettings();sendFeedback();">
-    <span class="s-icon">💬</span><span>Enviar comentarios</span>
-  </button>
   <button class="settings-item" onclick="closeSettings();showHelp();">
     <span class="s-icon">❓</span><span>Ayuda</span>
     <span class="s-arrow">›</span>
@@ -2511,7 +2688,77 @@ window.submitFeedback = function() {
 };
 
 window.showHelp = function() {
-  alert('❓ Ayuda ZettaxAI\n\n💬 Chat — Preguntas y consultas generales\n📝 Resumir — Pega textos para resumirlos\n💡 Ideas — Genera ideas creativas\n🎓 Tarea — Ayuda con tareas académicas\n🎨 Imagen — Crea imágenes con IA\n💻 Código — Escribe y depura código\n\n📧 Soporte: soporte@zettaxai.com');
+  document.getElementById("helpModal").classList.add("show");
+};
+
+window.closeHelp = function() {
+  document.getElementById("helpModal").classList.remove("show");
+};
+
+window.helpArticle = function(id) {
+  const articulos = {
+    modos: {
+      titulo: "Modos de ZettaxAI",
+      texto: "💬 Chat — Preguntas y consultas generales. Respuestas rápidas y directas.\n\n📝 Resumir — Pega cualquier texto largo y obtén un resumen claro y conciso.\n\n💡 Ideas — Escribe un tema y recibe ideas creativas y originales al instante.\n\n🎓 Tarea — Explica conceptos académicos o resuelve dudas escolares paso a paso.\n\n🎨 Imagen — Describe lo que quieres crear y la IA generará una imagen única.\n\n💻 Código — Escribe, explica y depura código en cualquier lenguaje."
+    },
+    limites: {
+      titulo: "Límites y planes",
+      texto: "Plan gratuito:\n• 20 chats / día\n• 10 resúmenes / día\n• 20 ideas / día\n• 15 tareas / día\n• 5 imágenes / día\n• 10 consultas de código / día (máx. 50 líneas)\n\nPlan GO ($100/mes): Mensajes ilimitados, 20 imágenes/día, hasta 150 líneas de código.\n\nPlan PLUS ($250/mes): Todo de GO + 50 imágenes/día, hasta 300 líneas, respuestas más largas.\n\nPlan ULTRA ($500/mes): Todo ilimitado + soporte 24/7 dedicado."
+    },
+    historial: {
+      titulo: "Historial de conversaciones",
+      texto: "Puedes ver, buscar y eliminar tus conversaciones desde el menú ⚙️ → Actividad.\n\nTambién puedes descargar todo tu historial en formato .txt desde esa misma sección.\n\nNota: los usuarios invitados (sin cuenta) no tienen historial guardado."
+    },
+    cuenta: {
+      titulo: "Cuenta y perfil",
+      texto: "Puedes registrarte con correo y contraseña, o iniciar sesión rápidamente con Google.\n\nTambién puedes usar ZettaxAI como invitado sin crear una cuenta, aunque con funciones limitadas y sin historial.\n\nPara cambiar tu foto o nombre, toca tu avatar en la parte superior derecha."
+    },
+    premium: {
+      titulo: "Planes Premium",
+      texto: "El plan gratuito tiene límites diarios por función. Si alcanzas el límite, espera hasta el día siguiente o actualiza tu plan.\n\nCon cualquier plan de pago (GO, PLUS o ULTRA) obtienes mensajes ilimitados y acceso extendido a imágenes y código.\n\nEl pago es mensual y se procesa de forma segura con Stripe."
+    },
+    privacidad: {
+      titulo: "Privacidad",
+      texto: "ZettaxAI solo almacena lo necesario para ofrecerte el servicio: tu email, plan activo y el historial de chats (si tienes cuenta).\n\nNo vendemos ni compartimos tus datos con terceros para publicidad.\n\nPuedes borrar todo tu historial en cualquier momento desde ⚙️ → Actividad → Borrar todo.\n\nPara más información escríbenos a: soporte@zettaxai.com"
+    }
+  };
+
+  const art = articulos[id];
+  if (!art) return;
+
+  closeHelp();
+
+  // Mostrar en modal reutilizando el de ayuda con contenido del artículo
+  const modal = document.getElementById("helpModal");
+  const body  = modal.querySelector(".help-body");
+  const title = modal.querySelector(".help-top h3");
+
+  // Guardar contenido original
+  if (!modal.dataset.originalContent) {
+    modal.dataset.originalContent = body.innerHTML;
+    modal.dataset.originalTitle   = title.textContent;
+  }
+
+  title.textContent = art.titulo;
+  body.innerHTML = `
+    <button class="help-feedback-btn" onclick="restoreHelpHome()" style="margin-bottom:8px; color:var(--accent);">
+      <span class="hf-icon">←</span> Volver a Ayuda
+    </button>
+    <div style="font-size:0.88rem; color:var(--text); line-height:1.8; white-space:pre-wrap;">${art.texto}</div>
+  `;
+  modal.classList.add("show");
+};
+
+window.restoreHelpHome = function() {
+  const modal = document.getElementById("helpModal");
+  const body  = modal.querySelector(".help-body");
+  const title = modal.querySelector(".help-top h3");
+  if (modal.dataset.originalContent) {
+    body.innerHTML    = modal.dataset.originalContent;
+    title.textContent = modal.dataset.originalTitle;
+    delete modal.dataset.originalContent;
+    delete modal.dataset.originalTitle;
+  }
 };
 
 async function loadChatHistory() {
