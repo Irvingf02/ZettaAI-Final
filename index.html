@@ -1660,6 +1660,190 @@
   }
   .help-feedback-btn:hover { background: rgba(255,255,255,0.05); }
   .help-feedback-btn .hf-icon { font-size: 1rem; color: var(--muted); flex-shrink: 0; }
+
+  /* ── MODAL APPS CONECTADAS ──────────────────────────────────────────────── */
+  #appsModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  #appsModal.show { display: flex; }
+
+  .apps-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 620px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    animation: fadeUp 0.25s ease;
+    overflow: hidden;
+  }
+
+  .apps-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .apps-top h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+
+  .apps-close {
+    background: none; border: none; color: var(--muted);
+    font-size: 1.1rem; cursor: pointer; width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; transition: background 0.15s;
+  }
+  .apps-close:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+  .apps-subtitle {
+    padding: 12px 24px 0;
+    font-size: 0.82rem;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .apps-subtitle a { color: var(--accent); text-decoration: none; }
+  .apps-subtitle a:hover { text-decoration: underline; }
+
+  .apps-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 14px 24px 0;
+    flex-shrink: 0;
+  }
+
+  .apps-tab {
+    padding: 7px 18px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .apps-tab.active {
+    background: var(--surface);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .apps-tab:hover:not(.active) { border-color: var(--text); color: var(--text); }
+
+  .apps-body {
+    overflow-y: auto;
+    flex: 1;
+    padding: 18px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .apps-section-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .apps-group-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .apps-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .apps-group-icons { display: flex; gap: 4px; align-items: center; }
+
+  .apps-group-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; background: var(--card);
+  }
+
+  .apps-group-info { flex: 1; padding: 0 14px; }
+  .apps-group-name { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .apps-group-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
+
+  /* Toggle switch */
+  .apps-toggle {
+    position: relative;
+    width: 44px; height: 24px; flex-shrink: 0;
+  }
+  .apps-toggle input { opacity: 0; width: 0; height: 0; }
+  .apps-toggle-slider {
+    position: absolute; inset: 0;
+    background: var(--border);
+    border-radius: 24px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .apps-toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .apps-toggle input:checked + .apps-toggle-slider { background: var(--accent); }
+  .apps-toggle input:checked + .apps-toggle-slider::before { transform: translateX(20px); }
+
+  .apps-subgrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .apps-sub-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 18px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .apps-sub-item:nth-child(even) { border-right: none; }
+  .apps-sub-item:nth-last-child(-n+2) { border-bottom: none; }
+
+  .apps-sub-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+
+  .apps-sub-info { flex: 1; min-width: 0; }
+  .apps-sub-name { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+  .apps-sub-handle { font-size: 0.72rem; color: var(--muted); margin-bottom: 2px; }
+  .apps-sub-link { font-size: 0.72rem; color: var(--accent); text-decoration: none; cursor: pointer; }
+  .apps-sub-link:hover { text-decoration: underline; }
+
+  @media (max-width: 480px) {
+    .apps-subgrid { grid-template-columns: 1fr; }
+    .apps-sub-item { border-right: none; }
+    .apps-sub-item:nth-last-child(-n+2) { border-bottom: 1px solid var(--border); }
+    .apps-sub-item:last-child { border-bottom: none; }
+  }
 </style>
 
 
@@ -1830,6 +2014,26 @@
 
 </div><!-- fin #appDiv -->
 
+
+<!-- MODAL APPS CONECTADAS -->
+<div id="appsModal">
+  <div class="apps-card">
+    <div class="apps-top">
+      <h3>Apps conectadas</h3>
+      <button class="apps-close" onclick="closeConnectedApps()">✕</button>
+    </div>
+    <div class="apps-subtitle">
+      Conecta tus apps favoritas para obtener ayuda más inteligente. <a href="#" onclick="return false;">Más información</a>
+    </div>
+    <div class="apps-tabs">
+      <button class="apps-tab active" id="tab-zettax" onclick="switchAppsTab('zettax')">De ZettaxAI</button>
+      <button class="apps-tab" id="tab-otras" onclick="switchAppsTab('otras')">Otras</button>
+    </div>
+    <div class="apps-body" id="appsBody">
+      <!-- contenido inyectado por JS -->
+    </div>
+  </div>
+</div>
 
 <!-- MODAL DE ACTIVIDAD -->
 <div id="activityModal">
@@ -2618,7 +2822,155 @@ window.downloadHistory = async function() {
 }
 
 window.showConnectedApps = function() {
-  alert('🔗 Aplicaciones conectadas:\n\n✅ Firebase Auth\n✅ OpenAI GPT-4\n✅ DALL-E 3\n✅ Stripe Pagos\n\nPróximamente: Google Drive, Notion, Slack');
+  closeSettings();
+  switchAppsTab('zettax');
+  document.getElementById("appsModal").classList.add("show");
+};
+
+window.closeConnectedApps = function() {
+  document.getElementById("appsModal").classList.remove("show");
+};
+
+const APPS_DATA = {
+  zettax: [
+    {
+      groupName: "ZettaxAI Suite",
+      groupDesc: "Potencia tu experiencia conectando las herramientas integradas de ZettaxAI",
+      groupIcons: ["🤖", "🎨", "💻"],
+      toggleId: "toggle-suite",
+      defaultOn: true,
+      subApps: [
+        { icon: "🎨", name: "Generador de Imágenes", handle: "@ZettaxImagen", link: true },
+        { icon: "💻", name: "Asistente de Código", handle: "@ZettaxCódigo", link: true },
+        { icon: "📝", name: "Resumidor Pro", handle: "@ZettaxResumen", link: true },
+        { icon: "💡", name: "Ideas Creator", handle: "@ZettaxIdeas", link: true },
+      ]
+    },
+    {
+      groupName: "Firebase",
+      groupDesc: "Autenticación y base de datos en tiempo real para tus conversaciones",
+      groupIcons: ["🔥"],
+      toggleId: "toggle-firebase",
+      defaultOn: true,
+      subApps: [
+        { icon: "🔑", name: "Firebase Auth", handle: "@Auth", link: false },
+        { icon: "🗄️", name: "Firestore DB", handle: "@Firestore", link: false },
+      ]
+    },
+    {
+      groupName: "Stripe Pagos",
+      groupDesc: "Gestiona tu suscripción y métodos de pago de forma segura",
+      groupIcons: ["💳"],
+      toggleId: "toggle-stripe",
+      defaultOn: true,
+      subApps: [
+        { icon: "💳", name: "Stripe Checkout", handle: "@Stripe", link: false },
+        { icon: "🔔", name: "Webhooks", handle: "@StripeWebhooks", link: false },
+      ]
+    }
+  ],
+  otras: [
+    {
+      groupName: "Google Workspace",
+      groupDesc: "Resume, encuentra y obtén respuestas rápidas a partir de tus documentos",
+      groupIcons: ["📅", "✉️", "📄"],
+      toggleId: "toggle-gworkspace",
+      defaultOn: false,
+      badge: "Próximamente",
+      subApps: [
+        { icon: "📅", name: "Google Calendar", handle: "@Calendar", link: false },
+        { icon: "✉️", name: "Gmail", handle: "@Gmail", link: false },
+        { icon: "📄", name: "Google Docs", handle: "@Docs", link: false },
+        { icon: "🗂️", name: "Google Drive", handle: "@Drive", link: false },
+      ]
+    },
+    {
+      groupName: "Notion",
+      groupDesc: "Accede y organiza tus notas y bases de datos de Notion con IA",
+      groupIcons: ["📓"],
+      toggleId: "toggle-notion",
+      defaultOn: false,
+      badge: "Próximamente",
+      subApps: [
+        { icon: "📓", name: "Notion Pages", handle: "@Notion", link: false },
+        { icon: "🗃️", name: "Notion Databases", handle: "@NotionDB", link: false },
+      ]
+    },
+    {
+      groupName: "Slack",
+      groupDesc: "Busca y resume conversaciones y canales de tu workspace",
+      groupIcons: ["💬"],
+      toggleId: "toggle-slack",
+      defaultOn: false,
+      badge: "Próximamente",
+      subApps: [
+        { icon: "💬", name: "Slack Mensajes", handle: "@Slack", link: false },
+        { icon: "📢", name: "Slack Canales", handle: "@SlackChannels", link: false },
+      ]
+    }
+  ]
+};
+
+window.switchAppsTab = function(tab) {
+  document.getElementById("tab-zettax").classList.toggle("active", tab === "zettax");
+  document.getElementById("tab-otras").classList.toggle("active",  tab === "otras");
+
+  const body = document.getElementById("appsBody");
+  const groups = APPS_DATA[tab];
+  body.innerHTML = `<div class="apps-section-title">${tab === "zettax" ? "De ZettaxAI" : "Otras aplicaciones"}</div>`;
+
+  groups.forEach(g => {
+    const checked = g.defaultOn ? "checked" : "";
+    const disabled = g.badge ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "";
+    const badgeHtml = g.badge ? `<span style="font-size:0.6rem;background:var(--accent);color:#000;padding:2px 8px;border-radius:10px;font-weight:700;margin-left:8px;">${g.badge}</span>` : "";
+
+    const subHtml = g.subApps.map((s, i) => `
+      <div class="apps-sub-item">
+        <div class="apps-sub-icon">${s.icon}</div>
+        <div class="apps-sub-info">
+          <div class="apps-sub-name">${s.name}</div>
+          <div class="apps-sub-handle">${s.handle}</div>
+          ${s.link ? `<span class="apps-sub-link">Más información</span>` : ""}
+        </div>
+      </div>
+    `).join("");
+
+    const iconsHtml = g.groupIcons.map(ic => `<div class="apps-group-icon">${ic}</div>`).join("");
+
+    body.innerHTML += `
+      <div class="apps-group-card">
+        <div class="apps-group-header">
+          <div class="apps-group-icons">${iconsHtml}</div>
+          <div class="apps-group-info">
+            <div class="apps-group-name">${g.groupName}${badgeHtml}</div>
+            <div class="apps-group-desc">${g.groupDesc}</div>
+          </div>
+          <label class="apps-toggle">
+            <input type="checkbox" ${checked} ${disabled} onchange="toggleApp('${g.toggleId}', this.checked)">
+            <span class="apps-toggle-slider"></span>
+          </label>
+        </div>
+        <div class="apps-subgrid">${subHtml}</div>
+      </div>
+    `;
+  });
+};
+
+window.toggleApp = function(id, on) {
+  const labels = {
+    "toggle-suite":      "ZettaxAI Suite",
+    "toggle-firebase":   "Firebase",
+    "toggle-stripe":     "Stripe Pagos",
+    "toggle-gworkspace": "Google Workspace",
+    "toggle-notion":     "Notion",
+    "toggle-slack":      "Slack"
+  };
+  const name = labels[id] || id;
+  const toast = document.createElement("div");
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 22px;border-radius:20px;font-size:0.82rem;z-index:9999;animation:fadeUp 0.3s ease;";
+  toast.textContent = on ? `✅ ${name} conectada` : `🔌 ${name} desconectada`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2500);
 };
 
 window.toggleTheme = function() {
