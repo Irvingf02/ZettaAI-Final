@@ -1359,6 +1359,177 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  /* ── MODAL FEEDBACK ─────────────────────────────────────────────────────── */
+  #feedbackModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  #feedbackModal.show { display: flex; }
+
+  .feedback-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    width: 100%;
+    max-width: 460px;
+    animation: fadeUp 0.25s ease;
+    overflow: hidden;
+  }
+
+  .feedback-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .feedback-top h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .feedback-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.15s;
+  }
+  .feedback-close:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+  .feedback-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .feedback-label {
+    font-size: 0.82rem;
+    color: var(--text);
+    font-weight: 500;
+    margin-bottom: -6px;
+  }
+
+  .feedback-textarea {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    width: 100%;
+    resize: vertical;
+    min-height: 110px;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.5;
+  }
+  .feedback-textarea:focus { border-color: var(--accent); }
+  .feedback-textarea::placeholder { color: var(--muted); }
+
+  .feedback-hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: -6px;
+  }
+
+  .feedback-screenshot-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .feedback-screenshot-btn:hover { background: rgba(0,212,255,0.07); border-color: var(--accent); }
+  .feedback-screenshot-btn.captured { border-color: var(--success); color: var(--success); }
+
+  .feedback-check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.4;
+    cursor: pointer;
+  }
+
+  .feedback-check-row input[type="checkbox"] {
+    margin-top: 2px;
+    accent-color: var(--accent);
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .feedback-legal {
+    font-size: 0.7rem;
+    color: var(--muted);
+    line-height: 1.6;
+    padding: 0 20px 4px;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+
+  .feedback-legal a { color: var(--accent); text-decoration: none; }
+  .feedback-legal a:hover { text-decoration: underline; }
+
+  .feedback-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .feedback-send-btn {
+    padding: 9px 26px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: not-allowed;
+    transition: all 0.2s;
+  }
+  .feedback-send-btn.ready {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    cursor: pointer;
+  }
+  .feedback-send-btn.ready:hover { background: #33DDFF; transform: translateY(-1px); }
 </style>
 
 
@@ -1553,6 +1724,35 @@
     <div class="activity-footer">
       <button class="activity-btn" onclick="downloadHistory()">⬇️ Descargar historial</button>
       <button class="activity-btn danger" onclick="deleteAllChats()">🗑️ Borrar todo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FEEDBACK -->
+<div id="feedbackModal">
+  <div class="feedback-card">
+    <div class="feedback-top">
+      <h3>Enviar comentarios a ZettaxAI</h3>
+      <button class="feedback-close" onclick="closeFeedback()">✕</button>
+    </div>
+    <div class="feedback-body">
+      <div class="feedback-label">Describe tus comentarios <span>(obligatorio)</span></div>
+      <textarea class="feedback-textarea" id="feedbackText" placeholder="Cuéntanos la razón de estos comentarios..." oninput="checkFeedbackReady()"></textarea>
+      <div class="feedback-hint">⚠️ No incluyas información sensible</div>
+      <div style="font-size:0.8rem; color:var(--muted); line-height:1.4;">Una captura de pantalla nos ayudará a entender mejor tus comentarios.</div>
+      <button class="feedback-screenshot-btn" id="screenshotBtn" onclick="captureScreenshot()">
+        <span>🖼️</span> Tomar captura de pantalla
+      </button>
+      <label class="feedback-check-row">
+        <input type="checkbox" id="feedbackEmailCheck">
+        Es posible que recibas correos electrónicos con más información o actualizaciones
+      </label>
+    </div>
+    <div class="feedback-legal">
+      Es posible que se envíe información de la cuenta y del sistema. La usaremos para solucionar problemas y mejorar nuestros servicios, de conformidad con nuestra <a href="#" onclick="return false;">Política de Privacidad</a> y las <a href="#" onclick="return false;">Condiciones del Servicio</a>.
+    </div>
+    <div class="feedback-footer">
+      <button class="feedback-send-btn" id="feedbackSendBtn" onclick="submitFeedback()">Enviar</button>
     </div>
   </div>
 </div>
@@ -2273,10 +2473,41 @@ window.showPublicLinks = function() {
 };
 
 window.sendFeedback = function() {
-  const fb = prompt('💬 ¿Qué piensas de ZettaxAI? Tu opinión nos ayuda a mejorar:');
-  if (fb && fb.trim()) {
-    alert('¡Gracias por tu comentario! Lo hemos recibido. 🙏');
-  }
+  document.getElementById("feedbackText").value = "";
+  document.getElementById("feedbackEmailCheck").checked = false;
+  document.getElementById("feedbackSendBtn").classList.remove("ready");
+  const btn = document.getElementById("screenshotBtn");
+  btn.classList.remove("captured");
+  btn.innerHTML = '<span>🖼️</span> Tomar captura de pantalla';
+  document.getElementById("feedbackModal").classList.add("show");
+};
+
+window.closeFeedback = function() {
+  document.getElementById("feedbackModal").classList.remove("show");
+};
+
+window.checkFeedbackReady = function() {
+  const txt = document.getElementById("feedbackText").value.trim();
+  const btn = document.getElementById("feedbackSendBtn");
+  btn.classList.toggle("ready", txt.length > 0);
+};
+
+window.captureScreenshot = function() {
+  const btn = document.getElementById("screenshotBtn");
+  btn.classList.add("captured");
+  btn.innerHTML = '<span>✅</span> Captura lista para adjuntar';
+};
+
+window.submitFeedback = function() {
+  const txt = document.getElementById("feedbackText").value.trim();
+  if (!txt) return;
+  closeFeedback();
+  // Mostrar confirmación tipo toast
+  const toast = document.createElement("div");
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--success);color:#000;padding:10px 22px;border-radius:20px;font-size:0.85rem;font-weight:600;z-index:9999;animation:fadeUp 0.3s ease;";
+  toast.textContent = "✅ ¡Gracias por tus comentarios!";
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
 };
 
 window.showHelp = function() {
