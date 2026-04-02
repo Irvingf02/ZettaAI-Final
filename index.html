@@ -2053,10 +2053,10 @@ window.showActivity = async function() {
           item.className = "activity-chat-item";
           item.innerHTML = \`
             <span style="font-size:1rem;">💬</span>
-            <span class="chat-title">\${titulo}</span>
-            <span class="chat-date">\${fecha}</span>
-            <button class="chat-delete" title="Borrar" onclick="deleteSingleChat('\${docSnap.id}', event)">🗑️</button>
-          \`;
+            <span class="chat-title">${titulo}</span>
+            <span class="chat-date">${fecha}</span>
+            <button class="chat-delete" title="Borrar" onclick="deleteSingleChat('${docSnap.id}', event)">🗑️</button>
+          `;
           item.onclick = (e) => {
             if (e.target.classList.contains("chat-delete")) return;
             loadSpecificChat(docSnap.id, data.messages || []);
@@ -2117,9 +2117,9 @@ window.downloadHistory = async function() {
     snap.forEach(d => {
       const data = d.data();
       const fecha = data.timestamp?.toDate ? data.timestamp.toDate().toLocaleString("es-MX") : "Sin fecha";
-      texto += \`--- \${data.title || "Chat"} (\${fecha}) ---\n\`;
+      texto += \`--- \${data.title || "Chat"} (${fecha}) ---\n`;
       (data.messages || []).forEach(m => {
-        texto += \`\${m.role === "user" ? "Tú" : "ZettaxAI"}: \${m.content}\n\`;
+        texto += \`\${m.role === "user" ? "Tú" : "ZettaxAI"}: \${m.content}\n`;
       });
       texto += "\n";
     });
