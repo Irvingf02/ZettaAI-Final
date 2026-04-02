@@ -2280,7 +2280,7 @@ window.payPremium = async (plan) => {
   };
 
   try {
-    const res = await fetch(`${BACKEND_URL}/create-checkout-session`, {
+    const res = await fetch(`${BACKEND_URL}/play`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
