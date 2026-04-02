@@ -7,9 +7,14 @@
   "theme_color": "#00D4FF",
   "icons": [
     {
-      "src": "https://tu-url.com/logo192.png",
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMTkyIDE5MiI+CiAgPHJlY3Qgd2lkdGg9IjE5MiIgaGVpZ2h0PSIxOTIiIHJ4PSIzMiIgZmlsbD0iIzBFMTExNyIvPgogIDx0ZXh0IHg9Ijk2IiB5PSIxMjAiIGZvbnQtZmFtaWx5PSJBcmlhbCBCbGFjaywgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMDAiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMwMEQ0RkYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlo8L3RleHQ+Cjwvc3ZnPg==",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSI4MCIgZmlsbD0iIzBFMTExNyIvPgogIDx0ZXh0IHg9IjI1NiIgeT0iMzIwIiBmb250LWZhbWlseT0iQXJpYWwgQmxhY2ssIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjgwIiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjMDBENEZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5aPC90ZXh0Pgo8L3N2Zz4=",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
     }
   ]
 }
