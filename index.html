@@ -800,6 +800,44 @@
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+  /* ── MODAL DE ACTIVIDAD ─────────────────────────────────────────────────── */
+  #activityModal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+    z-index: 200; align-items: center; justify-content: center; padding: 16px;
+  }
+  #activityModal.show { display: flex; }
+  .activity-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+    width: 100%; max-width: 560px; max-height: 88vh;
+    display: flex; flex-direction: column; animation: fadeUp 0.3s ease; overflow: hidden;
+  }
+  .activity-header {
+    padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .activity-header h2 { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+  .activity-close { background: none; border: none; color: var(--muted); font-size: 1.2rem; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+  .activity-close:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+  .activity-body { overflow-y: auto; flex: 1; padding: 16px 24px; }
+  .activity-section-title { font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 8px; }
+  .activity-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
+  .activity-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; text-align: center; }
+  .activity-stat .stat-num { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+  .activity-stat .stat-label { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+  .activity-chat-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); margin-bottom: 6px; cursor: pointer; transition: background 0.2s; }
+  .activity-chat-item:hover { background: rgba(255,255,255,0.05); }
+  .activity-chat-item .chat-title { flex: 1; font-size: 0.82rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .activity-chat-item .chat-date { font-size: 0.65rem; color: var(--muted); white-space: nowrap; }
+  .activity-chat-item .chat-delete { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9rem; padding: 2px 6px; border-radius: 4px; opacity: 0; transition: opacity 0.2s; }
+  .activity-chat-item:hover .chat-delete { opacity: 1; }
+  .activity-chat-item .chat-delete:hover { color: var(--danger); }
+  .activity-footer { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-shrink: 0; }
+  .activity-btn { flex: 1; padding: 9px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+  .activity-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .activity-btn.danger { border-color: var(--danger); color: var(--danger); }
+  .activity-btn.danger:hover { background: rgba(255,77,106,0.1); }
+
  
 .app-container {
  display: flex;
@@ -1429,6 +1467,34 @@
 
 </div><!-- fin #appDiv -->
 
+
+<!-- MODAL DE ACTIVIDAD -->
+<div id="activityModal">
+  <div class="activity-card">
+    <div class="activity-header">
+      <h2>📊 Mi Actividad</h2>
+      <button class="activity-close" onclick="closeActivity()">✕</button>
+    </div>
+    <div class="activity-body">
+      <div class="activity-section-title">Uso de hoy</div>
+      <div class="activity-stat-grid">
+        <div class="activity-stat"><div class="stat-num" id="act-chat">0</div><div class="stat-label">💬 Chat</div></div>
+        <div class="activity-stat"><div class="stat-num" id="act-resumen">0</div><div class="stat-label">📝 Resúmenes</div></div>
+        <div class="activity-stat"><div class="stat-num" id="act-ideas">0</div><div class="stat-label">💡 Ideas</div></div>
+        <div class="activity-stat"><div class="stat-num" id="act-tarea">0</div><div class="stat-label">🎓 Tareas</div></div>
+        <div class="activity-stat"><div class="stat-num" id="act-imagen">0</div><div class="stat-label">🎨 Imágenes</div></div>
+        <div class="activity-stat"><div class="stat-num" id="act-codigo">0</div><div class="stat-label">💻 Código</div></div>
+      </div>
+      <div class="activity-section-title">Historial de conversaciones</div>
+      <div id="activity-chats-list"><p style="font-size:0.8rem;color:var(--muted);">Cargando...</p></div>
+    </div>
+    <div class="activity-footer">
+      <button class="activity-btn" onclick="downloadHistory()">⬇️ Descargar historial</button>
+      <button class="activity-btn danger" onclick="deleteAllChats()">🗑️ Borrar todo</button>
+    </div>
+  </div>
+</div>
+
 <!-- PAYWALL MODAL -->
 <div id="paywallModal">
   <div class="modal-card" style="max-width:620px; padding:24px 16px;">
@@ -1579,6 +1645,8 @@ import {
   orderBy,
   getDocs,
   limit,
+  deleteDoc,
+  writeBatch,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -1950,20 +2018,120 @@ window.closeSettings = function() {
   document.getElementById('settingsOverlay').classList.remove('show');
 };
 
-window.showActivity = function() {
-  const msg = [
-    '📊 Tu actividad de hoy (' + fechaHoy + '):',
-    '💬 Chat: ' + (contadores.chat || 0) + ' mensajes',
-    '📝 Resúmenes: ' + (contadores.resumen || 0),
-    '💡 Ideas: ' + (contadores.ideas || 0),
-    '🎓 Tareas: ' + (contadores.tarea || 0),
-    '🎨 Imágenes: ' + (contadores.imagen || 0),
-    '💻 Código: ' + (contadores.codigo || 0),
-    '',
-    'Plan actual: ' + userPlan.toUpperCase()
-  ].join('\n');
-  alert(msg);
+window.showActivity = async function() {
+  // Actualizar estadísticas
+  document.getElementById("act-chat").textContent    = contadores.chat    || 0;
+  document.getElementById("act-resumen").textContent = contadores.resumen || 0;
+  document.getElementById("act-ideas").textContent   = contadores.ideas   || 0;
+  document.getElementById("act-tarea").textContent   = contadores.tarea   || 0;
+  document.getElementById("act-imagen").textContent  = contadores.imagen  || 0;
+  document.getElementById("act-codigo").textContent  = contadores.codigo  || 0;
+
+  // Cargar historial de chats
+  const listEl = document.getElementById("activity-chats-list");
+  listEl.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);'>Cargando...</p>";
+
+  if (currentUser && !currentUser.isAnonymous) {
+    try {
+      const q = query(
+        collection(db, "chats"),
+        where("userId", "==", currentUser.uid),
+        orderBy("timestamp", "desc"),
+        limit(50)
+      );
+      const snap = await getDocs(q);
+      listEl.innerHTML = "";
+
+      if (snap.empty) {
+        listEl.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);'>No hay conversaciones aún.</p>";
+      } else {
+        snap.forEach((docSnap) => {
+          const data = docSnap.data();
+          const fecha = data.timestamp?.toDate ? data.timestamp.toDate().toLocaleDateString("es-MX") : "";
+          const titulo = (data.title || "Chat sin título").substring(0, 45);
+          const item = document.createElement("div");
+          item.className = "activity-chat-item";
+          item.innerHTML = \`
+            <span style="font-size:1rem;">💬</span>
+            <span class="chat-title">\${titulo}</span>
+            <span class="chat-date">\${fecha}</span>
+            <button class="chat-delete" title="Borrar" onclick="deleteSingleChat('\${docSnap.id}', event)">🗑️</button>
+          \`;
+          item.onclick = (e) => {
+            if (e.target.classList.contains("chat-delete")) return;
+            loadSpecificChat(docSnap.id, data.messages || []);
+            closeActivity();
+          };
+          listEl.appendChild(item);
+        });
+      }
+    } catch (e) {
+      listEl.innerHTML = "<p style='color:var(--danger);font-size:0.8rem;'>Error al cargar historial.</p>";
+    }
+  } else {
+    listEl.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);'>Inicia sesión para ver tu historial.</p>";
+  }
+
+  document.getElementById("activityModal").classList.add("show");
 };
+
+window.closeActivity = function() {
+  document.getElementById("activityModal").classList.remove("show");
+};
+
+window.deleteSingleChat = async function(chatId, event) {
+  event.stopPropagation();
+  if (!confirm("¿Borrar esta conversación?")) return;
+  try {
+    await deleteDoc(doc(db, "chats", chatId));
+    // Quitar del DOM
+    event.target.closest(".activity-chat-item").remove();
+  } catch (e) {
+    alert("Error al borrar: " + e.message);
+  }
+};
+
+window.deleteAllChats = async function() {
+  if (!confirm("¿Borrar TODAS tus conversaciones? Esta acción no se puede deshacer.")) return;
+  if (!currentUser) return;
+  try {
+    const q = query(collection(db, "chats"), where("userId", "==", currentUser.uid));
+    const snap = await getDocs(q);
+    const batch = writeBatch(db);
+    snap.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+    document.getElementById("activity-chats-list").innerHTML = "<p style='font-size:0.8rem;color:var(--muted);'>No hay conversaciones aún.</p>";
+    chatHistory = [];
+    document.getElementById("messages").innerHTML = "";
+  } catch (e) {
+    alert("Error al borrar: " + e.message);
+  }
+};
+
+window.downloadHistory = async function() {
+  if (!currentUser) return;
+  try {
+    const q = query(collection(db, "chats"), where("userId", "==", currentUser.uid), orderBy("timestamp", "desc"));
+    const snap = await getDocs(q);
+    let texto = "=== Historial ZettaxAI ===\n\n";
+    snap.forEach(d => {
+      const data = d.data();
+      const fecha = data.timestamp?.toDate ? data.timestamp.toDate().toLocaleString("es-MX") : "Sin fecha";
+      texto += \`--- \${data.title || "Chat"} (\${fecha}) ---\n\`;
+      (data.messages || []).forEach(m => {
+        texto += \`\${m.role === "user" ? "Tú" : "ZettaxAI"}: \${m.content}\n\`;
+      });
+      texto += "\n";
+    });
+    const blob = new Blob([texto], { type: "text/plain;charset=utf-8" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = "historial-zettaxai.txt";
+    a.click(); URL.revokeObjectURL(url);
+  } catch (e) {
+    alert("Error al descargar: " + e.message);
+  }
+}
 
 window.showConnectedApps = function() {
   alert('🔗 Aplicaciones conectadas:\n\n✅ Firebase Auth\n✅ OpenAI GPT-4\n✅ DALL-E 3\n✅ Stripe Pagos\n\nPróximamente: Google Drive, Notion, Slack');
