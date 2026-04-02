@@ -6,7 +6,7 @@
   "main": "scripts.js",
   "scripts": {
     "start": "node scripts.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch scripts.js"
   },
   "dependencies": {
     "body-parser": "^1.20.2",
