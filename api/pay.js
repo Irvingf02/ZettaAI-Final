@@ -42,20 +42,15 @@ export default async function handler(req, res) {
       });
     }
 
-    // Crear sesión — Google Pay se activa automáticamente, OXXO se agrega manualmente
+    // Crear sesión — Google Pay aparece automáticamente según el dispositivo
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card", "oxxo"],
+      payment_method_types: ["card"],
       mode:     "subscription",
       customer: customer.id,
       line_items: [{ price: priceId, quantity: 1 }],
       metadata: { userId, plan: selectedPlan, firebaseUID: userId },
       subscription_data: {
         metadata: { userId, plan: selectedPlan, firebaseUID: userId }
-      },
-      payment_method_options: {
-        oxxo: {
-          expires_after_days: 3
-        }
       },
       success_url: `${frontendUrl}?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${frontendUrl}?cancel=true`
