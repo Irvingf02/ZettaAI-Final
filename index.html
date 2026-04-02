@@ -2876,7 +2876,7 @@ const APPS_DATA = {
       groupIcons: ["📅", "✉️", "📄"],
       toggleId: "toggle-gworkspace",
       defaultOn: false,
-      badge: "Próximamente",
+      badge: "🔔 Únete",
       subApps: [
         { icon: "📅", name: "Google Calendar", handle: "@Calendar", link: false },
         { icon: "✉️", name: "Gmail", handle: "@Gmail", link: false },
@@ -2890,7 +2890,7 @@ const APPS_DATA = {
       groupIcons: ["📓"],
       toggleId: "toggle-notion",
       defaultOn: false,
-      badge: "Próximamente",
+      badge: "🔔 Únete",
       subApps: [
         { icon: "📓", name: "Notion Pages", handle: "@Notion", link: false },
         { icon: "🗃️", name: "Notion Databases", handle: "@NotionDB", link: false },
@@ -2902,7 +2902,7 @@ const APPS_DATA = {
       groupIcons: ["💬"],
       toggleId: "toggle-slack",
       defaultOn: false,
-      badge: "Próximamente",
+      badge: "🔔 Únete",
       subApps: [
         { icon: "💬", name: "Slack Mensajes", handle: "@Slack", link: false },
         { icon: "📢", name: "Slack Canales", handle: "@SlackChannels", link: false },
@@ -2917,61 +2917,165 @@ window.switchAppsTab = function(tab) {
 
   const body = document.getElementById("appsBody");
   const groups = APPS_DATA[tab];
-  body.innerHTML = `<div class="apps-section-title">${tab === "zettax" ? "De ZettaxAI" : "Otras aplicaciones"}</div>`;
+  body.innerHTML = '<div class="apps-section-title">' + (tab === "zettax" ? "De ZettaxAI" : "Otras aplicaciones") + '</div>';
 
-  groups.forEach(g => {
-    const checked = g.defaultOn ? "checked" : "";
-    const disabled = g.badge ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "";
-    const badgeHtml = g.badge ? `<span style="font-size:0.6rem;background:var(--accent);color:#000;padding:2px 8px;border-radius:10px;font-weight:700;margin-left:8px;">${g.badge}</span>` : "";
+  groups.forEach(function(g) {
+    const checked  = g.defaultOn ? "checked" : "";
+    const badgeHtml = g.badge
+      ? '<span style="font-size:0.6rem;background:rgba(245,166,35,0.15);color:var(--gold);border:1px solid var(--gold);padding:2px 8px;border-radius:10px;font-weight:700;margin-left:8px;">' + g.badge + '</span>'
+      : "";
 
-    const subHtml = g.subApps.map((s, i) => `
-      <div class="apps-sub-item">
-        <div class="apps-sub-icon">${s.icon}</div>
-        <div class="apps-sub-info">
-          <div class="apps-sub-name">${s.name}</div>
-          <div class="apps-sub-handle">${s.handle}</div>
-          ${s.link ? `<span class="apps-sub-link">Más información</span>` : ""}
-        </div>
-      </div>
-    `).join("");
+    const subHtml = g.subApps.map(function(s) {
+      return '<div class="apps-sub-item">'
+        + '<div class="apps-sub-icon">' + s.icon + '</div>'
+        + '<div class="apps-sub-info">'
+        + '<div class="apps-sub-name">' + s.name + '</div>'
+        + '<div class="apps-sub-handle">' + s.handle + '</div>'
+        + (s.link ? '<span class="apps-sub-link">Más información</span>' : "")
+        + '</div>'
+        + '</div>';
+    }).join("");
 
-    const iconsHtml = g.groupIcons.map(ic => `<div class="apps-group-icon">${ic}</div>`).join("");
+    const iconsHtml = g.groupIcons.map(function(ic) {
+      return '<div class="apps-group-icon">' + ic + '</div>';
+    }).join("");
 
-    body.innerHTML += `
-      <div class="apps-group-card">
-        <div class="apps-group-header">
-          <div class="apps-group-icons">${iconsHtml}</div>
-          <div class="apps-group-info">
-            <div class="apps-group-name">${g.groupName}${badgeHtml}</div>
-            <div class="apps-group-desc">${g.groupDesc}</div>
-          </div>
-          <label class="apps-toggle">
-            <input type="checkbox" ${checked} ${disabled} onchange="toggleApp('${g.toggleId}', this.checked)">
-            <span class="apps-toggle-slider"></span>
-          </label>
-        </div>
-        <div class="apps-subgrid">${subHtml}</div>
-      </div>
-    `;
+    body.innerHTML +=
+      '<div class="apps-group-card">'
+      + '<div class="apps-group-header">'
+      + '<div class="apps-group-icons">' + iconsHtml + '</div>'
+      + '<div class="apps-group-info">'
+      + '<div class="apps-group-name">' + g.groupName + badgeHtml + '</div>'
+      + '<div class="apps-group-desc">' + g.groupDesc + '</div>'
+      + '</div>'
+      + '<label class="apps-toggle">'
+      + '<input type="checkbox" ' + checked + ' onchange="toggleApp(\'' + g.toggleId + '\', this.checked)">'
+      + '<span class="apps-toggle-slider"></span>'
+      + '</label>'
+      + '</div>'
+      + '<div class="apps-subgrid">' + subHtml + '</div>'
+      + '</div>';
   });
 };
 
 window.toggleApp = function(id, on) {
-  const labels = {
-    "toggle-suite":      "ZettaxAI Suite",
-    "toggle-firebase":   "Firebase",
-    "toggle-stripe":     "Stripe Pagos",
-    "toggle-gworkspace": "Google Workspace",
-    "toggle-notion":     "Notion",
-    "toggle-slack":      "Slack"
+  const appInfo = {
+    "toggle-suite":      { name: "ZettaxAI Suite",    external: false },
+    "toggle-firebase":   { name: "Firebase",           external: false },
+    "toggle-stripe":     { name: "Stripe Pagos",       external: false },
+    "toggle-gworkspace": { name: "Google Workspace",   external: true,  icon: "🗂️", desc: "Conecta tu Google Calendar, Gmail, Docs y Drive para obtener respuestas más inteligentes." },
+    "toggle-notion":     { name: "Notion",             external: true,  icon: "📓", desc: "Accede y organiza tus notas y bases de datos de Notion directamente desde ZettaxAI." },
+    "toggle-slack":      { name: "Slack",              external: true,  icon: "💬", desc: "Busca y resume conversaciones y canales de tu workspace de Slack." }
   };
-  const name = labels[id] || id;
+
+  const info = appInfo[id] || { name: id, external: false };
+
+  if (on && info.external) {
+    // Mostrar modal de conexión
+    showAppConnectModal(id, info);
+    return;
+  }
+
+  if (!on && info.external) {
+    showToast(`🔌 ${info.name} desconectada`);
+    return;
+  }
+
+  showToast(on ? `✅ ${info.name} conectada` : `🔌 ${info.name} desconectada`);
+};
+
+function showAppConnectModal(toggleId, info) {
+  // Crear modal de conexión inline
+  const existing = document.getElementById("appConnectOverlay");
+  if (existing) existing.remove();
+
+  const overlay = document.createElement("div");
+  overlay.id = "appConnectOverlay";
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;";
+
+  overlay.innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;width:100%;max-width:380px;overflow:hidden;animation:fadeUp 0.25s ease;">
+      <div style="padding:20px 22px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:1rem;font-weight:700;color:var(--text);">${info.icon} Conectar ${info.name}</span>
+        <button onclick="cancelAppConnect('${toggleId}')" style="background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;">✕</button>
+      </div>
+      <div style="padding:20px 22px;">
+        <p style="font-size:0.85rem;color:var(--muted);line-height:1.6;margin-bottom:18px;">${info.desc}</p>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:18px;font-size:0.78rem;color:var(--muted);line-height:1.6;">
+          <div style="font-weight:600;color:var(--text);margin-bottom:6px;">Al conectar, ZettaxAI podrá:</div>
+          ✅ Leer y buscar en tu contenido<br>
+          ✅ Generar respuestas basadas en tus datos<br>
+          🔒 Nunca compartir tu información con terceros
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="cancelAppConnect('${toggleId}')" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.85rem;cursor:pointer;">Cancelar</button>
+          <button onclick="confirmAppConnect('${toggleId}','${info.name}')" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--accent);color:#000;font-size:0.85rem;font-weight:700;cursor:pointer;">🔔 Avísame cuando esté lista</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+window.cancelAppConnect = function(toggleId) {
+  // Desmarcar el toggle
+  const toggles = document.querySelectorAll(`[onchange*="${toggleId}"]`);
+  toggles.forEach(t => t.checked = false);
+  const overlay = document.getElementById("appConnectOverlay");
+  if (overlay) overlay.remove();
+};
+
+window.confirmAppConnect = async function(toggleId, name) {
+  const overlay = document.getElementById("appConnectOverlay");
+
+  // Cambiar botón a "Conectando..."
+  const confirmBtn = overlay.querySelector("button:last-child");
+  confirmBtn.textContent = "Conectando...";
+  confirmBtn.disabled = true;
+
+  // Guardar interés en Firestore si hay usuario logueado
+  if (currentUser && !currentUser.isAnonymous) {
+    try {
+      await setDoc(doc(db, "integrations_waitlist", currentUser.uid), {
+        email: currentUser.email,
+        uid: currentUser.uid,
+        apps: { [toggleId]: true },
+        requestedAt: new Date().toISOString()
+      }, { merge: true });
+    } catch(e) { console.error("Error guardando interés:", e); }
+  }
+
+  if (overlay) overlay.remove();
+
+  // Mostrar modal de "en camino"
+  const modal = document.createElement("div");
+  modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;";
+  modal.innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;width:100%;max-width:360px;padding:28px 24px;text-align:center;animation:fadeUp 0.25s ease;">
+      <div style="font-size:2.5rem;margin-bottom:14px;">🔔</div>
+      <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:8px;">¡Apuntado a la lista!</div>
+      <div style="font-size:0.85rem;color:var(--muted);line-height:1.7;margin-bottom:20px;">
+        Estamos desarrollando la integración con <strong style="color:var(--text);">${name}</strong>.<br>
+        Te avisaremos a <strong style="color:var(--accent);">${currentUser?.email || "tu correo"}</strong> en cuanto esté disponible. ¡Serás de los primeros en usarla! 🚀
+      </div>
+      <div style="background:var(--surface);border:1px solid rgba(245,166,35,0.3);border-radius:10px;padding:12px 14px;font-size:0.78rem;color:var(--muted);margin-bottom:20px;text-align:left;line-height:1.8;">
+        ⚙️ <strong style="color:var(--text);">Estado:</strong> En desarrollo activo<br>
+        🔔 <strong style="color:var(--text);">Notificación:</strong> Email al lanzar<br>
+        🎁 <strong style="color:var(--gold);">Acceso anticipado</strong> para usuarios registrados
+      </div>
+      <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-size:0.88rem;font-weight:700;cursor:pointer;">¡Perfecto, avísame! 🙌</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+};
+
+function showToast(msg) {
   const toast = document.createElement("div");
-  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 22px;border-radius:20px;font-size:0.82rem;z-index:9999;animation:fadeUp 0.3s ease;";
-  toast.textContent = on ? `✅ ${name} conectada` : `🔌 ${name} desconectada`;
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 22px;border-radius:20px;font-size:0.82rem;z-index:9999;animation:fadeUp 0.3s ease;white-space:nowrap;";
+  toast.textContent = msg;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 2500);
-};
+}
 
 window.toggleTheme = function() {
   const root   = document.documentElement;
