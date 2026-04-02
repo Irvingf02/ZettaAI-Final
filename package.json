@@ -1,0 +1,13 @@
+{
+  "name": "ZettaxAI",
+  "version": "2.0.0",
+  "description": "Backend para ZettaxAI PRO",
+  "type": "module",
+  
+  "dependencies": {
+  
+    "firebase-admin": "^12.1.0",
+    "stripe": "^14.21.0",
+    "node-fetch": "^3.3.2"
+  }
+}
