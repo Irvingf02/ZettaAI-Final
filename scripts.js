@@ -395,12 +395,19 @@ app.post("/imagen", async (req, res) => {
   }
 });
 
-// ── 13. CREAR SESIÓN DE PAGO (CORREGIDO) ──────────────────────────────────────
+// ── 13. CREAR SESIÓN DE PAGO ──────────────────────────────────────────────────
 app.post("/create-checkout-session", async (req, res) => {
   const { email, userId, plan } = req.body;
 
   if (!email || !userId) {
     return res.status(400).json({ error: "Se requiere email y userId." });
+  }
+
+  // Validar que FRONTEND_URL esté configurado
+  const frontendUrl = process.env.FRONTEND_URL;
+  if (!frontendUrl) {
+    console.error("❌ FRONTEND_URL no está definido en variables de entorno.");
+    return res.status(500).json({ error: "Configuración del servidor incompleta (FRONTEND_URL)." });
   }
 
   const validPlans = ['go', 'plus', 'ultra'];
@@ -412,7 +419,8 @@ app.post("/create-checkout-session", async (req, res) => {
   else                               priceId = process.env.STRIPE_PRICE_ID_GO;
 
   if (!priceId) {
-    return res.status(500).json({ error: "Price ID no configurado." });
+    console.error(`❌ Price ID no configurado para plan: ${selectedPlan}`);
+    return res.status(500).json({ error: `Price ID no configurado para el plan "${selectedPlan}". Revisa las variables de entorno STRIPE_PRICE_ID_GO / STRIPE_PRICE_ID_PLUS / STRIPE_PRICE_ID_ULTRA.` });
   }
 
   try {
@@ -448,8 +456,8 @@ app.post("/create-checkout-session", async (req, res) => {
           firebaseUID: userId
         }
       },
-      success_url: `${process.env.FRONTEND_URL}?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}?cancel=true`
+      success_url: `${frontendUrl}?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `${frontendUrl}?cancel=true`
     });
 
     await db.collection("users").doc(userId).set(
@@ -463,8 +471,10 @@ app.post("/create-checkout-session", async (req, res) => {
     res.json({ url: session.url });
 
   } catch (e) {
-    console.error("❌ Error creando sesión:", e.message);
-    res.status(500).json({ error: e.message });
+    console.error("❌ Error creando sesión Stripe:", e);
+    // Stripe devuelve errores con e.type y e.message más descriptivos
+    const mensaje = e?.raw?.message || e?.message || "Error desconocido al crear sesión de pago.";
+    res.status(500).json({ error: mensaje });
   }
 });
 

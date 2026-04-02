@@ -2274,6 +2274,11 @@ window.payPremium = async (plan) => {
   loadingMsg.innerHTML = `<div style="color:#fff;font-size:1.1rem;font-weight:700;">⏳ Conectando con Stripe...</div>`;
   document.body.appendChild(loadingMsg);
 
+  const removeLoading = () => {
+    const el = document.getElementById("payLoading");
+    if (el) el.remove();
+  };
+
   try {
     const res = await fetch(`${BACKEND_URL}/create-checkout-session`, {
       method: "POST",
@@ -2288,20 +2293,25 @@ window.payPremium = async (plan) => {
       })
     });
 
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.error || "Error al crear sesión");
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error("El servidor devolvió una respuesta inválida. Intenta de nuevo.");
     }
 
-    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || `Error del servidor (${res.status})`);
+    }
+
     if (data.url) {
       window.location.href = data.url;
     } else {
-      throw new Error("No se recibió URL de checkout");
+      throw new Error("No se recibió URL de checkout. Revisa la configuración del servidor.");
     }
   } catch (e) {
-    document.body.removeChild(loadingMsg);
-    alert("❌ Error: " + e.message);
+    removeLoading();
+    alert("❌ Error al procesar el pago:\n\n" + e.message);
   }
 };
 </script>
