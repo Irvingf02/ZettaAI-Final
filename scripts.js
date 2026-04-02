@@ -7,6 +7,7 @@ import bodyParser from "body-parser";
 import admin from "firebase-admin";
 
 // ── 1. FIREBASE ADMIN ─────────────────────────────────────────────────────────
+
 let serviceAccount;
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
   serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
@@ -317,7 +318,7 @@ app.post("/chat", async (req, res) => {
 
   messages.push({ role: "user", content: message });
 
-  try {
+try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
