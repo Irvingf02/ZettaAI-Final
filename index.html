@@ -1754,6 +1754,10 @@ onAuthStateChanged(auth, async (user) => {
     // CORRECCIÓN: Verificar parámetros de éxito primero
     const params = new URLSearchParams(window.location.search);
     
+    // Quitar loading de Stripe si quedó pegado
+    const el = document.getElementById("payLoading");
+    if (el) el.remove();
+
     if (params.get("success") === "true") {
       document.getElementById("successBanner").style.display = "block";
       window.history.replaceState({}, "", window.location.pathname);
