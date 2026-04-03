@@ -2146,6 +2146,167 @@
     cursor: pointer; transition: all 0.2s;
   }
   .publinks-chat-btn:hover { background: #1558c0; transform: translateY(-1px); }
+
+  /* ── MODAL GEMS ─────────────────────────────────────────────────────────── */
+  #gemsModal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+    z-index: 300; align-items: flex-start; justify-content: center;
+    padding: 16px; overflow-y: auto;
+  }
+  #gemsModal.show { display: flex; }
+
+  .gems-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; width: 100%; max-width: 900px;
+    margin: auto; animation: fadeUp 0.25s ease; overflow: hidden;
+  }
+
+  .gems-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 28px 18px; border-bottom: 1px solid var(--border);
+  }
+  .gems-top h2 { font-size: 1.4rem; font-weight: 800; color: var(--text); }
+  .gems-close {
+    background: none; border: none; color: var(--muted); font-size: 1.1rem;
+    cursor: pointer; width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+  }
+  .gems-close:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+  .gems-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 28px; }
+
+  /* Banner superior */
+  .gems-banner {
+    background: linear-gradient(135deg, rgba(0,212,255,0.08) 0%, rgba(245,166,35,0.08) 100%);
+    border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px 20px; display: flex; align-items: center; gap: 16px;
+  }
+  .gems-banner-icon {
+    width: 52px; height: 52px; border-radius: 12px;
+    background: var(--surface); display: flex; align-items: center;
+    justify-content: center; font-size: 26px; flex-shrink: 0;
+  }
+  .gems-banner-text h4 { font-size: 0.95rem; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .gems-banner-text p  { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+  /* Sección */
+  .gems-section-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+  }
+  .gems-section-title {
+    font-size: 1rem; font-weight: 700; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .gems-show-more {
+    background: none; border: none; color: var(--accent);
+    font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 4px;
+  }
+  .gems-show-more:hover { text-decoration: underline; }
+
+  /* Grid de gems prediseñadas */
+  .gems-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;
+  }
+
+  .gem-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px; cursor: pointer;
+    transition: all 0.2s; position: relative;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .gem-card:hover { border-color: var(--accent); transform: translateY(-2px); background: rgba(0,212,255,0.04); }
+
+  .gem-card-top { display: flex; align-items: center; justify-content: space-between; }
+  .gem-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .gem-menu-btn {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 1rem; padding: 2px 6px; border-radius: 4px; transition: color 0.15s;
+    opacity: 0;
+  }
+  .gem-card:hover .gem-menu-btn { opacity: 1; }
+  .gem-menu-btn:hover { color: var(--text); }
+
+  .gem-badge {
+    font-size: 0.6rem; background: rgba(0,212,255,0.15); color: var(--accent);
+    border: 1px solid var(--accent); border-radius: 10px;
+    padding: 2px 7px; font-weight: 600;
+  }
+
+  .gem-name { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+  .gem-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+  /* Gems de Labs - grid con imágenes */
+  .gems-labs-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;
+  }
+  .gem-lab-card {
+    border-radius: 14px; overflow: hidden; cursor: pointer;
+    position: relative; min-height: 160px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    transition: transform 0.2s;
+  }
+  .gem-lab-card:hover { transform: translateY(-3px); }
+  .gem-lab-bg {
+    position: absolute; inset: 0; background-size: cover; background-position: center;
+    transition: transform 0.3s;
+  }
+  .gem-lab-card:hover .gem-lab-bg { transform: scale(1.04); }
+  .gem-lab-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);
+  }
+  .gem-lab-info { position: relative; z-index: 1; padding: 14px; }
+  .gem-lab-name { font-size: 0.9rem; font-weight: 700; color: white; margin-bottom: 4px; }
+  .gem-lab-desc { font-size: 0.72rem; color: rgba(255,255,255,0.75); line-height: 1.4; }
+
+  /* Mis Gems */
+  .gems-mis-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+  }
+  .gems-mis-title {
+    font-size: 1rem; font-weight: 700; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .gems-nueva-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 20px; background: #1a73e8; border: none;
+    border-radius: 20px; color: white; font-size: 0.85rem;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .gems-nueva-btn:hover { background: #1558c0; transform: translateY(-1px); }
+
+  .gems-empty-banner {
+    background: linear-gradient(135deg, rgba(100,80,200,0.15) 0%, rgba(0,150,200,0.1) 100%);
+    border: 1px solid var(--border); border-radius: 14px;
+    padding: 24px 28px; display: flex; align-items: center; gap: 24px;
+  }
+  .gems-empty-icons {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-shrink: 0;
+  }
+  .gems-empty-icon {
+    width: 42px; height: 42px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .gems-empty-text h4 { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .gems-empty-text p  { font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+  .gems-empty-actions { display: flex; gap: 12px; }
+  .gems-empty-discard {
+    background: none; border: none; color: var(--accent);
+    font-size: 0.82rem; cursor: pointer; padding: 0;
+  }
+  .gems-empty-discard:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .gems-grid, .gems-labs-grid { grid-template-columns: 1fr 1fr; }
+    .gems-body { padding: 16px; }
+    .gems-empty-banner { flex-direction: column; }
+  }
 </style>
 
 
@@ -2315,6 +2476,72 @@
 
 </div><!-- fin #appDiv -->
 
+
+<!-- MODAL GEMS -->
+<div id="gemsModal">
+  <div class="gems-card">
+    <div class="gems-top">
+      <h2>💎 Administrador de Gems</h2>
+      <button class="gems-close" onclick="closeGems()">✕</button>
+    </div>
+    <div class="gems-body">
+
+      <!-- Banner -->
+      <div class="gems-banner">
+        <div class="gems-banner-icon">🧪</div>
+        <div class="gems-banner-text">
+          <h4>Crea miniapps de IA, un nuevo tipo de Gem</h4>
+          <p>Crea y comparte versiones personalizadas de ZettaxAI con flujos de trabajo adaptados a tus necesidades. Prueba una Gem prediseñada o crea la tuya.</p>
+        </div>
+      </div>
+
+      <!-- Prediseñadas -->
+      <div>
+        <div class="gems-section-header">
+          <div class="gems-section-title">Prediseñadas por ZettaxAI</div>
+          <button class="gems-show-more" id="gemsShowMoreBtn" onclick="toggleGemsExtra()">Mostrar más ˅</button>
+        </div>
+        <div class="gems-grid" id="gemsGrid">
+          <!-- inyectado por JS -->
+        </div>
+      </div>
+
+      <!-- Gems de Labs -->
+      <div>
+        <div class="gems-section-header">
+          <div class="gems-section-title">🧪 Gems made by Labs</div>
+        </div>
+        <div class="gems-labs-grid" id="gemsLabsGrid">
+          <!-- inyectado por JS -->
+        </div>
+      </div>
+
+      <!-- Mis Gems -->
+      <div>
+        <div class="gems-mis-header">
+          <div class="gems-mis-title">Mis Gems <span style="font-size:0.8rem;color:var(--muted);font-weight:400;">ⓘ</span></div>
+          <button class="gems-nueva-btn" onclick="nuevaGem()">+ Nueva Gem</button>
+        </div>
+        <div class="gems-empty-banner" id="misGemsContent">
+          <div class="gems-empty-icons">
+            <div class="gems-empty-icon" style="background:rgba(0,180,200,0.2);">💻</div>
+            <div class="gems-empty-icon" style="background:rgba(180,100,200,0.2);">💡</div>
+            <div class="gems-empty-icon" style="background:rgba(200,120,50,0.2);">📚</div>
+            <div class="gems-empty-icon" style="background:rgba(80,160,100,0.2);">🎨</div>
+          </div>
+          <div class="gems-empty-text">
+            <h4>Descubre, crea y administra Gems</h4>
+            <p>Las Gems son versiones de ZettaxAI personalizadas que te brindan respuestas adaptadas a tus necesidades. Puedes personalizar una Gem prediseñada o crear una nueva desde cero con las indicaciones que establezcas.</p>
+            <div class="gems-empty-actions">
+              <button class="gems-empty-discard" onclick="document.getElementById('misGemsContent').style.display='none'">Descartar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 <!-- MODAL VÍNCULOS PÚBLICOS -->
 <div id="publicLinksModal">
@@ -3251,7 +3478,97 @@ window.showFavorites = function() {
 window.closeMisCosas = function() {
   document.getElementById("misCosasModal").classList.remove("show");
 };
-window.showGems      = function() { console.log("Mostrar Gems"); };
+const GEMS_PREDISEÑADAS = [
+  { icon: "💡", color: "rgba(255,180,50,0.2)",  name: "Generador de ideas",    desc: "Encuentra inspiración fácilmente. Obtén ideas para fiestas, regalos, negocios y más...", badge: "" },
+  { icon: "💻", color: "rgba(0,180,200,0.2)",   name: "Asistente de programac...", desc: "Mejora tus habilidades de programación. Obtén la ayuda que necesitas para crear tus proyectos.", badge: "" },
+  { icon: "📚", color: "rgba(150,100,220,0.2)", name: "Storybook",              desc: "Crea un libro ilustrado personalizado, para niños o adultos, a partir de un tema...", badge: "Experimental" },
+  { icon: "💼", color: "rgba(200,100,80,0.2)",  name: "Consejero de carrera",   desc: "Libera el potencial de tu carrera profesional. Obtén un plan detallado para...", badge: "" },
+  { icon: "🎓", color: "rgba(80,160,100,0.2)",  name: "Tutor personal",         desc: "Aprende cualquier tema a tu ritmo con explicaciones claras y ejercicios adaptados.", badge: "" },
+  { icon: "✍️", color: "rgba(200,150,50,0.2)",  name: "Escritor creativo",      desc: "Genera textos, historias y contenido creativo de alta calidad para cualquier propósito.", badge: "" },
+  { icon: "📊", color: "rgba(50,150,200,0.2)",  name: "Analista de datos",      desc: "Interpreta y visualiza datos complejos. Obtén insights útiles de tus números.", badge: "Experimental" },
+  { icon: "🧘", color: "rgba(180,80,180,0.2)",  name: "Coach de bienestar",     desc: "Guía personalizada para mejorar tu salud mental, física y hábitos diarios.", badge: "" },
+];
+
+const GEMS_LABS = [
+  { name: "Recipe Genie",        desc: "Transform your fridge leftovers into delicious meals", gradient: "linear-gradient(135deg,#1a1a2e,#16213e)" },
+  { name: "Marketing Maven",     desc: "Brainstorms with you on content and marketing strategy", gradient: "linear-gradient(135deg,#2d1b69,#11998e)" },
+  { name: "Claymation Explainer",desc: "Turn any topic into an animated claymation infographic", gradient: "linear-gradient(135deg,#134e5e,#71b280)" },
+  { name: "Learning with YouTube",desc: "Turn your YouTube video into a quiz to help you learn", gradient: "linear-gradient(135deg,#3a0000,#750000)" },
+];
+
+let gemsExpanded = false;
+
+window.showGems = function() {
+  if (window.innerWidth < 1024) toggleSidebar();
+  renderGems();
+  document.getElementById("gemsModal").classList.add("show");
+};
+
+window.closeGems = function() {
+  document.getElementById("gemsModal").classList.remove("show");
+};
+
+window.toggleGemsExtra = function() {
+  gemsExpanded = !gemsExpanded;
+  document.getElementById("gemsShowMoreBtn").textContent = gemsExpanded ? "Mostrar menos ˄" : "Mostrar más ˅";
+  renderGems();
+};
+
+window.nuevaGem = function() {
+  closeGems();
+  setTimeout(function() {
+    const toast = document.createElement("div");
+    toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--accent);color:var(--text);padding:12px 24px;border-radius:14px;font-size:0.82rem;z-index:9999;animation:fadeUp 0.3s ease;text-align:center;";
+    toast.innerHTML = "💎 <strong>Nueva Gem</strong><br><span style='color:var(--muted);font-size:0.75rem;'>Esta función estará disponible próximamente.</span>";
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.remove(); }, 3500);
+  }, 200);
+};
+
+function renderGems() {
+  const grid = document.getElementById("gemsGrid");
+  const labsGrid = document.getElementById("gemsLabsGrid");
+  if (!grid || !labsGrid) return;
+
+  const visible = gemsExpanded ? GEMS_PREDISEÑADAS : GEMS_PREDISEÑADAS.slice(0, 4);
+
+  grid.innerHTML = visible.map(function(g) {
+    return '<div class="gem-card" onclick="usarGem(\'' + g.name + '\')">'
+      + '<div class="gem-card-top">'
+      + '<div class="gem-icon" style="background:' + g.color + '">' + g.icon + '</div>'
+      + (g.badge ? '<span class="gem-badge">' + g.badge + '</span>' : '<button class="gem-menu-btn">⋮</button>')
+      + '</div>'
+      + '<div class="gem-name">' + g.name + '</div>'
+      + '<div class="gem-desc">' + g.desc + '</div>'
+      + '</div>';
+  }).join("");
+
+  const labEmojis = ["🍳","📢","🎭","📺"];
+  labsGrid.innerHTML = GEMS_LABS.map(function(g, i) {
+    return '<div class="gem-lab-card">'
+      + '<div class="gem-lab-bg" style="background:' + g.gradient + ';font-size:4rem;display:flex;align-items:center;justify-content:center;">' + labEmojis[i] + '</div>'
+      + '<div class="gem-lab-overlay"></div>'
+      + '<div class="gem-lab-info">'
+      + '<div class="gem-lab-name">' + g.name + '</div>'
+      + '<div class="gem-lab-desc">' + g.desc + '</div>'
+      + '</div>'
+      + '</div>';
+  }).join("");
+}
+
+window.usarGem = function(name) {
+  closeGems();
+  const modos = {
+    "Generador de ideas": "ideas",
+    "Asistente de programac...": "codigo",
+    "Tutor personal": "tarea",
+    "Escritor creativo": "chat",
+  };
+  const modo = modos[name] || "chat";
+  if (window.setMode) setMode(modo);
+  const input = document.getElementById("input");
+  if (input) input.focus();
+};
 window.showSettings = function() {
   const menu    = document.getElementById('settingsMenu');
   const overlay = document.getElementById('settingsOverlay');
