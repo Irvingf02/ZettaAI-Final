@@ -3385,6 +3385,7 @@ const APPS_DATA = {
       groupIcons: ["🔥"],
       toggleId: "toggle-firebase",
       defaultOn: true,
+      locked: true,
       subApps: [
         { icon: "🔑", name: "Firebase Auth", handle: "@Auth", link: false },
         { icon: "🗄️", name: "Firestore DB", handle: "@Firestore", link: false },
@@ -3396,6 +3397,7 @@ const APPS_DATA = {
       groupIcons: ["💳"],
       toggleId: "toggle-stripe",
       defaultOn: true,
+      locked: true,
       subApps: [
         { icon: "💳", name: "Stripe Checkout", handle: "@Stripe", link: false },
         { icon: "🔔", name: "Webhooks", handle: "@StripeWebhooks", link: false },
@@ -3482,8 +3484,9 @@ window.switchAppsTab = function(tab) {
       + '<div class="apps-group-desc">' + g.groupDesc + '</div>'
       + '</div>'
       + '<label class="apps-toggle">'
-      + '<input type="checkbox" ' + checked + ' onchange="toggleApp(\'' + g.toggleId + '\', this.checked)">'
-      + '<span class="apps-toggle-slider"></span>'
+      + (g.locked
+          ? '<span title="Servicio esencial — siempre activo" style="display:flex;align-items:center;justify-content:center;width:44px;height:24px;color:var(--success);font-size:1rem;" >✅</span>'
+          : '<input type="checkbox" ' + checked + ' onchange="toggleApp(\'' + g.toggleId + '\', this.checked)"><span class="apps-toggle-slider"></span>')
       + '</label>'
       + '</div>'
       + '<div class="apps-subgrid">' + subHtml + '</div>'
