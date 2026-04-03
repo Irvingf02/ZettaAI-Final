@@ -1965,6 +1965,61 @@
     background: rgba(245,166,35,0.1); border: 1px solid var(--gold);
     border-radius: 10px; padding: 10px 16px; font-size: 0.82rem; color: var(--gold);
   }
+
+  /* ── MODAL AGREGAR INSTRUCCIÓN ──────────────────────────────────────────── */
+  #addInstruccionModal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    z-index: 400; align-items: center; justify-content: center; padding: 16px;
+  }
+  #addInstruccionModal.show { display: flex; }
+
+  .addinstr-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; width: 100%; max-width: 480px;
+    animation: fadeUp 0.2s ease; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .addinstr-body { padding: 28px 24px 20px; }
+
+  .addinstr-title {
+    font-size: 1.1rem; font-weight: 700; color: var(--text);
+    margin-bottom: 16px; line-height: 1.3;
+  }
+
+  .addinstr-textarea {
+    width: 100%; min-height: 130px; resize: vertical;
+    background: var(--surface); border: 2px solid var(--accent);
+    border-radius: 10px; padding: 14px; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 0.9rem;
+    line-height: 1.5; outline: none; transition: border-color 0.2s;
+  }
+  .addinstr-textarea::placeholder { color: var(--muted); }
+  .addinstr-textarea:focus { border-color: #1a73e8; }
+
+  .addinstr-footer {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 8px; padding: 14px 24px 18px;
+  }
+
+  .addinstr-cancel {
+    background: none; border: none; color: #1a73e8;
+    font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    padding: 8px 16px; border-radius: 8px; transition: background 0.15s;
+  }
+  .addinstr-cancel:hover { background: rgba(26,115,232,0.08); }
+
+  .addinstr-send {
+    background: var(--surface); border: none;
+    border-radius: 20px; color: var(--muted);
+    font-size: 0.9rem; font-weight: 600;
+    padding: 9px 22px; cursor: not-allowed; transition: all 0.2s;
+  }
+  .addinstr-send.ready {
+    background: #1a73e8; color: white; cursor: pointer;
+  }
+  .addinstr-send.ready:hover { background: #1558c0; }
 </style>
 
 
@@ -2135,6 +2190,25 @@
 
 </div><!-- fin #appDiv -->
 
+
+<!-- MODAL AGREGAR INSTRUCCIÓN -->
+<div id="addInstruccionModal">
+  <div class="addinstr-card">
+    <div class="addinstr-body">
+      <div class="addinstr-title">¿Qué te gustaría que ZettaxAI recuerde?</div>
+      <textarea
+        class="addinstr-textarea"
+        id="addInstruccionText"
+        placeholder='Por ejemplo, "Prefiero respuestas cortas y concisas"'
+        oninput="checkAddInstrReady()"
+      ></textarea>
+    </div>
+    <div class="addinstr-footer">
+      <button class="addinstr-cancel" onclick="closeAddInstruccion()">Cancelar</button>
+      <button class="addinstr-send" id="addInstrSendBtn" onclick="submitInstruccion()">Enviar</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL CONTEXTO PERSONAL -->
 <div id="contextoModal">
@@ -2704,13 +2778,31 @@ window.toggleContextoFeature = function(feature, on) {
 };
 
 window.agregarInstruccion = function() {
-  const texto = prompt("Escribe tu instrucción para ZettaxAI:\n\nEjemplos:\n• Responde siempre en español\n• Usa listas cuando sea posible\n• Sé breve y directo");
-  if (!texto || !texto.trim()) return;
+  const textarea = document.getElementById("addInstruccionText");
+  textarea.value = "";
+  document.getElementById("addInstrSendBtn").classList.remove("ready");
+  document.getElementById("addInstruccionModal").classList.add("show");
+  setTimeout(function() { textarea.focus(); }, 100);
+};
+
+window.closeAddInstruccion = function() {
+  document.getElementById("addInstruccionModal").classList.remove("show");
+};
+
+window.checkAddInstrReady = function() {
+  const val = document.getElementById("addInstruccionText").value.trim();
+  document.getElementById("addInstrSendBtn").classList.toggle("ready", val.length > 0);
+};
+
+window.submitInstruccion = function() {
+  const texto = document.getElementById("addInstruccionText").value.trim();
+  if (!texto) return;
   try {
     const lista = JSON.parse(localStorage.getItem("zettax_instrucciones") || "[]");
-    lista.push(texto.trim());
+    lista.push(texto);
     localStorage.setItem("zettax_instrucciones", JSON.stringify(lista));
   } catch(e) {}
+  closeAddInstruccion();
   renderInstrucciones();
   showCtxToast("✅ Instrucción guardada");
 };
