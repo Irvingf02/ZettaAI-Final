@@ -2016,10 +2016,77 @@
     font-size: 0.9rem; font-weight: 600;
     padding: 9px 22px; cursor: not-allowed; transition: all 0.2s;
   }
-  .addinstr-send.ready {
-    background: #1a73e8; color: white; cursor: pointer;
-  }
+  .addinstr-send.ready { background: #1a73e8; color: white; cursor: pointer; }
   .addinstr-send.ready:hover { background: #1558c0; }
+
+  /* ── MODAL DETALLE APP ──────────────────────────────────────────────────── */
+  #appDetailModal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    z-index: 500; align-items: center; justify-content: center; padding: 16px;
+  }
+  #appDetailModal.show { display: flex; }
+
+  .appdetail-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; width: 100%; max-width: 560px;
+    max-height: 88vh; overflow-y: auto;
+    animation: fadeUp 0.22s ease;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .appdetail-top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 22px 24px 16px;
+  }
+  .appdetail-icon-name { display: flex; align-items: center; gap: 14px; }
+  .appdetail-icon {
+    width: 52px; height: 52px; border-radius: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0;
+  }
+  .appdetail-name { font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .appdetail-handle { font-size: 0.78rem; color: var(--muted); }
+  .appdetail-close {
+    background: none; border: none; color: var(--muted); font-size: 1.1rem;
+    cursor: pointer; width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .appdetail-close:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+  .appdetail-desc {
+    padding: 0 24px 16px; font-size: 0.88rem; color: var(--muted); line-height: 1.6;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .appdetail-section { padding: 18px 24px; border-bottom: 1px solid var(--border); }
+  .appdetail-section:last-child { border-bottom: none; }
+  .appdetail-section-title {
+    font-size: 0.82rem; color: var(--text); margin-bottom: 14px; line-height: 1.5;
+  }
+
+  .appdetail-caps {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px;
+  }
+  .appdetail-cap {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 0.82rem; color: var(--text); line-height: 1.4;
+  }
+  .appdetail-cap-check { color: var(--accent); flex-shrink: 0; font-size: 0.85rem; margin-top: 1px; }
+
+  .appdetail-prompts { display: flex; flex-direction: column; gap: 8px; }
+  .appdetail-prompt {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 9px 16px; font-size: 0.82rem; color: var(--accent);
+    cursor: pointer; transition: all 0.15s; border: none; text-align: left;
+    width: fit-content;
+  }
+  .appdetail-prompt:hover { background: rgba(0,212,255,0.08); }
+
+  @media (max-width: 480px) {
+    .appdetail-caps { grid-template-columns: 1fr; }
+  }
 </style>
 
 
@@ -2191,6 +2258,31 @@
 </div><!-- fin #appDiv -->
 
 
+<!-- MODAL DETALLE APP -->
+<div id="appDetailModal">
+  <div class="appdetail-card">
+    <div class="appdetail-top">
+      <div class="appdetail-icon-name">
+        <div class="appdetail-icon" id="appDetailIcon"></div>
+        <div>
+          <div class="appdetail-name" id="appDetailName"></div>
+          <div class="appdetail-handle" id="appDetailHandle"></div>
+        </div>
+      </div>
+      <button class="appdetail-close" onclick="closeAppDetail()">✕</button>
+    </div>
+    <div class="appdetail-desc" id="appDetailDesc"></div>
+    <div class="appdetail-section">
+      <div class="appdetail-section-title" id="appDetailCapsTitle"></div>
+      <div class="appdetail-caps" id="appDetailCaps"></div>
+    </div>
+    <div class="appdetail-section">
+      <div class="appdetail-section-title" style="font-weight:600;">Instrucciones que puedes probar</div>
+      <div class="appdetail-prompts" id="appDetailPrompts"></div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL AGREGAR INSTRUCCIÓN -->
 <div id="addInstruccionModal">
   <div class="addinstr-card">
@@ -2296,7 +2388,7 @@
       <button class="apps-close" onclick="closeConnectedApps()">✕</button>
     </div>
     <div class="apps-subtitle">
-      Conecta tus apps favoritas para obtener ayuda más inteligente. <a href="#" onclick="return false;">Más información</a>
+      Conecta tus apps favoritas para obtener ayuda más inteligente.
     </div>
     <div class="apps-tabs">
       <button class="apps-tab active" id="tab-zettax" onclick="switchAppsTab('zettax')">De ZettaxAI</button>
@@ -3208,6 +3300,48 @@ window.downloadHistory = async function() {
   }
 }
 
+window.showAppDetail = function(handle) {
+  // Buscar la subApp en APPS_DATA
+  var found = null;
+  Object.values(APPS_DATA).forEach(function(groups) {
+    groups.forEach(function(g) {
+      g.subApps.forEach(function(s) {
+        if (s.handle === handle) found = s;
+      });
+    });
+  });
+  if (!found || !found.capabilities) return;
+
+  document.getElementById("appDetailIcon").textContent    = found.icon;
+  document.getElementById("appDetailName").textContent    = found.name;
+  document.getElementById("appDetailHandle").textContent  = found.handle;
+  document.getElementById("appDetailDesc").textContent    = found.desc || "";
+
+  document.getElementById("appDetailCapsTitle").innerHTML =
+    'Con <strong>' + found.name + '</strong>, ZettaxAI puede hacer lo siguiente:';
+
+  document.getElementById("appDetailCaps").innerHTML = found.capabilities.map(function(c) {
+    return '<div class="appdetail-cap"><span class="appdetail-cap-check">✓</span><span>' + c + '</span></div>';
+  }).join("");
+
+  document.getElementById("appDetailPrompts").innerHTML = found.prompts.map(function(p) {
+    return '<button class="appdetail-prompt" onclick="usePromptFromDetail(\'' + p.replace(/'/g, "\\'") + '\')">' + p + '</button>';
+  }).join("");
+
+  document.getElementById("appDetailModal").classList.add("show");
+};
+
+window.closeAppDetail = function() {
+  document.getElementById("appDetailModal").classList.remove("show");
+};
+
+window.usePromptFromDetail = function(prompt) {
+  closeAppDetail();
+  closeConnectedApps();
+  var input = document.getElementById("input");
+  if (input) { input.value = prompt; input.focus(); }
+};
+
 window.showConnectedApps = function() {
   closeSettings();
   switchAppsTab('zettax');
@@ -3227,11 +3361,23 @@ const APPS_DATA = {
       toggleId: "toggle-suite",
       defaultOn: true,
       subApps: [
-        { icon: "🎨", name: "Generador de Imágenes", handle: "@ZettaxImagen", link: true },
-        { icon: "💻", name: "Asistente de Código", handle: "@ZettaxCódigo", link: true },
-        { icon: "📝", name: "Resumidor Pro", handle: "@ZettaxResumen", link: true },
-        { icon: "💡", name: "Ideas Creator", handle: "@ZettaxIdeas", link: true },
-      ]
+        { icon: "🎨", name: "Generador de Imágenes", handle: "@ZettaxImagen", link: true,
+          desc: "Crea imágenes únicas con IA a partir de tus descripciones.",
+          capabilities: ["Generar imágenes desde texto", "Ajustar estilo y resolución", "Descargar o compartir imágenes generadas", "Crear variaciones de una imagen"],
+          prompts: ["Crea una imagen de un atardecer en la playa", "Genera un logo minimalista para mi empresa", "Dibuja un personaje anime con cabello azul"] },
+        { icon: "💻", name: "Asistente de Código", handle: "@ZettaxCódigo", link: true,
+          desc: "Escribe, explica y depura código en cualquier lenguaje de programación.",
+          capabilities: ["Escribir funciones y scripts completos", "Explicar código línea por línea", "Detectar y corregir errores", "Convertir código entre lenguajes"],
+          prompts: ["Escribe una función en Python para ordenar una lista", "Explica qué hace este código", "Encuentra el error en mi función"] },
+        { icon: "📝", name: "Resumidor Pro", handle: "@ZettaxResumen", link: true,
+          desc: "Sintetiza textos largos en resúmenes claros y concisos.",
+          capabilities: ["Resumir artículos y documentos", "Extraer puntos clave", "Crear resúmenes por secciones", "Adaptar la longitud del resumen"],
+          prompts: ["Resume este artículo en 3 puntos", "Extrae las ideas principales", "Haz un resumen ejecutivo de este texto"] },
+        { icon: "💡", name: "Ideas Creator", handle: "@ZettaxIdeas", link: true,
+          desc: "Genera ideas creativas y originales para cualquier proyecto o tema.",
+          capabilities: ["Generar listas de ideas creativas", "Explorar ángulos originales de un tema", "Proponer nombres para proyectos o negocios", "Crear conceptos para campañas o contenido"],
+          prompts: ["Dame 10 ideas para un negocio de comida", "Sugiere nombres creativos para mi app", "Ideas de contenido para redes sociales sobre viajes"] },
+      ],
     },
     {
       groupName: "Firebase",
@@ -3318,7 +3464,7 @@ window.switchAppsTab = function(tab) {
         + '<div class="apps-sub-info">'
         + '<div class="apps-sub-name">' + s.name + '</div>'
         + '<div class="apps-sub-handle">' + s.handle + '</div>'
-        + (s.link ? '<span class="apps-sub-link">Más información</span>' : "")
+        + (s.link ? '<span class="apps-sub-link" onclick="showAppDetail(\'' + s.handle + '\')">Más información</span>' : "")
         + '</div>'
         + '</div>';
     }).join("");
