@@ -1844,6 +1844,127 @@
     .apps-sub-item:nth-last-child(-n+2) { border-bottom: 1px solid var(--border); }
     .apps-sub-item:last-child { border-bottom: none; }
   }
+
+  /* ── MODAL CONTEXTO PERSONAL ────────────────────────────────────────────── */
+  #contextoModal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+    z-index: 300; align-items: center; justify-content: center; padding: 16px;
+  }
+  #contextoModal.show { display: flex; }
+
+  .ctx-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; width: 100%; max-width: 640px;
+    max-height: 90vh; display: flex; flex-direction: column;
+    animation: fadeUp 0.25s ease; overflow: hidden;
+  }
+
+  .ctx-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 26px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .ctx-top h2 { font-size: 1.3rem; font-weight: 800; color: var(--text); }
+  .ctx-close {
+    background: none; border: none; color: var(--muted); font-size: 1.1rem;
+    cursor: pointer; width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+  }
+  .ctx-close:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+  .ctx-body { overflow-y: auto; flex: 1; padding: 24px 26px; display: flex; flex-direction: column; gap: 0; }
+
+  .ctx-intro {
+    font-size: 0.85rem; color: var(--muted); line-height: 1.6; margin-bottom: 28px;
+  }
+  .ctx-intro a { color: var(--accent); text-decoration: none; }
+  .ctx-intro a:hover { text-decoration: underline; }
+
+  .ctx-section {
+    padding: 24px 0;
+    border-top: 1px solid var(--border);
+  }
+  .ctx-section:first-of-type { border-top: none; padding-top: 0; }
+
+  .ctx-section-header {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 10px;
+  }
+  .ctx-section-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .ctx-section-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+  .ctx-section-desc a { color: var(--accent); text-decoration: none; }
+  .ctx-section-desc a:hover { text-decoration: underline; }
+  .ctx-section-desc ul { margin: 6px 0 0 18px; }
+  .ctx-section-desc li { margin-bottom: 3px; }
+
+  /* Toggle azul estilo Google */
+  .ctx-toggle { position: relative; width: 50px; height: 28px; flex-shrink: 0; }
+  .ctx-toggle input { opacity: 0; width: 0; height: 0; }
+  .ctx-toggle-slider {
+    position: absolute; inset: 0; background: var(--border);
+    border-radius: 28px; cursor: pointer; transition: background 0.2s;
+  }
+  .ctx-toggle-slider::before {
+    content: ''; position: absolute;
+    width: 20px; height: 20px; left: 4px; top: 4px;
+    background: white; border-radius: 50%; transition: transform 0.2s;
+  }
+  .ctx-toggle input:checked + .ctx-toggle-slider { background: #1a73e8; }
+  .ctx-toggle input:checked + .ctx-toggle-slider::before { transform: translateX(22px); }
+
+  /* Check mark inside toggle when active */
+  .ctx-toggle input:checked + .ctx-toggle-slider::after {
+    content: '✓'; position: absolute;
+    right: 6px; top: 50%; transform: translateY(-50%);
+    color: white; font-size: 10px; font-weight: 700;
+  }
+
+  .ctx-link-btn {
+    display: inline-block; font-size: 0.82rem; color: var(--accent);
+    text-decoration: none; cursor: pointer; margin-top: 6px;
+    background: none; border: none; padding: 0;
+  }
+  .ctx-link-btn:hover { text-decoration: underline; }
+
+  .ctx-add-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; background: #1a73e8; border: none;
+    border-radius: 20px; color: white; font-size: 0.88rem;
+    font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 14px;
+  }
+  .ctx-add-btn:hover { background: #1558c0; transform: translateY(-1px); }
+
+  .ctx-instrucciones-list {
+    display: flex; flex-direction: column; gap: 8px; margin-top: 14px;
+  }
+
+  .ctx-instruccion-item {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px; font-size: 0.85rem; color: var(--text);
+  }
+
+  .ctx-instruccion-del {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 1rem; padding: 2px 6px; border-radius: 4px; transition: color 0.15s;
+  }
+  .ctx-instruccion-del:hover { color: var(--danger); }
+
+  .ctx-empty-msg {
+    text-align: center; font-size: 0.82rem; color: var(--muted);
+    padding: 18px 0; font-style: italic;
+  }
+
+  .ctx-premium-section {
+    padding: 24px 0 0; border-top: 1px solid var(--border); margin-top: 4px;
+  }
+  .ctx-premium-title { font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+  .ctx-premium-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+
+  .ctx-premium-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(245,166,35,0.1); border: 1px solid var(--gold);
+    border-radius: 10px; padding: 10px 16px; font-size: 0.82rem; color: var(--gold);
+  }
 </style>
 
 
@@ -2014,6 +2135,86 @@
 
 </div><!-- fin #appDiv -->
 
+
+<!-- MODAL CONTEXTO PERSONAL -->
+<div id="contextoModal">
+  <div class="ctx-card">
+    <div class="ctx-top">
+      <h2>Contexto personal</h2>
+      <button class="ctx-close" onclick="closeContexto()">✕</button>
+    </div>
+    <div class="ctx-body">
+
+      <p class="ctx-intro">
+        Obtén una experiencia personalizada con la <a href="#" onclick="return false;">memoria</a> de tus chats anteriores. También puedes personalizar las respuestas de ZettaxAI dándole instrucciones. <a href="#" onclick="return false;">Más información</a>
+      </p>
+
+      <!-- MEMORIA -->
+      <div class="ctx-section">
+        <div class="ctx-section-header">
+          <div>
+            <div class="ctx-section-title">Memoria</div>
+            <div class="ctx-section-desc">
+              ZettaxAI aprende de tus chats anteriores para comprenderte mejor. <em>Próximamente, en Live.</em><br>
+              <button class="ctx-link-btn" onclick="closeContexto(); showActivity();">Administra y borra</button> tus chats anteriores en cualquier momento.
+              <a href="#" onclick="return false;"> Más información</a>.
+            </div>
+          </div>
+          <label class="ctx-toggle">
+            <input type="checkbox" id="toggleMemoria" checked onchange="toggleContextoFeature('memoria', this.checked)">
+            <span class="ctx-toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- INSTRUCCIONES -->
+      <div class="ctx-section">
+        <div class="ctx-section-header">
+          <div>
+            <div class="ctx-section-title">Tus instrucciones para ZettaxAI</div>
+            <div class="ctx-section-desc">
+              Personaliza cómo te responde ZettaxAI dándole instrucciones.
+              <a href="#" onclick="return false;"> Más información</a><br>
+              Ejemplos:
+              <ul>
+                <li>Comienza las respuestas con un resumen.</li>
+                <li>Usa viñetas para párrafos largos.</li>
+                <li>Responde siempre en español formal.</li>
+              </ul>
+            </div>
+          </div>
+          <label class="ctx-toggle">
+            <input type="checkbox" id="toggleInstrucciones" checked onchange="toggleContextoFeature('instrucciones', this.checked)">
+            <span class="ctx-toggle-slider"></span>
+          </label>
+        </div>
+
+        <button class="ctx-add-btn" onclick="agregarInstruccion()">
+          <span style="font-size:1.1rem;">+</span> Agregar
+        </button>
+
+        <div class="ctx-instrucciones-list" id="instruccionesList">
+          <!-- inyectado por JS -->
+        </div>
+        <div class="ctx-empty-msg" id="instruccionesEmpty">
+          Todavía no le pediste a ZettaxAI que guarde información sobre ti
+        </div>
+      </div>
+
+      <!-- CONTENIDO PREMIUM -->
+      <div class="ctx-premium-section">
+        <div class="ctx-premium-title">Tu contenido premium</div>
+        <div class="ctx-premium-desc">
+          ZettaxAI prioriza tus suscripciones pagadas para generar mejores respuestas. Aquí puedes controlar qué fuentes se incluyen en las respuestas relacionadas.
+        </div>
+        <div id="ctx-premium-content">
+          <!-- se llena según el plan -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 <!-- MODAL APPS CONECTADAS -->
 <div id="appsModal">
@@ -2459,9 +2660,104 @@ window.logout = async () => {
   } catch (e) { alert("Error al cerrar sesión: " + e.message); }
 };
 
-window.manageAccount = () => {
-  alert("Gestión de cuenta: próximamente.");
+window.manageAccount = function() {
+  // Cerrar menús abiertos
+  const profileMenu = document.getElementById("profileMenu");
+  const profileOverlay = document.getElementById("profileOverlay");
+  if (profileMenu) profileMenu.classList.remove("show");
+  if (profileOverlay) profileOverlay.classList.remove("show");
+
+  // Cargar instrucciones guardadas
+  renderInstrucciones();
+
+  // Mostrar plan premium
+  const premiumEl = document.getElementById("ctx-premium-content");
+  if (premiumEl) {
+    if (isPremium) {
+      premiumEl.innerHTML =
+        '<div class="ctx-premium-badge">'
+        + '<span>⭐</span>'
+        + '<span>Plan <strong>' + (userPlan || 'GO').toUpperCase() + '</strong> activo — acceso prioritario habilitado</span>'
+        + '</div>';
+    } else {
+      premiumEl.innerHTML =
+        '<div style="font-size:0.82rem;color:var(--muted);margin-bottom:10px;">No tienes un plan premium activo.</div>'
+        + '<button onclick="closeContexto();showPaywall();" style="padding:9px 20px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:20px;color:#000;font-size:0.82rem;font-weight:700;cursor:pointer;">✨ Ver planes premium</button>';
+    }
+  }
+
+  document.getElementById("contextoModal").classList.add("show");
 };
+
+window.closeContexto = function() {
+  document.getElementById("contextoModal").classList.remove("show");
+};
+
+window.toggleContextoFeature = function(feature, on) {
+  try {
+    const prefs = JSON.parse(localStorage.getItem("zettax_prefs") || "{}");
+    prefs[feature] = on;
+    localStorage.setItem("zettax_prefs", JSON.stringify(prefs));
+  } catch(e) {}
+  const label = feature === "memoria" ? "Memoria" : "Instrucciones";
+  showCtxToast(on ? ("✅ " + label + " activada") : ("🔕 " + label + " desactivada"));
+};
+
+window.agregarInstruccion = function() {
+  const texto = prompt("Escribe tu instrucción para ZettaxAI:\n\nEjemplos:\n• Responde siempre en español\n• Usa listas cuando sea posible\n• Sé breve y directo");
+  if (!texto || !texto.trim()) return;
+  try {
+    const lista = JSON.parse(localStorage.getItem("zettax_instrucciones") || "[]");
+    lista.push(texto.trim());
+    localStorage.setItem("zettax_instrucciones", JSON.stringify(lista));
+  } catch(e) {}
+  renderInstrucciones();
+  showCtxToast("✅ Instrucción guardada");
+};
+
+window.eliminarInstruccion = function(idx) {
+  try {
+    const lista = JSON.parse(localStorage.getItem("zettax_instrucciones") || "[]");
+    lista.splice(idx, 1);
+    localStorage.setItem("zettax_instrucciones", JSON.stringify(lista));
+  } catch(e) {}
+  renderInstrucciones();
+};
+
+function renderInstrucciones() {
+  const listEl  = document.getElementById("instruccionesList");
+  const emptyEl = document.getElementById("instruccionesEmpty");
+  if (!listEl || !emptyEl) return;
+  try {
+    const lista = JSON.parse(localStorage.getItem("zettax_instrucciones") || "[]");
+    if (lista.length === 0) {
+      listEl.innerHTML = "";
+      emptyEl.style.display = "block";
+    } else {
+      emptyEl.style.display = "none";
+      listEl.innerHTML = lista.map(function(item, i) {
+        return '<div class="ctx-instruccion-item">'
+          + '<span>' + item + '</span>'
+          + '<button class="ctx-instruccion-del" onclick="eliminarInstruccion(' + i + ')" title="Eliminar">✕</button>'
+          + '</div>';
+      }).join("");
+    }
+    // Restaurar estado toggles desde prefs
+    const prefs = JSON.parse(localStorage.getItem("zettax_prefs") || "{}");
+    const tMem = document.getElementById("toggleMemoria");
+    const tIns = document.getElementById("toggleInstrucciones");
+    if (tMem && prefs.memoria !== undefined) tMem.checked = prefs.memoria;
+    if (tIns && prefs.instrucciones !== undefined) tIns.checked = prefs.instrucciones;
+  } catch(e) {}
+}
+
+function showCtxToast(msg) {
+  const t = document.createElement("div");
+  t.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 22px;border-radius:20px;font-size:0.82rem;z-index:9999;animation:fadeUp 0.3s ease;white-space:nowrap;";
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 2500);
+}
 
 window.addAccount = () => {
   window.toggleProfileMenu();
