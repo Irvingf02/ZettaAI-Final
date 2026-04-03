@@ -329,7 +329,7 @@
       transition: padding-left 0.25s ease;
     }
     
-    body:has(#sidebar.sidebar-open) {
+    body.sidebar-is-open {
       padding-left: 300px;
     }
 
@@ -340,11 +340,6 @@
     
     .sidebar-header .menu-btn {
       display: flex;
-    }
-
-    #appDiv {
-      width: 100%;
-      transition: none;
     }
   }
 
@@ -1210,7 +1205,7 @@
 
 @media (min-width: 1024px) {
   #settingsMenu { left: 68px; bottom: 60px; }
-  body:has(#sidebar.sidebar-open) #settingsMenu { left: 308px; }
+  body.sidebar-is-open #settingsMenu { left: 308px; }
 }
 
 .settings-item {
@@ -3209,19 +3204,11 @@ window.toggleSidebar = function() {
 
   if (isOpen) {
     sidebar.classList.remove("sidebar-open");
+    document.body.classList.remove("sidebar-is-open");
   } else {
     sidebar.classList.add("sidebar-open");
+    document.body.classList.add("sidebar-is-open");
     loadChatHistory();
-  }
-
-  // Forzar reflow en desktop para evitar bug de layout residual
-  if (window.innerWidth >= 1024) {
-    const appDiv = document.getElementById("appDiv");
-    if (appDiv) {
-      appDiv.style.display = "none";
-      void appDiv.offsetHeight; // trigger reflow
-      appDiv.style.display = "flex";
-    }
   }
 };
 
