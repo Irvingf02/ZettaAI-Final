@@ -2415,35 +2415,36 @@ window.login = async () => {
 
 window.loginGoogle = async () => {
   const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
   try {
-    if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
-      await signInWithRedirect(auth, provider);
-    } else {
-      await signInWithPopup(auth, provider);
-    }
-  } catch (e) { alert("Error con Google: " + e.message); }
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    if (e.code === "auth/popup-blocked" || e.code === "auth/popup-closed-by-user") {
+      try { await signInWithRedirect(auth, provider); } catch (e2) { alert("Error con Google: " + e2.message); }
+    } else { alert("Error con Google: " + e.message); }
+  }
 };
 
 window.loginFacebook = async () => {
   const provider = new FacebookAuthProvider();
   try {
-    if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
-      await signInWithRedirect(auth, provider);
-    } else {
-      await signInWithPopup(auth, provider);
-    }
-  } catch (e) { alert("Error con Facebook: " + e.message); }
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    if (e.code === "auth/popup-blocked" || e.code === "auth/popup-closed-by-user") {
+      try { await signInWithRedirect(auth, provider); } catch (e2) { alert("Error con Facebook: " + e2.message); }
+    } else { alert("Error con Facebook: " + e.message); }
+  }
 };
 
 window.loginApple = async () => {
   const provider = new OAuthProvider("apple.com");
   try {
-    if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
-      await signInWithRedirect(auth, provider);
-    } else {
-      await signInWithPopup(auth, provider);
-    }
-  } catch (e) { alert("Error con Apple: " + e.message); }
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    if (e.code === "auth/popup-blocked" || e.code === "auth/popup-closed-by-user") {
+      try { await signInWithRedirect(auth, provider); } catch (e2) { alert("Error con Apple: " + e2.message); }
+    } else { alert("Error con Apple: " + e.message); }
+  }
 };
 
 window.loginAnonimo = async () => {
