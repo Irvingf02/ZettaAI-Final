@@ -332,9 +332,19 @@
     body:has(#sidebar.sidebar-open) {
       padding-left: 300px;
     }
+
+    #sidebar {
+      transform: none !important;
+      transition: width 0.25s ease;
+    }
     
     .sidebar-header .menu-btn {
       display: flex;
+    }
+
+    #appDiv {
+      width: 100%;
+      transition: none;
     }
   }
 
@@ -3195,11 +3205,23 @@ function updateUI() {
 
 window.toggleSidebar = function() {
   const sidebar = document.getElementById("sidebar");
-  if (sidebar.classList.contains("sidebar-open")) {
+  const isOpen  = sidebar.classList.contains("sidebar-open");
+
+  if (isOpen) {
     sidebar.classList.remove("sidebar-open");
   } else {
     sidebar.classList.add("sidebar-open");
     loadChatHistory();
+  }
+
+  // Forzar reflow en desktop para evitar bug de layout residual
+  if (window.innerWidth >= 1024) {
+    const appDiv = document.getElementById("appDiv");
+    if (appDiv) {
+      appDiv.style.display = "none";
+      void appDiv.offsetHeight; // trigger reflow
+      appDiv.style.display = "flex";
+    }
   }
 };
 
