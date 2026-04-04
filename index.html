@@ -2307,10 +2307,202 @@
     .gems-body { padding: 16px; }
     .gems-empty-banner { flex-direction: column; }
   }
+
+  /* ── MODAL DETALLE PERL (Labs) ──────────────────────────────────────────── */
+  #perlDetailModal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+    z-index: 400; align-items: center; justify-content: center; padding: 0;
+  }
+  #perlDetailModal.show { display: flex; }
+
+  .perldetail-wrap {
+    display: flex; width: 100%; max-width: 900px; height: 92vh;
+    border-radius: 20px; overflow: hidden;
+    animation: fadeUp 0.25s ease;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    margin: auto;
+  }
+
+  /* Panel izquierdo */
+  .perldetail-left {
+    width: 320px; flex-shrink: 0;
+    background: var(--card); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+
+  .perldetail-left-top {
+    padding: 18px 20px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .perldetail-name-badge { display: flex; align-items: center; gap: 10px; }
+  .perldetail-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .perldetail-exp {
+    font-size: 0.6rem; border: 1px solid var(--muted); color: var(--muted);
+    border-radius: 8px; padding: 2px 7px; font-weight: 600;
+  }
+
+  .perldetail-prompt-box {
+    margin: 14px 16px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .perldetail-prompt-label {
+    font-size: 0.72rem; color: var(--muted); margin-bottom: 6px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .perldetail-prompt-text { font-size: 0.8rem; color: var(--text); line-height: 1.5; }
+
+  .perldetail-steps { padding: 0 16px 16px; flex: 1; overflow-y: auto; }
+  .perldetail-steps-title { font-size: 0.82rem; font-weight: 600; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .perldetail-step {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .perldetail-step:hover { border-color: var(--accent); }
+  .perldetail-step-chevron { color: var(--muted); font-size: 0.8rem; }
+  .perldetail-step-icon { font-size: 1rem; }
+  .perldetail-step-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+
+  .perldetail-edit-area {
+    margin: 14px 16px; padding: 0;
+    border-top: 1px solid var(--border); padding-top: 14px; flex-shrink: 0;
+  }
+  .perldetail-edit-input {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 40px 10px 14px;
+    color: var(--text); font-size: 0.82rem; outline: none;
+    position: relative; resize: none; height: 44px;
+    font-family: 'Inter', sans-serif;
+  }
+  .perldetail-edit-input::placeholder { color: var(--muted); }
+  .perldetail-edit-input:focus { border-color: var(--accent); }
+  .perldetail-edit-wrap { position: relative; }
+  .perldetail-send {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem;
+  }
+  .perldetail-note {
+    font-size: 0.68rem; color: var(--muted); text-align: center;
+    padding: 8px 16px 14px; line-height: 1.4;
+  }
+
+  /* Panel derecho */
+  .perldetail-right {
+    flex: 1; display: flex; flex-direction: column; position: relative;
+  }
+  .perldetail-right-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px; background: rgba(0,0,0,0.3); position: absolute; top: 0; left: 0; right: 0; z-index: 2;
+  }
+  .perldetail-right-title { font-size: 0.88rem; font-weight: 600; color: white; display: flex; align-items: center; gap: 8px; }
+  .perldetail-right-actions { display: flex; align-items: center; gap: 16px; }
+  .perldetail-action-btn {
+    background: none; border: none; color: rgba(255,255,255,0.8);
+    font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    transition: color 0.15s;
+  }
+  .perldetail-action-btn:hover { color: white; }
+  .perldetail-close-btn {
+    background: none; border: none; color: rgba(255,255,255,0.7);
+    font-size: 1.1rem; cursor: pointer; width: 30px; height: 30px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .perldetail-close-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+
+  .perldetail-hero {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    padding: 60px 32px 32px; position: relative;
+  }
+  .perldetail-hero-emoji { font-size: 5rem; margin-bottom: 20px; }
+  .perldetail-hero-name { font-size: 2rem; font-weight: 800; margin-bottom: 10px; }
+  .perldetail-hero-desc { font-size: 1rem; margin-bottom: 28px; opacity: 0.85; }
+  .perldetail-start-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 32px; border: none; border-radius: 28px;
+    font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .perldetail-start-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+  /* ── MODAL NUEVA PERL ───────────────────────────────────────────────────── */
+  #nuevaPerlModal {
+    display: none; position: fixed; inset: 0;
+    background: var(--bg); z-index: 400;
+    flex-direction: column; align-items: center;
+    overflow-y: auto; padding: 40px 16px 80px;
+  }
+  #nuevaPerlModal.show { display: flex; }
+
+  .nuevaperl-close {
+    position: fixed; top: 16px; right: 20px;
+    background: none; border: none; color: var(--muted); font-size: 1.3rem;
+    cursor: pointer; z-index: 10; width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+  }
+  .nuevaperl-close:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+  .nuevaperl-title {
+    font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800;
+    color: var(--text); text-align: center; margin-bottom: 36px; max-width: 680px;
+  }
+
+  .nuevaperl-inspiration { width: 100%; max-width: 800px; margin-bottom: 40px; }
+  .nuevaperl-inspiration-title {
+    font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 16px;
+  }
+  .nuevaperl-prompts {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;
+  }
+  .nuevaperl-prompt-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 14px; cursor: pointer;
+    transition: all 0.2s; display: flex; flex-direction: column; gap: 10px;
+  }
+  .nuevaperl-prompt-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .nuevaperl-prompt-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(100,80,220,0.2); display: flex;
+    align-items: center; justify-content: center; font-size: 16px;
+  }
+  .nuevaperl-prompt-text { font-size: 0.8rem; color: var(--text); line-height: 1.5; }
+
+  .nuevaperl-input-area { width: 100%; max-width: 800px; }
+  .nuevaperl-input-wrap {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 16px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .nuevaperl-input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-size: 0.95rem; font-family: 'Inter', sans-serif;
+  }
+  .nuevaperl-input::placeholder { color: var(--muted); }
+  .nuevaperl-submit {
+    background: var(--accent); border: none; border-radius: 50%;
+    width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+    color: #000; font-size: 1rem; cursor: pointer; flex-shrink: 0; transition: all 0.2s;
+  }
+  .nuevaperl-submit:hover { background: #33DDFF; transform: scale(1.05); }
+  .nuevaperl-note {
+    text-align: center; font-size: 0.75rem; color: var(--muted);
+    margin-top: 16px; line-height: 1.5;
+  }
+
+  @media (max-width: 700px) {
+    .perldetail-wrap { flex-direction: column; height: 95vh; border-radius: 16px; }
+    .perldetail-left { width: 100%; height: 40%; border-right: none; border-bottom: 1px solid var(--border); }
+    .nuevaperl-prompts { grid-template-columns: 1fr 1fr; }
+  }
 </style>
 
 
 <body>
+
+<button class="menu-toggle-mobile" id="mobilMenuBtn" onclick="toggleSidebar()">☰</button>
 
 <!-- LOGIN -->
 <div id="loginDiv">
@@ -2346,8 +2538,6 @@
     </button>
   </div>
 </div>
-
-<button class="menu-toggle-mobile" id="mobilMenuBtn" onclick="toggleSidebar()">☰</button>
 
 <!-- SIDEBAR -->
 <div id="sidebar" style="display:none;">
@@ -2476,6 +2666,77 @@
 
 </div><!-- fin #appDiv -->
 
+
+<!-- MODAL DETALLE PERL LABS -->
+<div id="perlDetailModal">
+  <div class="perldetail-wrap">
+    <!-- Panel izquierdo -->
+    <div class="perldetail-left">
+      <div class="perldetail-left-top">
+        <div class="perldetail-name-badge">
+          <span class="perldetail-title" id="pdTitle"></span>
+          <span class="perldetail-exp">EXPERIMENTAL</span>
+        </div>
+      </div>
+      <div class="perldetail-prompt-box">
+        <div class="perldetail-prompt-label">
+          <span>Prompt original:</span>
+          <span style="color:var(--accent);cursor:pointer;">▾</span>
+        </div>
+        <div class="perldetail-prompt-text" id="pdPrompt"></div>
+      </div>
+      <div class="perldetail-steps">
+        <div class="perldetail-steps-title">Pasos</div>
+        <div id="pdSteps"></div>
+      </div>
+      <div class="perldetail-edit-area">
+        <div class="perldetail-edit-wrap">
+          <input class="perldetail-edit-input" id="pdEditInput" placeholder="Edita estos pasos" />
+          <button class="perldetail-send" onclick="sendPerlEdit()">➤</button>
+        </div>
+      </div>
+      <div class="perldetail-note" id="pdNote"></div>
+    </div>
+    <!-- Panel derecho -->
+    <div class="perldetail-right" id="pdRight">
+      <div class="perldetail-right-top">
+        <div class="perldetail-right-title" id="pdRightTitle"></div>
+        <div class="perldetail-right-actions">
+          <button class="perldetail-action-btn">↗ Abrir editor avanzado</button>
+          <button class="perldetail-action-btn" onclick="remixPerl()">⟳ Remix</button>
+          <button class="perldetail-close-btn" onclick="closePerlDetail()">✕</button>
+        </div>
+      </div>
+      <div class="perldetail-hero">
+        <div class="perldetail-hero-emoji" id="pdEmoji"></div>
+        <div class="perldetail-hero-name" id="pdHeroName"></div>
+        <div class="perldetail-hero-desc" id="pdHeroDesc"></div>
+        <button class="perldetail-start-btn" id="pdStartBtn" onclick="startPerl()">✦ Iniciar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVA PERL -->
+<div id="nuevaPerlModal">
+  <button class="nuevaperl-close" onclick="closeNuevaPerl()">✕</button>
+  <div class="nuevaperl-title">Describe la miniapp de IA que quieres crear</div>
+  <div class="nuevaperl-inspiration">
+    <div class="nuevaperl-inspiration-title">¿Buscas inspiración? Prueba uno de estos prompts</div>
+    <div class="nuevaperl-prompts" id="nuevaPerlPrompts">
+      <!-- inyectado por JS -->
+    </div>
+  </div>
+  <div class="nuevaperl-input-area">
+    <div class="nuevaperl-input-wrap">
+      <input class="nuevaperl-input" id="nuevaPerlInput" placeholder="Edita estos pasos" />
+      <button class="nuevaperl-submit" onclick="submitNuevaPerl()">➤</button>
+    </div>
+    <div class="nuevaperl-note">
+      Esta Perl está desarrollada por ZettaxAI. Puede cometer errores, así que verifica la información importante.
+    </div>
+  </div>
+</div>
 
 <!-- MODAL GEMS -->
 <div id="gemsModal">
@@ -3516,13 +3777,165 @@ window.toggleGemsExtra = function() {
 
 window.nuevaGem = function() {
   closeGems();
-  setTimeout(function() {
-    const toast = document.createElement("div");
-    toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--accent);color:var(--text);padding:12px 24px;border-radius:14px;font-size:0.82rem;z-index:9999;animation:fadeUp 0.3s ease;text-align:center;";
-    toast.innerHTML = "🪩 <strong>Nueva Perl</strong><br><span style='color:var(--muted);font-size:0.75rem;'>Esta función estará disponible próximamente.</span>";
-    document.body.appendChild(toast);
-    setTimeout(function() { toast.remove(); }, 3500);
-  }, 200);
+  // Poblar prompts de inspiración
+  const prompts = [
+    { icon: "🎯", text: "Ayúdame a prepararme para un examen creando preguntas de práctica con pistas como un quiz interactivo" },
+    { icon: "🍽️", text: "Analiza una foto de mi refrigerador y genera recetas con fotos del platillo final" },
+    { icon: "📋", text: "Analiza la transcripción de una reunión y redacta un correo con los puntos clave y acciones a seguir" },
+    { icon: "📄", text: "Toma un currículum y una descripción de trabajo, y genera una crítica detallada del perfil del candidato" },
+  ];
+  const container = document.getElementById("nuevaPerlPrompts");
+  if (container) {
+    container.innerHTML = prompts.map(function(p) {
+      return '<div class="nuevaperl-prompt-card" onclick="usarPromptNuevaPerl(\'' + p.text.replace(/'/g, "\\'") + '\')">'
+        + '<div class="nuevaperl-prompt-icon">' + p.icon + '</div>'
+        + '<div class="nuevaperl-prompt-text">' + p.text + '</div>'
+        + '</div>';
+    }).join("");
+  }
+  document.getElementById("nuevaPerlInput").value = "";
+  document.getElementById("nuevaPerlModal").classList.add("show");
+};
+
+window.closeNuevaPerl = function() {
+  document.getElementById("nuevaPerlModal").classList.remove("show");
+};
+
+window.usarPromptNuevaPerl = function(texto) {
+  document.getElementById("nuevaPerlInput").value = texto;
+  document.getElementById("nuevaPerlInput").focus();
+};
+
+window.submitNuevaPerl = function() {
+  const val = document.getElementById("nuevaPerlInput").value.trim();
+  if (!val) return;
+  closeNuevaPerl();
+  const toast = document.createElement("div");
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--accent);color:var(--text);padding:12px 24px;border-radius:14px;font-size:0.82rem;z-index:9999;animation:fadeUp 0.3s ease;text-align:center;max-width:90vw;";
+  toast.innerHTML = "🪩 <strong>Perl creada</strong><br><span style='color:var(--muted);font-size:0.75rem;'>Esta función estará disponible con el backend. ¡Pronto!</span>";
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.remove(); }, 3500);
+};
+
+// Datos detallados de cada Perl de Labs
+const PERL_DETAIL_DATA = {
+  "Chef Inteligente": {
+    emoji: "🍳",
+    desc: "Convierte los ingredientes que tienes en recetas deliciosas y personalizadas",
+    gradient: "linear-gradient(135deg,#1a1a2e,#4a1942)",
+    heroColor: "#fff",
+    btnBg: "#2d4a1e", btnColor: "#a8e063",
+    prompt: "Una app que toma una foto de los alimentos disponibles, identifica los ingredientes y genera recetas creativas con instrucciones paso a paso.",
+    steps: [
+      { icon: "📸", name: "Ingresar ingredientes" },
+      { icon: "✨", name: "Generar recetas" },
+      { icon: "📋", name: "Mostrar resultado" },
+    ],
+    note: "Esta Perl está desarrollada por ZettaxAI Labs. Puede cometer errores."
+  },
+  "Estratega Digital": {
+    emoji: "📱",
+    desc: "Diseña tu estrategia de redes sociales y marketing con IA a tu lado",
+    gradient: "linear-gradient(135deg,#0f3460,#533483)",
+    heroColor: "#fff",
+    btnBg: "#1a3a6e", btnColor: "#7eb8ff",
+    prompt: "Una app que analiza tu nicho, audiencia y objetivos para generar una estrategia completa de contenido y marketing digital.",
+    steps: [
+      { icon: "🎯", name: "Definir audiencia" },
+      { icon: "📊", name: "Analizar estrategia" },
+      { icon: "📅", name: "Generar calendario" },
+    ],
+    note: "Esta Perl está desarrollada por ZettaxAI Labs. Puede cometer errores."
+  },
+  "Explica con Arte": {
+    emoji: "🎨",
+    desc: "Convierte cualquier tema complejo en una explicación visual y creativa",
+    gradient: "linear-gradient(135deg,#134e5e,#1a6b4a)",
+    heroColor: "#fff",
+    btnBg: "#0d3d2e", btnColor: "#5dcfa0",
+    prompt: "Una app que recibe un tema complejo y lo convierte en una explicación visual con analogías creativas y ejemplos del mundo real.",
+    steps: [
+      { icon: "📝", name: "Ingresar tema" },
+      { icon: "🎭", name: "Crear explicación visual" },
+      { icon: "💡", name: "Mostrar resultado creativo" },
+    ],
+    note: "Esta Perl está desarrollada por ZettaxAI Labs. Puede cometer errores."
+  },
+  "Tutor de YouTube": {
+    emoji: "🎬",
+    desc: "Aprende de cualquier video: convierte contenido en resúmenes y quizzes",
+    gradient: "linear-gradient(135deg,#7b0000,#3a0000)",
+    heroColor: "#fff",
+    btnBg: "#5a0000", btnColor: "#ff8a80",
+    prompt: "Una app que toma la URL de un video de YouTube, extrae el contenido y genera un resumen, puntos clave y un quiz interactivo para reforzar el aprendizaje.",
+    steps: [
+      { icon: "🔗", name: "Ingresar video" },
+      { icon: "📖", name: "Generar resumen" },
+      { icon: "❓", name: "Crear quiz" },
+    ],
+    note: "Esta Perl está desarrollada por ZettaxAI Labs. Puede cometer errores."
+  }
+};
+
+window.openPerlDetail = function(name) {
+  const data = PERL_DETAIL_DATA[name];
+  if (!data) return;
+
+  document.getElementById("pdTitle").textContent      = name;
+  document.getElementById("pdEmoji").textContent      = data.emoji;
+  document.getElementById("pdHeroName").textContent   = name;
+  document.getElementById("pdHeroDesc").textContent   = data.desc;
+  document.getElementById("pdPrompt").textContent     = data.prompt;
+  document.getElementById("pdNote").textContent       = data.note;
+  document.getElementById("pdRightTitle").innerHTML   = '<span>' + data.emoji + '</span><span>' + name + '</span>';
+
+  // Hero background
+  const right = document.getElementById("pdRight");
+  right.style.background = data.gradient;
+  right.style.color = data.heroColor;
+
+  // Start button
+  const btn = document.getElementById("pdStartBtn");
+  btn.style.background = data.btnBg;
+  btn.style.color = data.btnColor;
+  btn.dataset.perl = name;
+
+  // Steps
+  document.getElementById("pdSteps").innerHTML = data.steps.map(function(s) {
+    return '<div class="perldetail-step">'
+      + '<span class="perldetail-step-chevron">›</span>'
+      + '<span class="perldetail-step-icon">' + s.icon + '</span>'
+      + '<span class="perldetail-step-name">' + s.name + '</span>'
+      + '</div>';
+  }).join("");
+
+  document.getElementById("perlDetailModal").classList.add("show");
+};
+
+window.closePerlDetail = function() {
+  document.getElementById("perlDetailModal").classList.remove("show");
+};
+
+window.startPerl = function() {
+  const name = document.getElementById("pdStartBtn").dataset.perl;
+  closePerlDetail();
+  closeGems();
+  const modos = { "Chef Inteligente": "chat", "Estratega Digital": "chat", "Explica con Arte": "ideas", "Tutor de YouTube": "resumen" };
+  if (window.setMode) setMode(modos[name] || "chat");
+  const input = document.getElementById("input");
+  if (input) { input.focus(); }
+};
+
+window.remixPerl = function() {
+  closePerlDetail();
+  setTimeout(nuevaGem, 200);
+};
+
+window.sendPerlEdit = function() {
+  const val = document.getElementById("pdEditInput").value.trim();
+  if (!val) return;
+  document.getElementById("pdEditInput").value = "";
+  showCtxToast("✅ Paso editado guardado");
 };
 
 function renderGems() {
@@ -3544,7 +3957,7 @@ function renderGems() {
   }).join("");
 
   labsGrid.innerHTML = GEMS_LABS.map(function(g) {
-    return '<div class="gem-lab-card">'
+    return '<div class="gem-lab-card" onclick="openPerlDetail(\'' + g.name.replace(/'/g, "\\'") + '\')">'
       + '<div class="gem-lab-bg" style="background:' + g.gradient + ';font-size:4rem;display:flex;align-items:center;justify-content:center;">' + g.emoji + '</div>'
       + '<div class="gem-lab-overlay"></div>'
       + '<div class="gem-lab-info">'
