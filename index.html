@@ -2312,8 +2312,6 @@
 
 <body>
 
-<button class="menu-toggle-mobile" id="mobilMenuBtn" onclick="toggleSidebar()">☰</button>
-
 <!-- LOGIN -->
 <div id="loginDiv">
   <div class="login-logo">🤖</div>
@@ -2349,6 +2347,8 @@
   </div>
 </div>
 
+<button class="menu-toggle-mobile" id="mobilMenuBtn" onclick="toggleSidebar()">☰</button>
+
 <!-- SIDEBAR -->
 <div id="sidebar" style="display:none;">
   <div class="sidebar-header">
@@ -2367,8 +2367,8 @@
       <span class="text">Mis cosas</span>
     </button>
     <button class="sidebar-item" onclick="showGems()">
-      <span class="icon">💎</span>
-      <span class="text">Gems</span>
+      <span class="icon">🪩</span>
+      <span class="text">Perls</span>
       <span class="chevron">›</span>
     </button>
   </div>
@@ -2481,7 +2481,7 @@
 <div id="gemsModal">
   <div class="gems-card">
     <div class="gems-top">
-      <h2>💎 Administrador de Gems</h2>
+      <h2>🪩 Administrador de Perls</h2>
       <button class="gems-close" onclick="closeGems()">✕</button>
     </div>
     <div class="gems-body">
@@ -2490,8 +2490,8 @@
       <div class="gems-banner">
         <div class="gems-banner-icon">🧪</div>
         <div class="gems-banner-text">
-          <h4>Crea miniapps de IA, un nuevo tipo de Gem</h4>
-          <p>Crea y comparte versiones personalizadas de ZettaxAI con flujos de trabajo adaptados a tus necesidades. Prueba una Gem prediseñada o crea la tuya.</p>
+          <h4>Crea miniapps de IA, un nuevo tipo de Perl</h4>
+          <p>Crea y comparte versiones personalizadas de ZettaxAI con flujos de trabajo adaptados a tus necesidades. Prueba una Perl prediseñada o crea la tuya.</p>
         </div>
       </div>
 
@@ -2509,7 +2509,7 @@
       <!-- Gems de Labs -->
       <div>
         <div class="gems-section-header">
-          <div class="gems-section-title">🧪 Gems made by Labs</div>
+          <div class="gems-section-title">🧪 Perls made by Labs</div>
         </div>
         <div class="gems-labs-grid" id="gemsLabsGrid">
           <!-- inyectado por JS -->
@@ -2519,8 +2519,8 @@
       <!-- Mis Gems -->
       <div>
         <div class="gems-mis-header">
-          <div class="gems-mis-title">Mis Gems <span style="font-size:0.8rem;color:var(--muted);font-weight:400;">ⓘ</span></div>
-          <button class="gems-nueva-btn" onclick="nuevaGem()">+ Nueva Gem</button>
+          <div class="gems-mis-title">Mis Perls <span style="font-size:0.8rem;color:var(--muted);font-weight:400;">ⓘ</span></div>
+          <button class="gems-nueva-btn" onclick="nuevaGem()">+ Nueva Perl</button>
         </div>
         <div class="gems-empty-banner" id="misGemsContent">
           <div class="gems-empty-icons">
@@ -2530,8 +2530,8 @@
             <div class="gems-empty-icon" style="background:rgba(80,160,100,0.2);">🎨</div>
           </div>
           <div class="gems-empty-text">
-            <h4>Descubre, crea y administra Gems</h4>
-            <p>Las Gems son versiones de ZettaxAI personalizadas que te brindan respuestas adaptadas a tus necesidades. Puedes personalizar una Gem prediseñada o crear una nueva desde cero con las indicaciones que establezcas.</p>
+            <h4>Descubre, crea y administra Perls</h4>
+            <p>Las Perls son versiones de ZettaxAI personalizadas que te brindan respuestas adaptadas a tus necesidades. Puedes personalizar una Perl prediseñada o crear una nueva desde cero con las indicaciones que establezcas.</p>
             <div class="gems-empty-actions">
               <button class="gems-empty-discard" onclick="document.getElementById('misGemsContent').style.display='none'">Descartar</button>
             </div>
@@ -3490,10 +3490,10 @@ const GEMS_PREDISEÑADAS = [
 ];
 
 const GEMS_LABS = [
-  { name: "Recipe Genie",        desc: "Transform your fridge leftovers into delicious meals", gradient: "linear-gradient(135deg,#1a1a2e,#16213e)" },
-  { name: "Marketing Maven",     desc: "Brainstorms with you on content and marketing strategy", gradient: "linear-gradient(135deg,#2d1b69,#11998e)" },
-  { name: "Claymation Explainer",desc: "Turn any topic into an animated claymation infographic", gradient: "linear-gradient(135deg,#134e5e,#71b280)" },
-  { name: "Learning with YouTube",desc: "Turn your YouTube video into a quiz to help you learn", gradient: "linear-gradient(135deg,#3a0000,#750000)" },
+  { name: "Chef Inteligente",      desc: "Convierte los ingredientes que tienes en recetas deliciosas y personalizadas", gradient: "linear-gradient(135deg,#1a1a2e,#4a1942)", emoji: "🍳" },
+  { name: "Estratega Digital",     desc: "Diseña tu estrategia de redes sociales y marketing con IA a tu lado", gradient: "linear-gradient(135deg,#0f3460,#533483)", emoji: "📱" },
+  { name: "Explica con Arte",      desc: "Convierte cualquier tema complejo en una explicación visual y creativa", gradient: "linear-gradient(135deg,#134e5e,#1a6b4a)", emoji: "🎨" },
+  { name: "Tutor de YouTube",      desc: "Aprende de cualquier video: convierte contenido en resúmenes y quizzes", gradient: "linear-gradient(135deg,#7b0000,#3a0000)", emoji: "🎬" },
 ];
 
 let gemsExpanded = false;
@@ -3519,7 +3519,7 @@ window.nuevaGem = function() {
   setTimeout(function() {
     const toast = document.createElement("div");
     toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--accent);color:var(--text);padding:12px 24px;border-radius:14px;font-size:0.82rem;z-index:9999;animation:fadeUp 0.3s ease;text-align:center;";
-    toast.innerHTML = "💎 <strong>Nueva Gem</strong><br><span style='color:var(--muted);font-size:0.75rem;'>Esta función estará disponible próximamente.</span>";
+    toast.innerHTML = "🪩 <strong>Nueva Perl</strong><br><span style='color:var(--muted);font-size:0.75rem;'>Esta función estará disponible próximamente.</span>";
     document.body.appendChild(toast);
     setTimeout(function() { toast.remove(); }, 3500);
   }, 200);
@@ -3543,10 +3543,9 @@ function renderGems() {
       + '</div>';
   }).join("");
 
-  const labEmojis = ["🍳","📢","🎭","📺"];
-  labsGrid.innerHTML = GEMS_LABS.map(function(g, i) {
+  labsGrid.innerHTML = GEMS_LABS.map(function(g) {
     return '<div class="gem-lab-card">'
-      + '<div class="gem-lab-bg" style="background:' + g.gradient + ';font-size:4rem;display:flex;align-items:center;justify-content:center;">' + labEmojis[i] + '</div>'
+      + '<div class="gem-lab-bg" style="background:' + g.gradient + ';font-size:4rem;display:flex;align-items:center;justify-content:center;">' + g.emoji + '</div>'
       + '<div class="gem-lab-overlay"></div>'
       + '<div class="gem-lab-info">'
       + '<div class="gem-lab-name">' + g.name + '</div>'
