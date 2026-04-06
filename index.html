@@ -2515,6 +2515,120 @@
     .perldetail-left { width: 100%; height: 40%; border-right: none; border-bottom: 1px solid var(--border); }
     .nuevaperl-prompts { grid-template-columns: 1fr 1fr; }
   }
+
+  /* ── SELECTOR ESTILO IMAGEN ─────────────────────────────────────────────── */
+  #imgStyleModal {
+    display: none; position: fixed; inset: 0;
+    background: var(--bg); z-index: 350;
+    flex-direction: column; overflow-y: auto;
+    padding: 32px 24px 100px;
+  }
+  #imgStyleModal.show { display: flex; }
+
+  .imgstyle-close {
+    position: fixed; top: 14px; right: 18px; z-index: 10;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); font-size: 1.1rem; cursor: pointer;
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .imgstyle-close:hover { background: var(--surface); color: var(--text); }
+
+  .imgstyle-title {
+    font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800;
+    color: var(--text); margin-bottom: 28px; max-width: 900px;
+  }
+
+  .imgstyle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px; max-width: 1000px; width: 100%;
+  }
+
+  .imgstyle-card {
+    border-radius: 16px; overflow: hidden; cursor: pointer;
+    position: relative; aspect-ratio: 4/3;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 3px solid transparent;
+  }
+  .imgstyle-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .imgstyle-card.selected { border-color: var(--accent); }
+
+  .imgstyle-bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    transition: transform 0.3s;
+  }
+  .imgstyle-card:hover .imgstyle-bg { transform: scale(1.05); }
+
+  .imgstyle-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%);
+  }
+
+  .imgstyle-label {
+    position: absolute; bottom: 10px; left: 12px;
+    font-size: 0.88rem; font-weight: 700; color: white;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  }
+
+  /* Barra inferior al seleccionar estilo */
+  #imgStyleBar {
+    display: none; position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--card); border-top: 1px solid var(--border);
+    padding: 14px 20px; z-index: 360;
+    flex-direction: column; gap: 10px;
+  }
+  #imgStyleBar.show { display: flex; }
+
+  .imgstyle-bar-top {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .imgstyle-bar-thumb {
+    width: 52px; height: 52px; border-radius: 10px;
+    overflow: hidden; flex-shrink: 0; border: 2px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+  }
+  .imgstyle-bar-info { flex: 1; }
+  .imgstyle-bar-name { font-size: 0.85rem; font-weight: 700; color: var(--text); }
+  .imgstyle-bar-hint { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+  .imgstyle-bar-input-row {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 24px; padding: 10px 16px;
+  }
+  .imgstyle-bar-input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-size: 0.9rem; font-family: 'Inter', sans-serif;
+  }
+  .imgstyle-bar-input::placeholder { color: var(--muted); }
+  .imgstyle-bar-actions { display: flex; align-items: center; gap: 10px; }
+  .imgstyle-bar-icon-btn {
+    background: none; border: none; color: var(--muted);
+    font-size: 1rem; cursor: pointer; padding: 4px; border-radius: 6px;
+    transition: color 0.15s;
+  }
+  .imgstyle-bar-icon-btn:hover { color: var(--accent); }
+  .imgstyle-bar-send {
+    background: var(--accent); border: none; border-radius: 50%;
+    width: 34px; height: 34px; display: flex; align-items: center;
+    justify-content: center; color: #000; font-size: 1rem;
+    cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+  }
+  .imgstyle-bar-send:hover { background: #33DDFF; transform: scale(1.05); }
+  .imgstyle-bar-cancel {
+    background: none; border: none; color: var(--muted);
+    font-size: 0.82rem; cursor: pointer; padding: 4px 8px;
+    transition: color 0.15s;
+  }
+  .imgstyle-bar-cancel:hover { color: var(--danger); }
+
+  @media (max-width: 500px) {
+    .imgstyle-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  }
 </style>
 
 
@@ -2684,6 +2798,34 @@
 
 </div><!-- fin #appDiv -->
 
+
+<!-- SELECTOR ESTILO IMAGEN -->
+<div id="imgStyleModal">
+  <button class="imgstyle-close" onclick="closeImgStyle()">✕</button>
+  <div class="imgstyle-title">Elige un estilo para tu imagen</div>
+  <div class="imgstyle-grid" id="imgStyleGrid"><!-- inyectado por JS --></div>
+</div>
+
+<!-- BARRA ESTILO SELECCIONADO -->
+<div id="imgStyleBar">
+  <div class="imgstyle-bar-top">
+    <div class="imgstyle-bar-thumb" id="imgStyleBarThumb"></div>
+    <div class="imgstyle-bar-info">
+      <div class="imgstyle-bar-name" id="imgStyleBarName"></div>
+      <div class="imgstyle-bar-hint">Agrega una foto y describe los cambios</div>
+    </div>
+    <button class="imgstyle-bar-cancel" onclick="cancelImgStyle()">✕</button>
+  </div>
+  <div class="imgstyle-bar-input-row">
+    <div class="imgstyle-bar-actions">
+      <button class="imgstyle-bar-icon-btn" title="Adjuntar" onclick="document.getElementById('fileInput').click()">+</button>
+      <button class="imgstyle-bar-icon-btn" title="Opciones">⚙</button>
+      <span style="font-size:0.75rem;color:var(--accent);cursor:pointer;white-space:nowrap;" onclick="openImgStyle()">🖼 Crear imagen &nbsp;✕</span>
+    </div>
+    <input class="imgstyle-bar-input" id="imgStyleInput" placeholder="Describe la imagen que quieres crear..." onkeypress="if(event.key==='Enter') sendImgStyled()" />
+    <button class="imgstyle-bar-send" onclick="sendImgStyled()">➤</button>
+  </div>
+</div>
 
 <!-- MODAL DETALLE PERL LABS -->
 <div id="perlDetailModal">
@@ -4712,6 +4854,88 @@ window.setMode = (m) => {
     codigo: "¿Qué código necesitas? Describe o pega tu código aquí..."
   };
   document.getElementById("input").placeholder = placeholders[m] || "Escribe un mensaje...";
+
+  // Abrir selector de estilo al activar modo imagen
+  if (m === "imagen") {
+    openImgStyle();
+  }
+};
+
+// ── ESTILOS DE IMAGEN ──────────────────────────────────────────────────────
+const IMG_STYLES = [
+  { name: "Monocromo",           emoji: "🖤", gradient: "linear-gradient(135deg,#1a1a1a,#3a3a3a)" },
+  { name: "Color",               emoji: "🌈", gradient: "linear-gradient(135deg,#00c9ff,#92fe9d)" },
+  { name: "Pista",               emoji: "🌃", gradient: "linear-gradient(135deg,#0f0c29,#302b63,#24243e)" },
+  { name: "Risografía",          emoji: "🎨", gradient: "linear-gradient(135deg,#ff416c,#ff4b2b)" },
+  { name: "Tecnicolor",          emoji: "🔮", gradient: "linear-gradient(135deg,#4776e6,#8e54e9)" },
+  { name: "Arcilla gótica",      emoji: "🏰", gradient: "linear-gradient(135deg,#1f1c2c,#928dab)" },
+  { name: "Dinamita",            emoji: "💥", gradient: "linear-gradient(135deg,#f7971e,#ffd200)" },
+  { name: "Salón",               emoji: "🪑", gradient: "linear-gradient(135deg,#c9d6df,#e2ebf0)" },
+  { name: "Boceto a mano",       emoji: "✏️", gradient: "linear-gradient(135deg,#d3cce3,#e9e4f0)" },
+  { name: "Cinematográfico",     emoji: "🎬", gradient: "linear-gradient(135deg,#0f2027,#203a43,#2c5364)" },
+  { name: "Steampunk",           emoji: "⚙️", gradient: "linear-gradient(135deg,#3e1f00,#8b4513)" },
+  { name: "Amanecer",            emoji: "🌅", gradient: "linear-gradient(135deg,#f83600,#f9d423)" },
+  { name: "Lucha mítica",        emoji: "⚔️", gradient: "linear-gradient(135deg,#232526,#414345)" },
+  { name: "Surrealista",         emoji: "🌀", gradient: "linear-gradient(135deg,#c94b4b,#4b134f)" },
+  { name: "Misterio",            emoji: "🔍", gradient: "linear-gradient(135deg,#0d0d0d,#1a237e)" },
+  { name: "Prendedor",           emoji: "📌", gradient: "linear-gradient(135deg,#e0e0e0,#f5f5f5)" },
+  { name: "Cyborg",              emoji: "🤖", gradient: "linear-gradient(135deg,#00b4db,#0083b0)" },
+  { name: "Retrato tenue",       emoji: "🕯️", gradient: "linear-gradient(135deg,#3d3d3d,#7f7f7f)" },
+  { name: "Dibujo animado antiguo", emoji: "📺", gradient: "linear-gradient(135deg,#f5f5f5,#c8c8c8)" },
+  { name: "Pintura al óleo",     emoji: "🖌️", gradient: "linear-gradient(135deg,#c79081,#dfa579)" },
+];
+
+let selectedImgStyle = null;
+
+window.openImgStyle = function() {
+  // Renderizar grid
+  const grid = document.getElementById("imgStyleGrid");
+  grid.innerHTML = IMG_STYLES.map(function(s) {
+    const isSelected = selectedImgStyle && selectedImgStyle.name === s.name;
+    return '<div class="imgstyle-card' + (isSelected ? ' selected' : '') + '" onclick="selectImgStyle(\'' + s.name.replace(/'/g, "\\'") + '\')">'
+      + '<div class="imgstyle-bg" style="background:' + s.gradient + ';display:flex;align-items:center;justify-content:center;font-size:3.5rem;">' + s.emoji + '</div>'
+      + '<div class="imgstyle-overlay"></div>'
+      + '<div class="imgstyle-label">' + s.name + '</div>'
+      + '</div>';
+  }).join("");
+  document.getElementById("imgStyleModal").classList.add("show");
+};
+
+window.closeImgStyle = function() {
+  document.getElementById("imgStyleModal").classList.remove("show");
+};
+
+window.selectImgStyle = function(name) {
+  selectedImgStyle = IMG_STYLES.find(function(s) { return s.name === name; });
+  if (!selectedImgStyle) return;
+
+  // Actualizar barra inferior
+  document.getElementById("imgStyleBarThumb").textContent = selectedImgStyle.emoji;
+  document.getElementById("imgStyleBarThumb").style.background = selectedImgStyle.gradient;
+  document.getElementById("imgStyleBarName").textContent = selectedImgStyle.name;
+
+  // Cerrar modal y mostrar barra
+  closeImgStyle();
+  document.getElementById("imgStyleBar").classList.add("show");
+  document.getElementById("imgStyleInput").focus();
+};
+
+window.cancelImgStyle = function() {
+  selectedImgStyle = null;
+  document.getElementById("imgStyleBar").classList.remove("show");
+  document.getElementById("imgStyleInput").value = "";
+};
+
+window.sendImgStyled = function() {
+  const desc = document.getElementById("imgStyleInput").value.trim();
+  if (!desc || !selectedImgStyle) return;
+  const prompt = "Estilo " + selectedImgStyle.name + ": " + desc;
+  document.getElementById("imgStyleInput").value = "";
+  document.getElementById("imgStyleBar").classList.remove("show");
+  // Poner en el input principal y enviar
+  const input = document.getElementById("input");
+  input.value = prompt;
+  if (window.send) send();
 };
 
 function addMessage(text, role, extra = "") {
