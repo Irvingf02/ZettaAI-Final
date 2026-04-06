@@ -2362,9 +2362,27 @@
     transition: border-color 0.15s;
   }
   .perldetail-step:hover { border-color: var(--accent); }
-  .perldetail-step-chevron { color: var(--muted); font-size: 0.8rem; }
+  .perldetail-step-chevron { color: var(--muted); font-size: 0.8rem; cursor: pointer; transition: transform 0.2s; min-width: 16px; }
+  .perldetail-step-chevron.open { transform: rotate(90deg); color: var(--accent); }
   .perldetail-step-icon { font-size: 1rem; }
   .perldetail-step-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+
+  .perldetail-step-body {
+    display: none; padding: 10px 14px 14px 42px;
+    border-top: 1px solid var(--border); margin-top: 0;
+  }
+  .perldetail-step-body.open { display: block; }
+  .perldetail-step-question {
+    font-size: 0.72rem; color: var(--muted); margin-bottom: 6px;
+  }
+  .perldetail-step-input {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px; color: var(--text);
+    font-size: 0.82rem; font-family: 'Inter', sans-serif; outline: none;
+    transition: border-color 0.2s;
+  }
+  .perldetail-step-input:focus { border-color: var(--accent); }
+  .perldetail-step-input::placeholder { color: var(--muted); }
 
   .perldetail-edit-area {
     margin: 14px 16px; padding: 0;
@@ -3827,11 +3845,13 @@ const PERL_DETAIL_DATA = {
     btnBg: "#2d4a1e", btnColor: "#a8e063",
     prompt: "Una app que toma una foto de los alimentos disponibles, identifica los ingredientes y genera recetas creativas con instrucciones paso a paso.",
     steps: [
-      { icon: "📸", name: "Ingresar ingredientes" },
-      { icon: "✨", name: "Generar recetas" },
-      { icon: "📋", name: "Mostrar resultado" },
+      { icon: "📸", name: "Ingresar ingredientes", question: "¿Qué ingredientes tienes disponibles?", placeholder: "Ej: pollo, arroz, tomate, cebolla..." },
+      { icon: "✨", name: "Generar recetas",       question: "¿Qué tipo de cocina prefieres?",        placeholder: "Ej: mexicana, italiana, rápida y fácil..." },
+      { icon: "📋", name: "Mostrar resultado",     question: "¿Cuántas porciones necesitas?",          placeholder: "Ej: 2 personas, familia de 4..." },
     ],
-    note: "Esta Perl está desarrollada por ZettaxAI Labs. Puede cometer errores."
+    note: "Esta Perl está desarrollada por ZettaxAI Labs. Puede cometer errores.",
+    chatMode: "chat",
+    systemPrompt: "Eres un chef experto de ZettaxAI. El usuario te dará ingredientes disponibles y preferencias. Tu misión es crear recetas deliciosas, creativas y paso a paso adaptadas exactamente a lo que tiene. Sé entusiasta, detallado y práctico."
   },
   "Estratega Digital": {
     emoji: "📱",
@@ -3841,11 +3861,13 @@ const PERL_DETAIL_DATA = {
     btnBg: "#1a3a6e", btnColor: "#7eb8ff",
     prompt: "Una app que analiza tu nicho, audiencia y objetivos para generar una estrategia completa de contenido y marketing digital.",
     steps: [
-      { icon: "🎯", name: "Definir audiencia" },
-      { icon: "📊", name: "Analizar estrategia" },
-      { icon: "📅", name: "Generar calendario" },
+      { icon: "🎯", name: "Definir audiencia",    question: "¿Cuál es tu negocio o marca?",           placeholder: "Ej: tienda de ropa, restaurante, app de fitness..." },
+      { icon: "📊", name: "Analizar estrategia",  question: "¿En qué redes sociales quieres crecer?", placeholder: "Ej: Instagram, TikTok, LinkedIn..." },
+      { icon: "📅", name: "Generar calendario",   question: "¿Cuántas publicaciones por semana?",      placeholder: "Ej: 3 veces por semana, diario..." },
     ],
-    note: "Esta Perl está desarrollada por ZettaxAI Labs. Puede cometer errores."
+    note: "Esta Perl está desarrollada por ZettaxAI Labs. Puede cometer errores.",
+    chatMode: "ideas",
+    systemPrompt: "Eres un estratega de marketing digital experto de ZettaxAI. Basándote en el negocio, redes sociales y frecuencia del usuario, crea una estrategia completa con calendario de contenido, ideas de posts y consejos de crecimiento. Sé específico y accionable."
   },
   "Explica con Arte": {
     emoji: "🎨",
@@ -3855,11 +3877,13 @@ const PERL_DETAIL_DATA = {
     btnBg: "#0d3d2e", btnColor: "#5dcfa0",
     prompt: "Una app que recibe un tema complejo y lo convierte en una explicación visual con analogías creativas y ejemplos del mundo real.",
     steps: [
-      { icon: "📝", name: "Ingresar tema" },
-      { icon: "🎭", name: "Crear explicación visual" },
-      { icon: "💡", name: "Mostrar resultado creativo" },
+      { icon: "📝", name: "Ingresar tema",           question: "¿Qué tema quieres entender?",          placeholder: "Ej: inteligencia artificial, agujeros negros, blockchain..." },
+      { icon: "🎭", name: "Crear explicación visual", question: "¿Cuál es tu nivel de conocimiento?",  placeholder: "Ej: principiante, intermedio, experto..." },
+      { icon: "💡", name: "Mostrar resultado creativo", question: "¿Qué formato prefieres?",          placeholder: "Ej: analogía, paso a paso, con ejemplos del día a día..." },
     ],
-    note: "Esta Perl está desarrollada por ZettaxAI Labs. Puede cometer errores."
+    note: "Esta Perl está desarrollada por ZettaxAI Labs. Puede cometer errores.",
+    chatMode: "chat",
+    systemPrompt: "Eres un educador creativo de ZettaxAI. Tu misión es tomar temas complejos y explicarlos de forma visual, usando analogías brillantes, metáforas del mundo real y ejemplos cotidianos. Adapta el nivel al del usuario. Haz que aprender sea fascinante."
   },
   "Tutor de YouTube": {
     emoji: "🎬",
@@ -3869,11 +3893,13 @@ const PERL_DETAIL_DATA = {
     btnBg: "#5a0000", btnColor: "#ff8a80",
     prompt: "Una app que toma la URL de un video de YouTube, extrae el contenido y genera un resumen, puntos clave y un quiz interactivo para reforzar el aprendizaje.",
     steps: [
-      { icon: "🔗", name: "Ingresar video" },
-      { icon: "📖", name: "Generar resumen" },
-      { icon: "❓", name: "Crear quiz" },
+      { icon: "🔗", name: "Ingresar video",   question: "¿Cuál es el tema o URL del video?",    placeholder: "Ej: video sobre React hooks, historia de Roma..." },
+      { icon: "📖", name: "Generar resumen",  question: "¿Qué nivel de detalle quieres?",        placeholder: "Ej: resumen breve, detallado con puntos clave..." },
+      { icon: "❓", name: "Crear quiz",       question: "¿Cuántas preguntas quieres para el quiz?", placeholder: "Ej: 5 preguntas, 10 preguntas de opción múltiple..." },
     ],
-    note: "Esta Perl está desarrollada por ZettaxAI Labs. Puede cometer errores."
+    note: "Esta Perl está desarrollada por ZettaxAI Labs. Puede cometer errores.",
+    chatMode: "resumen",
+    systemPrompt: "Eres un tutor de aprendizaje de ZettaxAI. Basándote en el tema o video que el usuario te da, genera un resumen claro con los puntos más importantes y luego crea un quiz interactivo para reforzar lo aprendido. Sé pedagógico y motivador."
   }
 };
 
@@ -3901,11 +3927,18 @@ window.openPerlDetail = function(name) {
   btn.dataset.perl = name;
 
   // Steps
-  document.getElementById("pdSteps").innerHTML = data.steps.map(function(s) {
-    return '<div class="perldetail-step">'
-      + '<span class="perldetail-step-chevron">›</span>'
+  // Steps expandibles
+  document.getElementById("pdSteps").innerHTML = data.steps.map(function(s, i) {
+    return '<div class="perldetail-step" style="flex-direction:column;align-items:stretch;cursor:default;padding:0;">'
+      + '<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;" onclick="togglePerlStep(' + i + ')">'
+      + '<span class="perldetail-step-chevron" id="pdChevron' + i + '">›</span>'
       + '<span class="perldetail-step-icon">' + s.icon + '</span>'
       + '<span class="perldetail-step-name">' + s.name + '</span>'
+      + '</div>'
+      + '<div class="perldetail-step-body" id="pdStepBody' + i + '">'
+      + '<div class="perldetail-step-question">Pregunta al usuario:</div>'
+      + '<input class="perldetail-step-input" id="pdStepInput' + i + '" placeholder="' + s.placeholder + '" />'
+      + '</div>'
       + '</div>';
   }).join("");
 
@@ -3916,14 +3949,53 @@ window.closePerlDetail = function() {
   document.getElementById("perlDetailModal").classList.remove("show");
 };
 
+window.togglePerlStep = function(i) {
+  const body     = document.getElementById("pdStepBody" + i);
+  const chevron  = document.getElementById("pdChevron" + i);
+  const isOpen   = body.classList.contains("open");
+  body.classList.toggle("open", !isOpen);
+  chevron.classList.toggle("open", !isOpen);
+};
+
 window.startPerl = function() {
   const name = document.getElementById("pdStartBtn").dataset.perl;
+  const data = PERL_DETAIL_DATA[name];
+  if (!data) return;
+
+  // Recoger valores de cada paso
+  var stepValues = data.steps.map(function(s, i) {
+    var input = document.getElementById("pdStepInput" + i);
+    var val = input ? input.value.trim() : "";
+    return val ? (s.name + ": " + val) : null;
+  }).filter(Boolean);
+
   closePerlDetail();
   closeGems();
-  const modos = { "Chef Inteligente": "chat", "Estratega Digital": "chat", "Explica con Arte": "ideas", "Tutor de YouTube": "resumen" };
-  if (window.setMode) setMode(modos[name] || "chat");
-  const input = document.getElementById("input");
-  if (input) { input.focus(); }
+
+  // Activar modo correspondiente
+  if (window.setMode) setMode(data.chatMode || "chat");
+
+  // Construir mensaje de inicio con contexto
+  var contexto = "🪩 Perl activada: " + name + "\n";
+  if (stepValues.length > 0) {
+    contexto += stepValues.join("\n");
+    contexto += "\n\nCon esta información, por favor ayúdame.";
+  } else {
+    contexto += "\nPor favor ayúdame con: " + data.desc;
+  }
+
+  // Poner en el input y simular envío
+  var input = document.getElementById("input");
+  if (input) {
+    input.value = contexto;
+    input.focus();
+    // Mostrar toast informativo
+    var toast = document.createElement("div");
+    toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--accent);color:var(--text);padding:12px 24px;border-radius:14px;font-size:0.82rem;z-index:9999;animation:fadeUp 0.3s ease;text-align:center;max-width:90vw;white-space:nowrap;";
+    toast.innerHTML = data.emoji + " <strong>" + name + "</strong> lista — presiona Enviar para comenzar";
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.remove(); }, 4000);
+  }
 };
 
 window.remixPerl = function() {
@@ -4581,7 +4653,7 @@ async function loadChatHistory() {
     const snap = await getDocs(q);
     list.innerHTML = "";
     if (snap.empty) {
-      list.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);padding:10px;'>No hay chats aún</p>";
+      list.innerHTML = "";
       return;
     }
     snap.forEach((docSnap) => {
