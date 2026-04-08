@@ -11,7 +11,10 @@
 <meta property="og:url" content="https://zettax-ai-pnhu.vercel.app/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap');
+</style>
 <link rel="manifest" href="/manifest.json">
 <link rel="canonical" href="https://zettax-ai-pnhu.vercel.app/">
 
@@ -2519,76 +2522,31 @@
   /* ── SELECTOR ESTILO IMAGEN ─────────────────────────────────────────────── */
   #imgStyleModal {
     display: none; position: fixed; inset: 0;
-    background: #f5f6f8; z-index: 350;
+    background: var(--bg); z-index: 350;
     flex-direction: column; overflow-y: auto;
-    padding: 48px 24px 120px;
-    align-items: center;
+    padding: 32px 24px 100px;
   }
   #imgStyleModal.show { display: flex; }
 
   .imgstyle-close {
-    position: fixed; top: 16px; right: 20px; z-index: 10;
-    background: rgba(0,0,0,0.08); border: none;
-    color: #333; font-size: 1rem; cursor: pointer;
+    position: fixed; top: 14px; right: 18px; z-index: 10;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); font-size: 1.1rem; cursor: pointer;
     width: 36px; height: 36px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     transition: background 0.15s;
   }
-  .imgstyle-close:hover { background: rgba(0,0,0,0.15); }
+  .imgstyle-close:hover { background: var(--surface); color: var(--text); }
 
   .imgstyle-title {
-    font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700;
-    color: #111; margin-bottom: 32px;
-    text-align: center; max-width: 800px; width: 100%;
+    font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800;
+    color: var(--text); margin-bottom: 28px; max-width: 900px;
   }
 
   .imgstyle-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px; max-width: 720px; width: 100%;
-  }
-
-  @media (min-width: 768px) {
-    .imgstyle-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      max-width: 720px;
-    }
-  }
-
-  @media (min-width: 1200px) {
-    .imgstyle-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      max-width: 840px;
-    }
-    #imgStyleModal {
-      padding: 56px 60px 140px;
-    }
-  }
-
-  .imgstyle-card {
-    border-radius: 18px !important;
-    aspect-ratio: 3/2 !important;
-    border: 3px solid transparent !important;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.13) !important;
-    transition: transform 0.2s, box-shadow 0.2s !important;
-  }
-  .imgstyle-card:hover {
-    transform: translateY(-4px) !important;
-    box-shadow: 0 8px 28px rgba(0,0,0,0.2) !important;
-  }
-  .imgstyle-card.selected {
-    border-color: #111 !important;
-    box-shadow: 0 0 0 4px rgba(0,0,0,0.15) !important;
-  }
-
-  .imgstyle-label {
-    font-size: 0.95rem !important;
-    font-weight: 700 !important;
-    bottom: 12px !important;
-    left: 14px !important;
-    text-shadow: 0 1px 6px rgba(0,0,0,0.9) !important;
+    gap: 14px; max-width: 1000px; width: 100%;
   }
 
   .imgstyle-card {
@@ -3411,6 +3369,19 @@
   </button>
 </div>
 
+<!-- MODAL CONFIRMACIÓN PERSONALIZADO -->
+<div id="confirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:10000;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:360px;width:100%;animation:fadeUp 0.2s ease;">
+    <div style="font-size:1.5rem;margin-bottom:8px;" id="confirmIcon">🗑️</div>
+    <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:8px;" id="confirmTitle"></div>
+    <div style="font-size:0.85rem;color:var(--muted);line-height:1.5;margin-bottom:20px;" id="confirmMessage"></div>
+    <div style="display:flex;gap:10px;">
+      <button id="confirmCancelBtn" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:0.88rem;cursor:pointer;">Cancelar</button>
+      <button id="confirmOkBtn" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--danger);color:#fff;font-size:0.88rem;font-weight:700;cursor:pointer;">Eliminar</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
@@ -3483,7 +3454,27 @@ let mode        = "chat";
 let chatHistory = [];
 let contadores  = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0, codigo: 0 };
 let fechaHoy    = new Date().toISOString().slice(0, 10);
-let misCosasImages = []; // Almacena imágenes generadas en la sesión
+let misCosasImages = (() => {
+  try { return JSON.parse(localStorage.getItem("zettax_mis_imagenes") || "[]"); }
+  catch { return []; }
+})();
+
+function guardarMisCosas() {
+  try { localStorage.setItem("zettax_mis_imagenes", JSON.stringify(misCosasImages)); }
+  catch (e) { console.warn("No se pudo guardar en localStorage:", e); }
+}
+
+function showConfirm({ icon = "🗑️", title, message, okLabel = "Eliminar", onOk }) {
+  const modal = document.getElementById("confirmModal");
+  document.getElementById("confirmIcon").textContent    = icon;
+  document.getElementById("confirmTitle").textContent   = title;
+  document.getElementById("confirmMessage").textContent = message;
+  document.getElementById("confirmOkBtn").textContent   = okLabel;
+  modal.style.display = "flex";
+  const close = () => { modal.style.display = "none"; };
+  document.getElementById("confirmCancelBtn").onclick = close;
+  document.getElementById("confirmOkBtn").onclick = () => { close(); onOk(); };
+}
 
 window.toggleProfileMenu = function() {
   const menu = document.getElementById("profileMenu");
@@ -3930,10 +3921,18 @@ window.showFavorites = function() {
     misCosasImages.forEach((item, i) => {
       const el = document.createElement("div");
       el.className = "miscosas-item";
-      el.innerHTML = `
-        <img src="${item.url}" alt="${item.prompt}">
-        <div class="miscosas-item-label" title="${item.prompt}">${item.prompt.substring(0, 28)}${item.prompt.length > 28 ? "…" : ""}</div>
-      `;
+
+      const img = document.createElement("img");
+      img.src = item.url;
+      img.alt = item.prompt;
+
+      const label = document.createElement("div");
+      label.className = "miscosas-item-label";
+      label.title = item.prompt;
+      label.textContent = item.prompt.substring(0, 28) + (item.prompt.length > 28 ? "…" : "");
+
+      el.appendChild(img);
+      el.appendChild(label);
       el.onclick = () => window.open(item.url, "_blank");
       grid.appendChild(el);
     });
@@ -3946,7 +3945,7 @@ window.closeMisCosas = function() {
 };
 const GEMS_PREDISEÑADAS = [
   { icon: "💡", color: "rgba(255,180,50,0.2)",  name: "Generador de ideas",    desc: "Encuentra inspiración fácilmente. Obtén ideas para fiestas, regalos, negocios y más...", badge: "" },
-  { icon: "💻", color: "rgba(0,180,200,0.2)",   name: "Asistente de programac...", desc: "Mejora tus habilidades de programación. Obtén la ayuda que necesitas para crear tus proyectos.", badge: "" },
+  { icon: "💻", color: "rgba(0,180,200,0.2)",   name: "Asistente de programación", desc: "Mejora tus habilidades de programación. Obtén la ayuda que necesitas para crear tus proyectos.", badge: "" },
   { icon: "📚", color: "rgba(150,100,220,0.2)", name: "Storybook",              desc: "Crea un libro ilustrado personalizado, para niños o adultos, a partir de un tema...", badge: "Experimental" },
   { icon: "💼", color: "rgba(200,100,80,0.2)",  name: "Consejero de carrera",   desc: "Libera el potencial de tu carrera profesional. Obtén un plan detallado para...", badge: "" },
   { icon: "🎓", color: "rgba(80,160,100,0.2)",  name: "Tutor personal",         desc: "Aprende cualquier tema a tu ritmo con explicaciones claras y ejercicios adaptados.", badge: "" },
@@ -4231,7 +4230,7 @@ window.usarGem = function(name) {
   closeGems();
   const modos = {
     "Generador de ideas": "ideas",
-    "Asistente de programac...": "codigo",
+    "Asistente de programación": "codigo",
     "Tutor personal": "tarea",
     "Escritor creativo": "chat",
   };
@@ -4315,31 +4314,44 @@ window.closeActivity = function() {
 
 window.deleteSingleChat = async function(chatId, event) {
   event.stopPropagation();
-  if (!confirm("¿Borrar esta conversación?")) return;
-  try {
-    await deleteDoc(doc(db, "chats", chatId));
-    // Quitar del DOM
-    event.target.closest(".activity-chat-item").remove();
-  } catch (e) {
-    alert("Error al borrar: " + e.message);
-  }
+  showConfirm({
+    icon: "🗑️",
+    title: "Borrar conversación",
+    message: "Esta acción no se puede deshacer.",
+    okLabel: "Borrar",
+    onOk: async () => {
+      try {
+        await deleteDoc(doc(db, "chats", chatId));
+        event.target.closest(".activity-chat-item").remove();
+      } catch (e) {
+        addMessage("Error al borrar: " + e.message, "bot error");
+      }
+    }
+  });
 };
 
 window.deleteAllChats = async function() {
-  if (!confirm("¿Borrar TODAS tus conversaciones? Esta acción no se puede deshacer.")) return;
   if (!currentUser) return;
-  try {
-    const q = query(collection(db, "chats"), where("userId", "==", currentUser.uid));
-    const snap = await getDocs(q);
-    const batch = writeBatch(db);
-    snap.forEach(d => batch.delete(d.ref));
-    await batch.commit();
-    document.getElementById("activity-chats-list").innerHTML = "<p style='font-size:0.8rem;color:var(--muted);'>No hay conversaciones aún.</p>";
-    chatHistory = [];
-    document.getElementById("messages").innerHTML = "";
-  } catch (e) {
-    alert("Error al borrar: " + e.message);
-  }
+  showConfirm({
+    icon: "⚠️",
+    title: "Borrar todas las conversaciones",
+    message: "Esta acción eliminará TODO tu historial y no se puede deshacer.",
+    okLabel: "Borrar todo",
+    onOk: async () => {
+      try {
+        const q = query(collection(db, "chats"), where("userId", "==", currentUser.uid));
+        const snap = await getDocs(q);
+        const batch = writeBatch(db);
+        snap.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+        document.getElementById("activity-chats-list").innerHTML = "<p style='font-size:0.8rem;color:var(--muted);'>No hay conversaciones aún.</p>";
+        chatHistory = [];
+        document.getElementById("messages").innerHTML = "";
+      } catch (e) {
+        addMessage("Error al borrar: " + e.message, "bot error");
+      }
+    }
+  });
 };
 
 window.downloadHistory = async function() {
@@ -4908,26 +4920,26 @@ window.setMode = (m) => {
 
 // ── ESTILOS DE IMAGEN ──────────────────────────────────────────────────────
 const IMG_STYLES = [
-  { name: "Monocromo",           emoji: "🖤", gradient: "linear-gradient(135deg,#1a1a1a,#3a3a3a)",    photo: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&q=80&fit=crop" },
-  { name: "Color",               emoji: "🌈", gradient: "linear-gradient(135deg,#00c9ff,#92fe9d)",    photo: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&fit=crop" },
-  { name: "Pista",               emoji: "🌃", gradient: "linear-gradient(135deg,#0f0c29,#302b63)",    photo: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&q=80&fit=crop" },
-  { name: "Risografía",          emoji: "🎨", gradient: "linear-gradient(135deg,#ff416c,#ff4b2b)",    photo: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600&q=80&fit=crop" },
-  { name: "Tecnicolor",          emoji: "🔮", gradient: "linear-gradient(135deg,#4776e6,#8e54e9)",    photo: "https://images.unsplash.com/photo-1524638431109-93d95c968f03?w=600&q=80&fit=crop" },
-  { name: "Arcilla gótica",      emoji: "🏰", gradient: "linear-gradient(135deg,#1f1c2c,#928dab)",    photo: "https://images.unsplash.com/photo-1519751138087-5bf79df62d5b?w=600&q=80&fit=crop" },
-  { name: "Dinamita",            emoji: "💥", gradient: "linear-gradient(135deg,#f7971e,#ffd200)",    photo: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80&fit=crop" },
-  { name: "Salón",               emoji: "🪑", gradient: "linear-gradient(135deg,#c9d6df,#e2ebf0)",    photo: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&fit=crop" },
-  { name: "Boceto a mano",       emoji: "✏️", gradient: "linear-gradient(135deg,#d3cce3,#e9e4f0)",    photo: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&q=80&fit=crop" },
-  { name: "Cinematográfico",     emoji: "🎬", gradient: "linear-gradient(135deg,#0f2027,#2c5364)",    photo: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=600&q=80&fit=crop" },
-  { name: "Steampunk",           emoji: "⚙️", gradient: "linear-gradient(135deg,#3e1f00,#8b4513)",    photo: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&q=80&fit=crop" },
-  { name: "Amanecer",            emoji: "🌅", gradient: "linear-gradient(135deg,#f83600,#f9d423)",    photo: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=600&q=80&fit=crop" },
-  { name: "Lucha mítica",        emoji: "⚔️", gradient: "linear-gradient(135deg,#232526,#414345)",    photo: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&q=80&fit=crop" },
-  { name: "Surrealista",         emoji: "🌀", gradient: "linear-gradient(135deg,#c94b4b,#4b134f)",    photo: "https://images.unsplash.com/photo-1501366062246-723b4d3e4eb6?w=600&q=80&fit=crop" },
-  { name: "Misterio",            emoji: "🔍", gradient: "linear-gradient(135deg,#0d0d0d,#1a237e)",    photo: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=600&q=80&fit=crop" },
-  { name: "Prendedor",           emoji: "📌", gradient: "linear-gradient(135deg,#e0e0e0,#f5f5f5)",    photo: "https://images.unsplash.com/photo-1558171813-40209-9b9f?w=600&q=80&fit=crop" },
-  { name: "Cyborg",              emoji: "🤖", gradient: "linear-gradient(135deg,#00b4db,#0083b0)",    photo: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&q=80&fit=crop" },
-  { name: "Retrato tenue",       emoji: "🕯️", gradient: "linear-gradient(135deg,#3d3d3d,#7f7f7f)",    photo: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&q=80&fit=crop&sat=-80" },
-  { name: "Dibujo animado",      emoji: "📺", gradient: "linear-gradient(135deg,#f5f5f5,#c8c8c8)",    photo: "https://images.unsplash.com/photo-1607457561901-e6ec3a6d16cf?w=600&q=80&fit=crop" },
-  { name: "Pintura al óleo",     emoji: "🖌️", gradient: "linear-gradient(135deg,#c79081,#dfa579)",    photo: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=600&q=80&fit=crop" },
+  { name: "Monocromo",           emoji: "🖤", gradient: "linear-gradient(135deg,#1a1a1a,#3a3a3a)" },
+  { name: "Color",               emoji: "🌈", gradient: "linear-gradient(135deg,#00c9ff,#92fe9d)" },
+  { name: "Pista",               emoji: "🌃", gradient: "linear-gradient(135deg,#0f0c29,#302b63,#24243e)" },
+  { name: "Risografía",          emoji: "🎨", gradient: "linear-gradient(135deg,#ff416c,#ff4b2b)" },
+  { name: "Tecnicolor",          emoji: "🔮", gradient: "linear-gradient(135deg,#4776e6,#8e54e9)" },
+  { name: "Arcilla gótica",      emoji: "🏰", gradient: "linear-gradient(135deg,#1f1c2c,#928dab)" },
+  { name: "Dinamita",            emoji: "💥", gradient: "linear-gradient(135deg,#f7971e,#ffd200)" },
+  { name: "Salón",               emoji: "🪑", gradient: "linear-gradient(135deg,#c9d6df,#e2ebf0)" },
+  { name: "Boceto a mano",       emoji: "✏️", gradient: "linear-gradient(135deg,#d3cce3,#e9e4f0)" },
+  { name: "Cinematográfico",     emoji: "🎬", gradient: "linear-gradient(135deg,#0f2027,#203a43,#2c5364)" },
+  { name: "Steampunk",           emoji: "⚙️", gradient: "linear-gradient(135deg,#3e1f00,#8b4513)" },
+  { name: "Amanecer",            emoji: "🌅", gradient: "linear-gradient(135deg,#f83600,#f9d423)" },
+  { name: "Lucha mítica",        emoji: "⚔️", gradient: "linear-gradient(135deg,#232526,#414345)" },
+  { name: "Surrealista",         emoji: "🌀", gradient: "linear-gradient(135deg,#c94b4b,#4b134f)" },
+  { name: "Misterio",            emoji: "🔍", gradient: "linear-gradient(135deg,#0d0d0d,#1a237e)" },
+  { name: "Prendedor",           emoji: "📌", gradient: "linear-gradient(135deg,#e0e0e0,#f5f5f5)" },
+  { name: "Cyborg",              emoji: "🤖", gradient: "linear-gradient(135deg,#00b4db,#0083b0)" },
+  { name: "Retrato tenue",       emoji: "🕯️", gradient: "linear-gradient(135deg,#3d3d3d,#7f7f7f)" },
+  { name: "Dibujo animado antiguo", emoji: "📺", gradient: "linear-gradient(135deg,#f5f5f5,#c8c8c8)" },
+  { name: "Pintura al óleo",     emoji: "🖌️", gradient: "linear-gradient(135deg,#c79081,#dfa579)" },
 ];
 
 let selectedImgStyle = null;
@@ -4937,12 +4949,8 @@ window.openImgStyle = function() {
   const grid = document.getElementById("imgStyleGrid");
   grid.innerHTML = IMG_STYLES.map(function(s) {
     const isSelected = selectedImgStyle && selectedImgStyle.name === s.name;
-    const bg = s.photo
-      ? 'background-image:url(' + s.photo + ');background-size:cover;background-position:center;'
-      : 'background:' + s.gradient + ';display:flex;align-items:center;justify-content:center;font-size:3.5rem;';
-    const inner = s.photo ? '' : s.emoji;
     return '<div class="imgstyle-card' + (isSelected ? ' selected' : '') + '" onclick="selectImgStyle(\'' + s.name.replace(/'/g, "\\'") + '\')">'
-      + '<div class="imgstyle-bg" style="' + bg + '">' + inner + '</div>'
+      + '<div class="imgstyle-bg" style="background:' + s.gradient + ';display:flex;align-items:center;justify-content:center;font-size:3.5rem;">' + s.emoji + '</div>'
       + '<div class="imgstyle-overlay"></div>'
       + '<div class="imgstyle-label">' + s.name + '</div>'
       + '</div>';
@@ -5003,12 +5011,18 @@ function addMessage(text, role, extra = "") {
   return div;
 }
 
+let pendingFile = null; // Archivo pendiente para enviar con el siguiente mensaje
+
 window.handleFile = (event) => {
   const file = event.target.files[0];
-  if (file) {
-    addMessage(`Archivo seleccionado: ${file.name}`, "user", "📎 Archivo listo");
-    console.log("Archivo listo para procesar:", file);
-  }
+  if (!file) return;
+  pendingFile = file;
+  // Mostrar preview en el input placeholder
+  const input = document.getElementById("input");
+  input.placeholder = `📎 ${file.name} — escribe tu mensaje y presiona Enviar`;
+  input.focus();
+  // Limpiar el input de archivo para permitir seleccionar el mismo archivo de nuevo
+  event.target.value = "";
 };
 
 window.send = async () => {
@@ -5037,16 +5051,16 @@ window.send = async () => {
       return true;
     },
     resumen: (t) => {
-      if (t.split(" ").length < 15) { addMessage("📝 Para resumir necesitas pegar un texto más largo. ¿Tienes el texto que quieres resumir?", "bot error"); return false; }
+      if (t.trim().split(/\s+/).filter(Boolean).length < 15) { addMessage("📝 Para resumir necesitas pegar un texto más largo. ¿Tienes el texto que quieres resumir?", "bot error"); return false; }
       return true;
     },
     ideas: (t) => {
-      if (t.split(" ").length > 60) { addMessage("💡 Para ideas, escribe solo el tema (ej: 'ideas para un negocio de comida'). No pegues textos largos.", "bot error"); return false; }
+      if (t.trim().split(/\s+/).filter(Boolean).length > 60) { addMessage("💡 Para ideas, escribe solo el tema (ej: 'ideas para un negocio de comida'). No pegues textos largos.", "bot error"); return false; }
       return true;
     },
     imagen: () => true,
     codigo: (t) => {
-      if (t.split(" ").length < 3) {
+      if (t.trim().split(/\s+/).filter(Boolean).length < 3) {
         addMessage("💻 Describe mejor lo que necesitas, por ejemplo: 'función en Python que ordene una lista'.", "bot error");
         return false;
       }
@@ -5063,8 +5077,10 @@ window.send = async () => {
 
   if (validaciones[mode] && !validaciones[mode](text)) return;
 
-  addMessage(text, "user");
+  addMessage(text + (pendingFile ? `\n📎 ${pendingFile.name}` : ""), "user");
   input.value      = "";
+  input.placeholder = "Escribe un mensaje...";
+  pendingFile      = null;
   sendBtn.disabled = true;
 
   if (mode === "imagen") {
@@ -5081,6 +5097,7 @@ window.send = async () => {
       if (data.imageUrl) {
         // Guardar en Mis cosas
         misCosasImages.push({ url: data.imageUrl, prompt: text, date: new Date().toLocaleDateString("es-MX") });
+        guardarMisCosas();
 
         const div = document.createElement("div");
         div.className = "msg bot";
@@ -5093,13 +5110,16 @@ window.send = async () => {
         caption.textContent = "🎨 " + text.substring(0, 60);
         div.appendChild(img);
         div.appendChild(caption);
-        document.getElementById("messages").appendChild(div);
-        document.getElementById("messages").scrollTop = 9999;
+        const msgBox = document.getElementById("messages");
+        msgBox.appendChild(div);
+        msgBox.scrollTop = msgBox.scrollHeight;
       } else {
         addMessage(data.reply || "⚠️ No se pudo generar la imagen.", "bot error");
       }
 
-      await incrementarContador("imagen");
+      if (!currentUser.isAnonymous) {
+        await incrementarContador("imagen");
+      }
     } catch (e) {
       document.querySelector(".typing") && document.querySelector(".typing").remove();
       addMessage("⚠️ Error generando imagen.", "bot error");
