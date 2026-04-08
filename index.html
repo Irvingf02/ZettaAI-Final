@@ -2542,8 +2542,27 @@
 
   .imgstyle-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 14px; max-width: 1000px; width: 100%;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px; max-width: 1100px; width: 100%;
+  }
+
+  @media (min-width: 1024px) {
+    .imgstyle-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      max-width: 1100px;
+    }
+    #imgStyleModal {
+      padding: 48px 60px 120px;
+      align-items: center;
+    }
+  }
+
+  @media (min-width: 1400px) {
+    .imgstyle-grid {
+      grid-template-columns: repeat(5, 1fr);
+      max-width: 1400px;
+    }
   }
 
   .imgstyle-card {
