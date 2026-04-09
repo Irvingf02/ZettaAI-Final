@@ -4483,7 +4483,8 @@ const APPS_DATA = {
       groupIcons: ["📓"],
       toggleId: "toggle-notion",
       defaultOn: false,
-      badge: "🔔 Únete",
+      badge: "🟢 Disponible",
+      badgeStyle: "background:rgba(0,196,140,0.15);color:#00C48C;border:1px solid #00C48C;",
       subApps: [
         { icon: "📓", name: "Notion Pages", handle: "@Notion", link: false },
         { icon: "🗃️", name: "Notion Databases", handle: "@NotionDB", link: false },
@@ -4514,8 +4515,9 @@ window.switchAppsTab = function(tab) {
 
   groups.forEach(function(g) {
     const checked  = g.defaultOn ? "checked" : "";
+    const badgeStyle = g.badgeStyle || "background:rgba(245,166,35,0.15);color:var(--gold);border:1px solid var(--gold);";
     const badgeHtml = g.badge
-      ? '<span style="font-size:0.6rem;background:rgba(245,166,35,0.15);color:var(--gold);border:1px solid var(--gold);padding:2px 8px;border-radius:10px;font-weight:700;margin-left:8px;">' + g.badge + '</span>'
+      ? '<span style="font-size:0.6rem;' + badgeStyle + 'padding:2px 8px;border-radius:10px;font-weight:700;margin-left:8px;">' + g.badge + '</span>'
       : "";
 
     const subHtml = g.subApps.map(function(s) {
