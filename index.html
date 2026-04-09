@@ -4557,20 +4557,20 @@ window.toggleApp = function(id, on) {
     "toggle-suite":      { name: "ZettaxAI Suite",    external: false },
     "toggle-firebase":   { name: "Firebase",           external: false },
     "toggle-stripe":     { name: "Stripe Pagos",       external: false },
-    "toggle-gworkspace": { name: "Google Workspace",   external: true,  icon: "🗂️", desc: "Conecta tu Google Calendar, Gmail, Docs y Drive para obtener respuestas más inteligentes." },
-    "toggle-notion":     { name: "Notion",             external: true,  icon: "📓", desc: "Accede y organiza tus notas y bases de datos de Notion directamente desde ZettaxAI." },
-    "toggle-slack":      { name: "Slack",              external: true,  icon: "💬", desc: "Busca y resume conversaciones y canales de tu workspace de Slack." }
+    "toggle-gworkspace": { name: "Google Workspace",   external: true,  icon: "🗂️", desc: "Conecta tu Google Calendar, Gmail, Docs y Drive para obtener respuestas más inteligentes.", ready: false },
+    "toggle-notion":     { name: "Notion",             external: true,  icon: "📓", desc: "Accede y organiza tus notas y bases de datos de Notion directamente desde ZettaxAI.",        ready: true  },
+    "toggle-slack":      { name: "Slack",              external: true,  icon: "💬", desc: "Busca y resume conversaciones y canales de tu workspace de Slack.",                          ready: false }
   };
 
   const info = appInfo[id] || { name: id, external: false };
 
   if (on && info.external) {
-    // Mostrar modal de conexión
     showAppConnectModal(id, info);
     return;
   }
 
   if (!on && info.external) {
+    if (id === "toggle-notion") notionConnected = false;
     showToast(`🔌 ${info.name} desconectada`);
     return;
   }
@@ -4578,14 +4578,19 @@ window.toggleApp = function(id, on) {
   showToast(on ? `✅ ${info.name} conectada` : `🔌 ${info.name} desconectada`);
 };
 
+// Estado de conexión Notion
+let notionConnected = false;
+
 function showAppConnectModal(toggleId, info) {
-  // Crear modal de conexión inline
   const existing = document.getElementById("appConnectOverlay");
   if (existing) existing.remove();
 
   const overlay = document.createElement("div");
   overlay.id = "appConnectOverlay";
   overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;";
+
+  const isReady = info.ready;
+  const btnLabel = isReady ? "✅ Conectar ahora" : "🔔 Avísame cuando esté lista";
 
   overlay.innerHTML = `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;width:100%;max-width:380px;overflow:hidden;animation:fadeUp 0.25s ease;">
@@ -4601,9 +4606,13 @@ function showAppConnectModal(toggleId, info) {
           ✅ Generar respuestas basadas en tus datos<br>
           🔒 Nunca compartir tu información con terceros
         </div>
+        ${isReady ? `
+        <div style="background:rgba(0,196,140,0.1);border:1px solid var(--success);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:var(--success);">
+          🟢 <strong>Integración disponible</strong> — Lista para conectar
+        </div>` : ""}
         <div style="display:flex;gap:8px;">
           <button onclick="cancelAppConnect('${toggleId}')" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.85rem;cursor:pointer;">Cancelar</button>
-          <button onclick="confirmAppConnect('${toggleId}','${info.name}')" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--accent);color:#000;font-size:0.85rem;font-weight:700;cursor:pointer;">🔔 Avísame cuando esté lista</button>
+          <button onclick="confirmAppConnect('${toggleId}','${info.name}')" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--accent);color:#000;font-size:0.85rem;font-weight:700;cursor:pointer;">${btnLabel}</button>
         </div>
       </div>
     </div>
@@ -4621,13 +4630,75 @@ window.cancelAppConnect = function(toggleId) {
 
 window.confirmAppConnect = async function(toggleId, name) {
   const overlay = document.getElementById("appConnectOverlay");
+  const confirmBtn = overlay ? overlay.querySelector("button:last-child") : null;
+  if (confirmBtn) { confirmBtn.textContent = "Conectando..."; confirmBtn.disabled = true; }
 
-  // Cambiar botón a "Conectando..."
-  const confirmBtn = overlay.querySelector("button:last-child");
-  confirmBtn.textContent = "Conectando...";
-  confirmBtn.disabled = true;
+  // ── NOTION: conexión real ──────────────────────────────────────────────
+  if (toggleId === "toggle-notion") {
+    if (overlay) overlay.remove();
+    try {
+      const res = await fetch(`${BACKEND_URL}/notion`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "search", query: "" })
+      });
+      const data = await res.json();
 
-  // Guardar interés en Firestore si hay usuario logueado
+      if (res.ok) {
+        notionConnected = true;
+
+        // Guardar en Firestore
+        if (currentUser && !currentUser.isAnonymous) {
+          try {
+            await setDoc(doc(db, "integrations", currentUser.uid), {
+              notion: true, notionConnectedAt: new Date().toISOString()
+            }, { merge: true });
+          } catch(e) {}
+        }
+
+        // Mostrar modal de éxito con páginas encontradas
+        const pagesHtml = (data.pages || []).slice(0, 4).map(p =>
+          `<div style="padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:0.78rem;color:var(--text);">📄 ${p.title}</div>`
+        ).join("") || `<div style="font-size:0.78rem;color:var(--muted);">No se encontraron páginas aún. Comparte páginas con la integración desde Notion.</div>`;
+
+        const modal = document.createElement("div");
+        modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;";
+        modal.innerHTML = `
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;width:100%;max-width:400px;padding:28px 24px;text-align:center;animation:fadeUp 0.25s ease;">
+            <div style="font-size:2.5rem;margin-bottom:12px;">📓</div>
+            <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px;">¡Notion conectado!</div>
+            <div style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;">ZettaxAI ahora puede acceder a tu workspace.</div>
+            <div style="text-align:left;display:flex;flex-direction:column;gap:6px;margin-bottom:20px;">${pagesHtml}</div>
+            <div style="background:rgba(0,196,140,0.1);border:1px solid var(--success);border-radius:10px;padding:10px;font-size:0.78rem;color:var(--success);margin-bottom:16px;">
+              💡 Ahora puedes pedirle a ZettaxAI: <em>"Busca en mis notas de Notion sobre X"</em>
+            </div>
+            <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:11px;border-radius:10px;border:none;background:var(--accent);color:#000;font-size:0.88rem;font-weight:700;cursor:pointer;">¡Listo, empezar!</button>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      } else {
+        throw new Error(data.error || "Error al conectar");
+      }
+    } catch(e) {
+      // Desmarcar toggle
+      const toggles = document.querySelectorAll(`[onchange*="${toggleId}"]`);
+      toggles.forEach(t => t.checked = false);
+      const errModal = document.createElement("div");
+      errModal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;";
+      errModal.innerHTML = `
+        <div style="background:var(--card);border:1px solid var(--danger);border-radius:18px;width:100%;max-width:360px;padding:28px 24px;text-align:center;">
+          <div style="font-size:2rem;margin-bottom:12px;">⚠️</div>
+          <div style="font-size:0.9rem;font-weight:700;color:var(--danger);margin-bottom:8px;">Error al conectar Notion</div>
+          <div style="font-size:0.8rem;color:var(--muted);margin-bottom:16px;">${e.message}<br><br>Verifica que el NOTION_TOKEN esté configurado en Vercel.</div>
+          <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:10px;border-radius:10px;border:none;background:var(--card);border:1px solid var(--border);color:var(--text);cursor:pointer;">Cerrar</button>
+        </div>
+      `;
+      document.body.appendChild(errModal);
+    }
+    return;
+  }
+
+  // ── OTRAS APPS: lista de espera ────────────────────────────────────────
   if (currentUser && !currentUser.isAnonymous) {
     try {
       await setDoc(doc(db, "integrations_waitlist", currentUser.uid), {
@@ -4636,12 +4707,11 @@ window.confirmAppConnect = async function(toggleId, name) {
         apps: { [toggleId]: true },
         requestedAt: new Date().toISOString()
       }, { merge: true });
-    } catch(e) { console.error("Error guardando interés:", e); }
+    } catch(e) {}
   }
 
   if (overlay) overlay.remove();
 
-  // Mostrar modal de "en camino"
   const modal = document.createElement("div");
   modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;";
   modal.innerHTML = `
@@ -4650,7 +4720,7 @@ window.confirmAppConnect = async function(toggleId, name) {
       <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:8px;">¡Apuntado a la lista!</div>
       <div style="font-size:0.85rem;color:var(--muted);line-height:1.7;margin-bottom:20px;">
         Estamos desarrollando la integración con <strong style="color:var(--text);">${name}</strong>.<br>
-        Te avisaremos a <strong style="color:var(--accent);">${currentUser?.email || "tu correo"}</strong> en cuanto esté disponible. ¡Serás de los primeros en usarla! 🚀
+        Te avisaremos a <strong style="color:var(--accent);">${currentUser?.email || "tu correo"}</strong> en cuanto esté disponible. 🚀
       </div>
       <div style="background:var(--surface);border:1px solid rgba(245,166,35,0.3);border-radius:10px;padding:12px 14px;font-size:0.78rem;color:var(--muted);margin-bottom:20px;text-align:left;line-height:1.8;">
         ⚙️ <strong style="color:var(--text);">Estado:</strong> En desarrollo activo<br>
@@ -4662,6 +4732,41 @@ window.confirmAppConnect = async function(toggleId, name) {
   `;
   document.body.appendChild(modal);
 };
+
+// ── NOTION: buscar desde el chat ──────────────────────────────────────────
+async function searchNotion(query) {
+  if (!notionConnected) return null;
+  try {
+    const res = await fetch(`${BACKEND_URL}/notion`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "search", query })
+    });
+    const data = await res.json();
+    if (data.pages && data.pages.length > 0) {
+      return "📓 Encontré esto en tu Notion:\n" + data.pages.map(p => `• ${p.title}`).join("\n");
+    }
+    return "📓 No encontré páginas relacionadas en tu Notion.";
+  } catch(e) {
+    return null;
+  }
+}
+
+// Interceptar mensajes del chat que mencionen Notion
+async function checkNotionIntent(text) {
+  if (!notionConnected) return false;
+  const keywords = ["notion", "mis notas", "mi workspace", "base de datos", "mi página", "busca en notion", "encuentra en notion"];
+  const lower = text.toLowerCase();
+  if (keywords.some(k => lower.includes(k))) {
+    const query = text.replace(/notion|mis notas|mi workspace|busca en notion|encuentra en notion/gi, "").trim();
+    const result = await searchNotion(query);
+    if (result) {
+      addMessage(result, "bot");
+      return true;
+    }
+  }
+  return false;
+}
 
 function showToast(msg) {
   const toast = document.createElement("div");
@@ -5125,6 +5230,14 @@ window.send = async () => {
 
   chatHistory.push({ role: "user", content: text });
   if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+
+  // Verificar si el mensaje es para Notion
+  const handledByNotion = await checkNotionIntent(text);
+  if (handledByNotion) {
+    sendBtn.disabled = false;
+    input.focus();
+    return;
+  }
 
   const typing = addMessage("IA escribiendo...", "bot typing");
 
