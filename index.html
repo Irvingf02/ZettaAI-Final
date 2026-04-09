@@ -2605,6 +2605,7 @@
     .imgstyle-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
   }
 </style>
+<button class="menu-toggle-mobile" id="mobilMenuBtn" onclick="toggleSidebar()">☰</button>
 <script>
   (function() {
     if (localStorage.getItem("zettax_session") === "1") {
@@ -2620,8 +2621,6 @@
     }
   })();
 </script>
-
-<button class="menu-toggle-mobile" id="mobilMenuBtn" onclick="toggleSidebar()">☰</button>
 
 <!-- LOGIN -->
 <div id="loginDiv" style="display:none;">
