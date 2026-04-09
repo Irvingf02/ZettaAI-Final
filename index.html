@@ -2605,7 +2605,7 @@
     .imgstyle-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
   }
 </style>
-<button class="menu-toggle-mobile" id="mobilMenuBtn" onclick="toggleSidebar()">☰</button>
+
 <script>
   (function() {
     if (localStorage.getItem("zettax_session") === "1") {
@@ -2662,6 +2662,7 @@
   <div class="sidebar-header">
     <button class="menu-btn" onclick="toggleSidebar()">
       <span class="hamburger">☰</span>
+      <button class="menu-toggle-mobile" id="mobilMenuBtn" onclick="toggleSidebar()">☰</button>
     </button>
     <span class="sidebar-logo">ZettaxAI</span>
   </div>
