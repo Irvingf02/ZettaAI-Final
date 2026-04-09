@@ -2605,8 +2605,6 @@
     .imgstyle-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
   }
 </style>
-
-<!-- Script síncrono: muestra el chat antes de que Firebase responda si ya hay sesión -->
 <script>
   (function() {
     if (localStorage.getItem("zettax_session") === "1") {
@@ -2622,6 +2620,8 @@
     }
   })();
 </script>
+
+<button class="menu-toggle-mobile" id="mobilMenuBtn" onclick="toggleSidebar()">☰</button>
 
 <!-- LOGIN -->
 <div id="loginDiv" style="display:none;">
@@ -2693,7 +2693,6 @@
   </div>
 </div>
 
-<button class="menu-toggle-mobile" id="mobilMenuBtn" onclick="toggleSidebar()">☰</button>
 
 <!-- APP DIV -->
 <div id="appDiv" style="display:none; flex-direction:column; width:100%; gap:12px;">
