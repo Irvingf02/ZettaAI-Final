@@ -2520,117 +2520,89 @@
   }
 
   /* ── SELECTOR ESTILO IMAGEN ─────────────────────────────────────────────── */
+  /* ── SELECTOR DE ESTILO inline dentro del area de mensajes ── */
   #imgStyleModal {
-    display: none; position: fixed; inset: 0;
-    background: var(--bg); z-index: 350;
-    flex-direction: column; overflow-y: auto;
-    padding: 32px 24px 100px;
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 16px 4px;
+    border-bottom: 1px solid var(--border);
+    animation: fadeUp 0.2s ease;
   }
   #imgStyleModal.show { display: flex; }
 
-  .imgstyle-close {
-    position: fixed; top: 14px; right: 18px; z-index: 10;
-    background: var(--card); border: 1px solid var(--border);
-    color: var(--muted); font-size: 1.1rem; cursor: pointer;
-    width: 36px; height: 36px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s;
+  .imgstyle-close { display: none; }
+
+  .imgstyle-header {
+    display: flex; align-items: center; justify-content: space-between;
   }
-  .imgstyle-close:hover { background: var(--surface); color: var(--text); }
 
   .imgstyle-title {
-    font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800;
-    color: var(--text); margin-bottom: 28px; max-width: 900px;
+    font-size: 0.88rem; font-weight: 700; color: var(--text);
   }
+
+  .imgstyle-skip {
+    background: none; border: none; color: var(--muted);
+    font-size: 0.75rem; cursor: pointer; padding: 4px 8px;
+    border-radius: 6px; transition: color 0.15s;
+  }
+  .imgstyle-skip:hover { color: var(--text); }
 
   .imgstyle-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 14px; max-width: 1000px; width: 100%;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px;
   }
 
   .imgstyle-card {
-    border-radius: 16px; overflow: hidden; cursor: pointer;
+    border-radius: 10px; overflow: hidden; cursor: pointer;
     position: relative; aspect-ratio: 4/3;
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: 3px solid transparent;
+    transition: transform 0.18s, box-shadow 0.18s;
+    border: 2px solid transparent;
   }
-  .imgstyle-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
-  .imgstyle-card.selected { border-color: var(--accent); }
+  .imgstyle-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.45); }
+  .imgstyle-card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,212,255,0.3); }
 
   .imgstyle-bg {
     position: absolute; inset: 0;
     background-size: cover; background-position: center;
     transition: transform 0.3s;
   }
-  .imgstyle-card:hover .imgstyle-bg { transform: scale(1.05); }
+  .imgstyle-card:hover .imgstyle-bg { transform: scale(1.06); }
 
   .imgstyle-overlay {
     position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%);
+    background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 55%);
   }
 
   .imgstyle-label {
-    position: absolute; bottom: 10px; left: 12px;
-    font-size: 0.88rem; font-weight: 700; color: white;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+    position: absolute; bottom: 6px; left: 8px;
+    font-size: 0.72rem; font-weight: 700; color: white;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.9);
   }
 
-  /* Barra inferior al seleccionar estilo */
-  #imgStyleBar {
-    display: none; position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--card); border-top: 1px solid var(--border);
-    padding: 14px 20px; z-index: 360;
-    flex-direction: column; gap: 10px;
+  /* Chip dentro del input al seleccionar estilo */
+  #imgStyleChip {
+    display: none; align-items: center; gap: 5px;
+    background: rgba(0,212,255,0.12);
+    border: 1px solid rgba(0,212,255,0.4);
+    border-radius: 20px; padding: 3px 8px 3px 5px;
+    font-size: 0.73rem; font-weight: 600; color: var(--accent);
+    white-space: nowrap; flex-shrink: 0;
   }
-  #imgStyleBar.show { display: flex; }
+  #imgStyleChip.show { display: flex; }
+  #imgStyleChip .chip-emoji { font-size: 0.95rem; line-height: 1; }
+  #imgStyleChip .chip-remove {
+    background: none; border: none; color: var(--accent);
+    font-size: 0.65rem; cursor: pointer; padding: 0; line-height: 1; opacity: 0.6;
+  }
+  #imgStyleChip .chip-remove:hover { opacity: 1; }
 
-  .imgstyle-bar-top {
-    display: flex; align-items: center; gap: 12px;
-  }
-  .imgstyle-bar-thumb {
-    width: 52px; height: 52px; border-radius: 10px;
-    overflow: hidden; flex-shrink: 0; border: 2px solid var(--accent);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem;
-  }
-  .imgstyle-bar-info { flex: 1; }
-  .imgstyle-bar-name { font-size: 0.85rem; font-weight: 700; color: var(--text); }
-  .imgstyle-bar-hint { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
-
-  .imgstyle-bar-input-row {
-    display: flex; align-items: center; gap: 8px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 24px; padding: 10px 16px;
-  }
-  .imgstyle-bar-input {
-    flex: 1; background: none; border: none; outline: none;
-    color: var(--text); font-size: 0.9rem; font-family: 'Inter', sans-serif;
-  }
-  .imgstyle-bar-input::placeholder { color: var(--muted); }
-  .imgstyle-bar-actions { display: flex; align-items: center; gap: 10px; }
-  .imgstyle-bar-icon-btn {
-    background: none; border: none; color: var(--muted);
-    font-size: 1rem; cursor: pointer; padding: 4px; border-radius: 6px;
-    transition: color 0.15s;
-  }
-  .imgstyle-bar-icon-btn:hover { color: var(--accent); }
-  .imgstyle-bar-send {
-    background: var(--accent); border: none; border-radius: 50%;
-    width: 34px; height: 34px; display: flex; align-items: center;
-    justify-content: center; color: #000; font-size: 1rem;
-    cursor: pointer; transition: all 0.2s; flex-shrink: 0;
-  }
-  .imgstyle-bar-send:hover { background: #33DDFF; transform: scale(1.05); }
-  .imgstyle-bar-cancel {
-    background: none; border: none; color: var(--muted);
-    font-size: 0.82rem; cursor: pointer; padding: 4px 8px;
-    transition: color 0.15s;
-  }
-  .imgstyle-bar-cancel:hover { color: var(--danger); }
+  /* Ocultar la vieja barra flotante */
+  #imgStyleBar { display: none !important; }
 
   @media (max-width: 500px) {
-    .imgstyle-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .imgstyle-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
   }
 </style>
 
@@ -2789,10 +2761,26 @@
       <span class="chat-mode-title" id="modeTitle">Chat Rápido</span>
       <span class="chat-mode-desc" id="modeDesc">Respuestas cortas y directas</span>
     </div>
+
+    <!-- SELECTOR DE ESTILO DE IMAGEN (inline, zona 1) -->
+    <div id="imgStyleModal">
+      <div class="imgstyle-header">
+        <div class="imgstyle-title">🎨 Elige un estilo para tu imagen</div>
+        <button class="imgstyle-skip" onclick="closeImgStyle()">Omitir ›</button>
+      </div>
+      <div class="imgstyle-grid" id="imgStyleGrid"><!-- inyectado por JS --></div>
+    </div>
+
     <div id="messages"></div>
     <div class="input-area">
       <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf,.txt" onchange="handleFile(event)">
       <button class="mode-btn" onclick="document.getElementById('fileInput').click()" style="padding: 10px; font-size: 1.2rem;">+</button>
+      <!-- Chip de estilo seleccionado (zona 2) -->
+      <div id="imgStyleChip">
+        <span class="chip-emoji" id="chipEmoji"></span>
+        <span id="chipName"></span>
+        <button class="chip-remove" onclick="cancelImgStyle()" title="Quitar estilo">✕</button>
+      </div>
       <input class="chat-input" id="input" placeholder="Escribe un mensaje..."
         onkeypress="if(event.key==='Enter' && !event.shiftKey) send()" />
       <button class="send-btn" id="sendBtn" onclick="send()">Enviar</button>
@@ -2802,33 +2790,7 @@
 </div><!-- fin #appDiv -->
 
 
-<!-- SELECTOR ESTILO IMAGEN -->
-<div id="imgStyleModal">
-  <button class="imgstyle-close" onclick="closeImgStyle()">✕</button>
-  <div class="imgstyle-title">Elige un estilo para tu imagen</div>
-  <div class="imgstyle-grid" id="imgStyleGrid"><!-- inyectado por JS --></div>
-</div>
 
-<!-- BARRA ESTILO SELECCIONADO -->
-<div id="imgStyleBar">
-  <div class="imgstyle-bar-top">
-    <div class="imgstyle-bar-thumb" id="imgStyleBarThumb"></div>
-    <div class="imgstyle-bar-info">
-      <div class="imgstyle-bar-name" id="imgStyleBarName"></div>
-      <div class="imgstyle-bar-hint">Agrega una foto y describe los cambios</div>
-    </div>
-    <button class="imgstyle-bar-cancel" onclick="cancelImgStyle()">✕</button>
-  </div>
-  <div class="imgstyle-bar-input-row">
-    <div class="imgstyle-bar-actions">
-      <button class="imgstyle-bar-icon-btn" title="Adjuntar" onclick="document.getElementById('fileInput').click()">+</button>
-      <button class="imgstyle-bar-icon-btn" title="Opciones">⚙</button>
-      <span style="font-size:0.75rem;color:var(--accent);cursor:pointer;white-space:nowrap;" onclick="openImgStyle()">🖼 Crear imagen &nbsp;✕</span>
-    </div>
-    <input class="imgstyle-bar-input" id="imgStyleInput" placeholder="Describe la imagen que quieres crear..." onkeypress="if(event.key==='Enter') sendImgStyled()" />
-    <button class="imgstyle-bar-send" onclick="sendImgStyled()">➤</button>
-  </div>
-</div>
 
 <!-- MODAL DETALLE PERL LABS -->
 <div id="perlDetailModal">
@@ -4902,6 +4864,11 @@ window.setMode = (m) => {
   document.getElementById("modeTitle").textContent = MODOS[m].title;
   document.getElementById("modeDesc").textContent  = MODOS[m].desc;
   updateUI();
+
+  // Limpiar chip y panel de estilos si cambias de modo
+  closeImgStyle();
+  if (selectedImgStyle) cancelImgStyle();
+
   const placeholders = {
     chat: "Escribe un mensaje...",
     resumen: "Pega el texto que quieres resumir...",
@@ -4912,7 +4879,7 @@ window.setMode = (m) => {
   };
   document.getElementById("input").placeholder = placeholders[m] || "Escribe un mensaje...";
 
-  // Abrir selector de estilo al activar modo imagen
+  // Mostrar selector de estilo al activar modo imagen
   if (m === "imagen") {
     openImgStyle();
   }
@@ -4966,34 +4933,33 @@ window.selectImgStyle = function(name) {
   selectedImgStyle = IMG_STYLES.find(function(s) { return s.name === name; });
   if (!selectedImgStyle) return;
 
-  // Actualizar barra inferior
-  document.getElementById("imgStyleBarThumb").textContent = selectedImgStyle.emoji;
-  document.getElementById("imgStyleBarThumb").style.background = selectedImgStyle.gradient;
-  document.getElementById("imgStyleBarName").textContent = selectedImgStyle.name;
+  // Marcar card seleccionada visualmente
+  document.querySelectorAll(".imgstyle-card").forEach(function(c) { c.classList.remove("selected"); });
+  var cards = document.querySelectorAll(".imgstyle-card");
+  cards.forEach(function(c) {
+    if (c.querySelector(".imgstyle-label") && c.querySelector(".imgstyle-label").textContent === name) {
+      c.classList.add("selected");
+    }
+  });
 
-  // Cerrar modal y mostrar barra
+  // Mostrar chip en el input (zona 2)
+  document.getElementById("chipEmoji").textContent = selectedImgStyle.emoji;
+  document.getElementById("chipName").textContent  = selectedImgStyle.name;
+  document.getElementById("imgStyleChip").classList.add("show");
+
+  // Cerrar el panel de estilos y enfocar el input
   closeImgStyle();
-  document.getElementById("imgStyleBar").classList.add("show");
-  document.getElementById("imgStyleInput").focus();
+  document.getElementById("input").placeholder = "Describe tu imagen con estilo " + selectedImgStyle.name + "...";
+  document.getElementById("input").focus();
 };
 
 window.cancelImgStyle = function() {
   selectedImgStyle = null;
-  document.getElementById("imgStyleBar").classList.remove("show");
-  document.getElementById("imgStyleInput").value = "";
+  document.getElementById("imgStyleChip").classList.remove("show");
+  document.getElementById("input").placeholder = "Describe la imagen que quieres crear...";
 };
 
-window.sendImgStyled = function() {
-  const desc = document.getElementById("imgStyleInput").value.trim();
-  if (!desc || !selectedImgStyle) return;
-  const prompt = "Estilo " + selectedImgStyle.name + ": " + desc;
-  document.getElementById("imgStyleInput").value = "";
-  document.getElementById("imgStyleBar").classList.remove("show");
-  // Poner en el input principal y enviar
-  const input = document.getElementById("input");
-  input.value = prompt;
-  if (window.send) send();
-};
+// sendImgStyled ya no se usa: el estilo se aplica desde send() via selectedImgStyle
 
 function addMessage(text, role, extra = "") {
   const div = document.createElement("div");
@@ -5028,8 +4994,13 @@ window.handleFile = (event) => {
 window.send = async () => {
   const input   = document.getElementById("input");
   const sendBtn = document.getElementById("sendBtn");
-  const text    = input.value.trim();
-  if (!text || !currentUser) return;
+  const rawText = input.value.trim();
+  if (!rawText || !currentUser) return;
+
+  // Si hay estilo de imagen seleccionado, anteponerlo al prompt
+  const text = (mode === "imagen" && selectedImgStyle)
+    ? "Estilo " + selectedImgStyle.name + ": " + rawText
+    : rawText;
 
   if (limiteAlcanzado(mode)) {
     showPaywall();
@@ -5078,10 +5049,15 @@ window.send = async () => {
   if (validaciones[mode] && !validaciones[mode](text)) return;
 
   addMessage(text + (pendingFile ? `\n📎 ${pendingFile.name}` : ""), "user");
-  input.value      = "";
+  input.value       = "";
   input.placeholder = "Escribe un mensaje...";
-  pendingFile      = null;
-  sendBtn.disabled = true;
+  pendingFile       = null;
+  sendBtn.disabled  = true;
+
+  // Limpiar chip de estilo después de enviar
+  if (selectedImgStyle) {
+    cancelImgStyle();
+  }
 
   if (mode === "imagen") {
     const typing = addMessage("🎨 Generando imagen...", "bot typing");
