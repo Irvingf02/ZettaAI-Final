@@ -2612,15 +2612,15 @@
 <script>
   (function() {
     if (localStorage.getItem("zettax_session") === "1") {
-      // Ya había sesión → mostrar chat de inmediato, sin parpadeo
-      document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById("loginDiv").style.display  = "none";
-        document.getElementById("appDiv").style.display    = "flex";
-        var sb = document.getElementById("sidebar");
-        if (sb) sb.style.display = "flex";
-        var mb = document.querySelector(".menu-toggle-mobile");
-        if (mb) mb.style.removeProperty("display");
-      });
+      // Inyectar estilos inline para mostrar todo de inmediato, sin esperar DOMContentLoaded
+      var style = document.createElement("style");
+      style.textContent = [
+        "#loginDiv { display: none !important; }",
+        "#appDiv   { display: flex !important; }",
+        "#sidebar  { display: flex !important; }",
+        ".menu-toggle-mobile { display: none; }"
+      ].join(" ");
+      document.head.appendChild(style);
     }
   })();
 </script>
