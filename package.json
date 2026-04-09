@@ -8,6 +8,7 @@
   
     "firebase-admin": "^12.1.0",
     "stripe": "^14.21.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "@notionhq/client": "^2.2.15"
   }
 }
