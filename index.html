@@ -64,8 +64,9 @@
     height: 100vh;
     background: var(--surface);
     border-right: 1px solid var(--border);
-    width: 60px;
-    transition: width 0.25s ease;
+    width: 300px;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
     display: flex;
     flex-direction: column;
     z-index: 1000;
@@ -73,7 +74,8 @@
   }
 
   #sidebar.sidebar-open {
-    width: 300px;
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
   }
 
   .sidebar-header {
@@ -273,16 +275,6 @@
   }
 
   @media (max-width: 1023px) {
-    #sidebar {
-      transform: translateX(-100%);
-      width: 300px !important;
-    }
-    
-    #sidebar.sidebar-open {
-      transform: translateX(0);
-      box-shadow: 4px 0 24px rgba(0,0,0,0.5);
-    }
-    
     #sidebar::after {
       content: '';
       position: fixed;
@@ -301,52 +293,77 @@
       pointer-events: auto;
     }
     
-    .mobile-menu-btn {
-      display: flex;
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 999;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 18px;
-      color: var(--text);
-      cursor: pointer;
-      align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 44px;
-    }
-    
     .sidebar-header .menu-btn {
       display: none;
     }
   }
 
   @media (min-width: 1024px) {
-    .mobile-menu-btn {
-      display: none !important;
+    #sidebar::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 300px;
+      width: calc(100vw - 300px);
+      height: 100vh;
+      background: rgba(0,0,0,0.3);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
     }
-    
+
+    #sidebar.sidebar-open::after {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     body {
-      padding-left: 60px;
+      padding-left: 0;
       transition: padding-left 0.25s ease;
     }
-    
+
     body.sidebar-is-open {
       padding-left: 300px;
     }
 
     #sidebar {
-      transform: none !important;
-      transition: width 0.25s ease;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
-    
+
+    #sidebar.sidebar-open {
+      transform: translateX(0);
+    }
+
     .sidebar-header .menu-btn {
       display: flex;
     }
+  }
+
+  /* Botón ☰ flotante — visible en TODAS las pantallas */
+  .menu-toggle-mobile {
+    display: flex !important;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1100;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 18px;
+    color: var(--text);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .menu-toggle-mobile:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: var(--accent);
   }
 
   #loginDiv {
@@ -2614,6 +2631,7 @@
     if (localStorage.getItem("zettax_session") === "1") {
       // Inyectar estilos inline para mostrar todo de inmediato, sin esperar DOMContentLoaded
       var style = document.createElement("style");
+      style.id = "zettax-quick-session-style";
       style.textContent = [
         "#loginDiv { display: none !important; }",
         "#appDiv   { display: flex !important; }",
@@ -3553,19 +3571,27 @@ window.loginAnonimo = async () => {
 
 window.logout = async () => {
   try {
-    // Cerrar menú y actualizar UI de inmediato, sin esperar a Firebase
+    // Cerrar menú de perfil
     const menu    = document.getElementById("profileMenu");
     const overlay = document.getElementById("profileOverlay");
     if (menu)    menu.classList.remove("show");
     if (overlay) overlay.classList.remove("show");
 
+    // Eliminar la sesión guardada
     localStorage.removeItem("zettax_session");
-    document.getElementById("loginDiv").style.display = "block";
+
+    // Eliminar el <style> que inyectó el script rápido (tiene !important y bloquea loginDiv)
+    const quickStyle = document.getElementById("zettax-quick-session-style");
+    if (quickStyle) quickStyle.remove();
+
+    // Mostrar login y ocultar app
+    document.getElementById("loginDiv").style.cssText = "display:block !important";
     document.getElementById("appDiv").style.display   = "none";
     document.getElementById("sidebar").style.display  = "none";
-    document.getElementById("mobilMenuBtn").style.display = "none";
+    const mobileBtn = document.getElementById("mobilMenuBtn");
+    if (mobileBtn) mobileBtn.style.display = "none";
 
-    // Luego cerrar sesión en Firebase en segundo plano
+    // Cerrar sesión en Firebase en segundo plano
     signOut(auth).catch(e => console.error("Error signOut:", e));
   } catch (e) { alert("Error al cerrar sesión: " + e.message); }
 };
@@ -3877,28 +3903,57 @@ function updateUI() {
 }
 
 window.toggleSidebar = function() {
-  const sidebar = document.getElementById("sidebar");
-  const isOpen  = sidebar.classList.contains("sidebar-open");
+  const sidebar  = document.getElementById("sidebar");
+  const mobileBtn = document.getElementById("mobilMenuBtn");
+  const isOpen   = sidebar.classList.contains("sidebar-open");
+  const isDesktop = window.innerWidth >= 1024;
 
   if (isOpen) {
     sidebar.classList.remove("sidebar-open");
-    document.body.classList.remove("sidebar-is-open");
+    if (isDesktop) document.body.classList.remove("sidebar-is-open");
+    if (mobileBtn) mobileBtn.style.opacity = "1";
   } else {
     sidebar.classList.add("sidebar-open");
-    document.body.classList.add("sidebar-is-open");
+    if (isDesktop) document.body.classList.add("sidebar-is-open");
+    if (mobileBtn) mobileBtn.style.opacity = "0";
     loadChatHistory();
   }
 };
+
+// Cerrar sidebar al hacer clic en el overlay (::after no captura eventos directamente, usamos click en el doc)
+document.addEventListener("click", function(e) {
+  const sidebar   = document.getElementById("sidebar");
+  const mobileBtn = document.getElementById("mobilMenuBtn");
+  if (!sidebar) return;
+  if (!sidebar.classList.contains("sidebar-open")) return;
+  // Si el clic fue dentro del sidebar o en el propio botón ☰, ignorar
+  if (sidebar.contains(e.target) || (mobileBtn && mobileBtn.contains(e.target))) return;
+  sidebar.classList.remove("sidebar-open");
+  document.body.classList.remove("sidebar-is-open");
+  if (mobileBtn) mobileBtn.style.opacity = "1";
+});
 
 window.newChat = function() {
   document.getElementById("messages").innerHTML = "";
   document.getElementById("input").value = "";
   chatHistory = [];
-  if (window.innerWidth < 1024) toggleSidebar();
+  const sidebar = document.getElementById("sidebar");
+  const mobileBtn = document.getElementById("mobilMenuBtn");
+  if (sidebar && sidebar.classList.contains("sidebar-open")) {
+    sidebar.classList.remove("sidebar-open");
+    document.body.classList.remove("sidebar-is-open");
+    if (mobileBtn) mobileBtn.style.opacity = "1";
+  }
 };
 
 window.showFavorites = function() {
-  if (window.innerWidth < 1024) toggleSidebar();
+  const sidebar = document.getElementById("sidebar");
+  const mobileBtn = document.getElementById("mobilMenuBtn");
+  if (sidebar && sidebar.classList.contains("sidebar-open")) {
+    sidebar.classList.remove("sidebar-open");
+    document.body.classList.remove("sidebar-is-open");
+    if (mobileBtn) mobileBtn.style.opacity = "1";
+  }
   const grid  = document.getElementById("miscosas-grid");
   const empty = document.getElementById("miscosas-empty");
 
@@ -3955,7 +4010,13 @@ const GEMS_LABS = [
 let gemsExpanded = false;
 
 window.showGems = function() {
-  if (window.innerWidth < 1024) toggleSidebar();
+  const sidebar = document.getElementById("sidebar");
+  const mobileBtn = document.getElementById("mobilMenuBtn");
+  if (sidebar && sidebar.classList.contains("sidebar-open")) {
+    sidebar.classList.remove("sidebar-open");
+    document.body.classList.remove("sidebar-is-open");
+    if (mobileBtn) mobileBtn.style.opacity = "1";
+  }
   renderGems();
   document.getElementById("gemsModal").classList.add("show");
 };
