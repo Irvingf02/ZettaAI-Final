@@ -5363,7 +5363,7 @@ window.send = async () => {
 window.showPaywall  = () => { document.getElementById("paywallModal").classList.add("show"); };
 window.closePaywall = () => { document.getElementById("paywallModal").classList.remove("show"); };
 
-// CORRECCIÓN: Función payPremium mejorada
+// Función payPremium — redirige a Stripe sin pantalla de carga
 window.payPremium = async (plan) => {
   if (!currentUser) return alert("Inicia sesión primero.");
 
@@ -5378,17 +5378,6 @@ window.payPremium = async (plan) => {
   }
 
   closePaywall();
-
-  const loadingMsg = document.createElement("div");
-  loadingMsg.id = "payLoading";
-  loadingMsg.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;";
-  loadingMsg.innerHTML = `<div style="color:#fff;font-size:1.1rem;font-weight:700;">⏳ Conectando con Stripe...</div>`;
-  document.body.appendChild(loadingMsg);
-
-  const removeLoading = () => {
-    const el = document.getElementById("payLoading");
-    if (el) el.remove();
-  };
 
   try {
     const res = await fetch(`${BACKEND_URL}/pay`, {
@@ -5421,7 +5410,6 @@ window.payPremium = async (plan) => {
       throw new Error("No se recibió URL de checkout. Revisa la configuración del servidor.");
     }
   } catch (e) {
-    removeLoading();
     alert("❌ Error al procesar el pago:\n\n" + e.message);
   }
 };
