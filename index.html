@@ -2606,6 +2606,8 @@
   }
 </style>
 
+<button class="menu-toggle-mobile" id="mobilMenuBtn" onclick="toggleSidebar()">☰</button>
+
 <!-- Script síncrono: muestra el chat antes de que Firebase responda si ya hay sesión -->
 <script>
   (function() {
@@ -2615,8 +2617,7 @@
       style.textContent = [
         "#loginDiv { display: none !important; }",
         "#appDiv   { display: flex !important; }",
-        "#sidebar  { display: flex !important; }",
-        ".menu-toggle-mobile { display: none; }"
+        "#sidebar  { display: flex !important; }"
       ].join(" ");
       document.head.appendChild(style);
     }
@@ -2692,8 +2693,6 @@
     </button>
   </div>
 </div>
-
-<button class="menu-toggle-mobile" id="mobilMenuBtn" onclick="toggleSidebar()">☰</button>
 
 <!-- APP DIV -->
 <div id="appDiv" style="display:none; flex-direction:column; width:100%; gap:12px;">
@@ -3553,26 +3552,22 @@ window.loginAnonimo = async () => {
 };
 
 window.logout = async () => {
-  // Cerrar menú inmediatamente para dar feedback visual
-  const profileMenu = document.getElementById("profileMenu");
-  const profileOverlay = document.getElementById("profileOverlay");
-  if (profileMenu) profileMenu.classList.remove("show");
-  if (profileOverlay) profileOverlay.classList.remove("show");
-
-  // Mostrar indicador de carga
-  const toast = document.createElement("div");
-  toast.id = "logoutToast";
-  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 22px;border-radius:20px;font-size:0.82rem;z-index:9999;white-space:nowrap;";
-  toast.textContent = "⏳ Cerrando sesión...";
-  document.body.appendChild(toast);
-
   try {
-    await signOut(auth);
-  } catch (e) {
-    const t = document.getElementById("logoutToast");
-    if (t) t.remove();
-    alert("Error al cerrar sesión: " + e.message);
-  }
+    // Cerrar menú y actualizar UI de inmediato, sin esperar a Firebase
+    const menu    = document.getElementById("profileMenu");
+    const overlay = document.getElementById("profileOverlay");
+    if (menu)    menu.classList.remove("show");
+    if (overlay) overlay.classList.remove("show");
+
+    localStorage.removeItem("zettax_session");
+    document.getElementById("loginDiv").style.display = "block";
+    document.getElementById("appDiv").style.display   = "none";
+    document.getElementById("sidebar").style.display  = "none";
+    document.getElementById("mobilMenuBtn").style.display = "none";
+
+    // Luego cerrar sesión en Firebase en segundo plano
+    signOut(auth).catch(e => console.error("Error signOut:", e));
+  } catch (e) { alert("Error al cerrar sesión: " + e.message); }
 };
 
 window.manageAccount = function() {
@@ -3697,56 +3692,43 @@ window.addAccount = () => {
   alert("Función de múltiples cuentas: próximamente.");
 };
 
-// ── MOSTRAR BOTÓN MÓVIL INMEDIATAMENTE si hay sesión guardada ──────────────
-(function() {
-  const mobileBtn = document.querySelector(".menu-toggle-mobile");
-  const sidebar   = document.getElementById("sidebar");
-  if (localStorage.getItem("zettax_session") === "1" && mobileBtn) {
-    mobileBtn.style.removeProperty("display");
-    if (sidebar) sidebar.style.display = "flex";
-  }
-})();
-
 getRedirectResult(auth).catch(e => console.error("Redirect error:", e));
 
 onAuthStateChanged(auth, async (user) => {
   const sidebar   = document.getElementById("sidebar");
-  const mobileBtn = document.querySelector(".menu-toggle-mobile");
+  const mobileBtn = document.getElementById("mobilMenuBtn");
 
   if (user) {
     // Guardar marca de sesión para la próxima carga
     localStorage.setItem("zettax_session", "1");
 
     currentUser = user;
+    // Mostrar la app DE INMEDIATO sin esperar a Firebase
     document.getElementById("loginDiv").style.display = "none";
     document.getElementById("appDiv").style.display   = "flex";
     sidebar.style.display   = "flex";
-    mobileBtn.style.removeProperty("display");
+    if (mobileBtn) mobileBtn.style.display = "";
     setTimeout(() => updateUserProfile(user), 100);
     
     const params = new URLSearchParams(window.location.search);
     const el = document.getElementById("payLoading");
     if (el) el.remove();
 
+    // Cargar datos en segundo plano (sin bloquear la UI)
     if (params.get("success") === "true") {
       document.getElementById("successBanner").style.display = "block";
       window.history.replaceState({}, "", window.location.pathname);
-      setTimeout(async () => {
-        await refreshPremiumStatus();
+      refreshPremiumStatus().then(() => {
         setTimeout(() => {
           document.getElementById("successBanner").style.display = "none";
         }, 5000);
-      }, 2000);
+      });
     } else {
-      await refreshPremiumStatus();
+      refreshPremiumStatus(); // sin await
     }
     
-    await loadChatHistory();
+    loadChatHistory(); // sin await
   } else {
-    // Quitar toast de "cerrando sesión" si existe
-    const logoutToast = document.getElementById("logoutToast");
-    if (logoutToast) logoutToast.remove();
-
     // Borrar marca de sesión al cerrar sesión
     localStorage.removeItem("zettax_session");
 
@@ -3756,7 +3738,7 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("loginDiv").style.display = "block";
     document.getElementById("appDiv").style.display   = "none";
     sidebar.style.display   = "none";
-    mobileBtn.style.setProperty("display", "none", "important");
+    if (mobileBtn) mobileBtn.style.display = "none";
   }
 });
 
