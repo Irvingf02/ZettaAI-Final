@@ -4605,9 +4605,8 @@ const APPS_DATA = {
       toggleId: "toggle-slack",
       defaultOn: true,
       locked: true,
-      premium: true,
-      badge: "⭐ Premium",
-      badgeStyle: "background:rgba(245,166,35,0.15);color:var(--gold);border:1px solid var(--gold);",
+      badge: "🟢 Activo",
+      badgeStyle: "background:rgba(0,196,140,0.15);color:#00C48C;border:1px solid #00C48C;",
       subApps: [
         { icon: "💬", name: "Slack Mensajes", handle: "@Slack", link: false },
         { icon: "📢", name: "Slack Canales", handle: "@SlackChannels", link: false },
@@ -4655,13 +4654,9 @@ window.switchAppsTab = function(tab) {
       + '<div class="apps-group-desc">' + g.groupDesc + '</div>'
       + '</div>'
       + '<label class="apps-toggle">'
-      + (g.locked && g.premium
-          ? (isPremium
-              ? '<span title="Activo — plan Premium" style="display:flex;align-items:center;justify-content:center;width:44px;height:24px;color:var(--success);font-size:1rem;">✅</span>'
-              : '<span title="Exclusivo Premium — haz clic para desbloquear" style="display:flex;align-items:center;justify-content:center;width:44px;height:24px;color:var(--gold);font-size:1rem;cursor:pointer;" onclick="showPaywall()">⭐</span>')
-          : g.locked
-            ? '<span title="Servicio esencial — siempre activo" style="display:flex;align-items:center;justify-content:center;width:44px;height:24px;color:var(--success);font-size:1rem;">✅</span>'
-            : '<input type="checkbox" ' + checked + ' onchange="toggleApp(\'' + g.toggleId + '\', this.checked)"><span class="apps-toggle-slider"></span>')
+      + (g.locked
+          ? '<span title="Servicio esencial — siempre activo" style="display:flex;align-items:center;justify-content:center;width:44px;height:24px;color:var(--success);font-size:1rem;">✅</span>'
+          : '<input type="checkbox" ' + checked + ' onchange="toggleApp(\'' + g.toggleId + '\', this.checked)"><span class="apps-toggle-slider"></span>')
       + '</label>'
       + '</div>'
       + '<div class="apps-subgrid">' + subHtml + '</div>'
@@ -4698,8 +4693,8 @@ window.toggleApp = function(id, on) {
 // Estado de conexión Notion
 let notionConnected = false;
 
-// Estado de conexión Slack
-let slackConnected = false;
+// Estado de conexión Slack — siempre activo
+let slackConnected = true;
 
 // ── SLACK: funciones de integración al chat ───────────────────────────────
 async function slackAction(action, params = {}) {
@@ -4712,13 +4707,18 @@ async function slackAction(action, params = {}) {
 }
 
 async function checkSlackIntent(text) {
-  if (!slackConnected || !isPremium) return false;
+  if (!slackConnected) return false;
   const lower = text.toLowerCase();
 
-  // Enviar mensaje: "envía/manda [mensaje] a #canal"
+  // Enviar mensaje: solo premium
   const sendMatch = lower.match(/(?:envía|manda|escribe|publica)\s+["']?(.+?)["']?\s+(?:a|en)\s+#?([\w-]+)/i)
                  || text.match(/(?:envía|manda|escribe|publica)\s+["']?(.+?)["']?\s+(?:a|en)\s+#?([\w-]+)/i);
   if (sendMatch) {
+    if (!isPremium) {
+      addMessage("⭐ Enviar mensajes a Slack es exclusivo de usuarios Premium. ¡Actualiza tu plan!", "bot error");
+      showPaywall();
+      return true;
+    }
     const mensaje  = sendMatch[1].trim();
     const canalNom = sendMatch[2].trim();
     const typing   = addMessage("💬 Enviando mensaje a Slack...", "bot typing");
@@ -4891,12 +4891,6 @@ window.confirmAppConnect = async function(toggleId, name) {
   // ── SLACK: conexión real (solo premium) ───────────────────────────────────
   if (toggleId === "toggle-slack") {
     if (overlay) overlay.remove();
-
-    // Bloquear si no es premium
-    if (!isPremium) {
-      showPaywall();
-      return;
-    }
 
     try {
       const res = await fetch(`${BACKEND_URL}/slack`, {
