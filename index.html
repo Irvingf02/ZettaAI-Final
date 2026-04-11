@@ -4600,11 +4600,14 @@ const APPS_DATA = {
     },
     {
       groupName: "Slack",
-      groupDesc: "Busca y resume conversaciones y canales de tu workspace",
+      groupDesc: "Lee, busca y envía mensajes en tu workspace de Slack desde ZettaxAI",
       groupIcons: ["💬"],
       toggleId: "toggle-slack",
-      defaultOn: false,
-      badge: "🔔 Únete",
+      defaultOn: true,
+      locked: true,
+      premium: true,
+      badge: "⭐ Premium",
+      badgeStyle: "background:rgba(245,166,35,0.15);color:var(--gold);border:1px solid var(--gold);",
       subApps: [
         { icon: "💬", name: "Slack Mensajes", handle: "@Slack", link: false },
         { icon: "📢", name: "Slack Canales", handle: "@SlackChannels", link: false },
@@ -4652,9 +4655,13 @@ window.switchAppsTab = function(tab) {
       + '<div class="apps-group-desc">' + g.groupDesc + '</div>'
       + '</div>'
       + '<label class="apps-toggle">'
-      + (g.locked
-          ? '<span title="Servicio esencial — siempre activo" style="display:flex;align-items:center;justify-content:center;width:44px;height:24px;color:var(--success);font-size:1rem;" >✅</span>'
-          : '<input type="checkbox" ' + checked + ' onchange="toggleApp(\'' + g.toggleId + '\', this.checked)"><span class="apps-toggle-slider"></span>')
+      + (g.locked && g.premium
+          ? (isPremium
+              ? '<span title="Activo — plan Premium" style="display:flex;align-items:center;justify-content:center;width:44px;height:24px;color:var(--success);font-size:1rem;">✅</span>'
+              : '<span title="Exclusivo Premium — haz clic para desbloquear" style="display:flex;align-items:center;justify-content:center;width:44px;height:24px;color:var(--gold);font-size:1rem;cursor:pointer;" onclick="showPaywall()">⭐</span>')
+          : g.locked
+            ? '<span title="Servicio esencial — siempre activo" style="display:flex;align-items:center;justify-content:center;width:44px;height:24px;color:var(--success);font-size:1rem;">✅</span>'
+            : '<input type="checkbox" ' + checked + ' onchange="toggleApp(\'' + g.toggleId + '\', this.checked)"><span class="apps-toggle-slider"></span>')
       + '</label>'
       + '</div>'
       + '<div class="apps-subgrid">' + subHtml + '</div>'
@@ -4669,7 +4676,7 @@ window.toggleApp = function(id, on) {
     "toggle-stripe":     { name: "Stripe Pagos",       external: false },
     "toggle-gworkspace": { name: "Google Workspace",   external: true,  icon: "🗂️", desc: "Conecta tu Google Calendar, Gmail, Docs y Drive para obtener respuestas más inteligentes.", ready: false },
     "toggle-notion":     { name: "Notion",             external: true,  icon: "📓", desc: "Accede y organiza tus notas y bases de datos de Notion directamente desde ZettaxAI.",        ready: true  },
-    "toggle-slack":      { name: "Slack",              external: true,  icon: "💬", desc: "Busca y resume conversaciones y canales de tu workspace de Slack.",                          ready: false }
+    "toggle-slack":      { name: "Slack",              external: true,  icon: "💬", desc: "Lee, busca y envía mensajes en tu workspace de Slack directamente desde ZettaxAI.",        ready: true,  premium: true }
   };
 
   const info = appInfo[id] || { name: id, external: false };
@@ -4690,6 +4697,79 @@ window.toggleApp = function(id, on) {
 
 // Estado de conexión Notion
 let notionConnected = false;
+
+// Estado de conexión Slack
+let slackConnected = false;
+
+// ── SLACK: funciones de integración al chat ───────────────────────────────
+async function slackAction(action, params = {}) {
+  const res = await fetch(`${BACKEND_URL}/slack`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, ...params })
+  });
+  return res.json();
+}
+
+async function checkSlackIntent(text) {
+  if (!slackConnected || !isPremium) return false;
+  const lower = text.toLowerCase();
+
+  // Enviar mensaje: "envía/manda [mensaje] a #canal"
+  const sendMatch = lower.match(/(?:envía|manda|escribe|publica)\s+["']?(.+?)["']?\s+(?:a|en)\s+#?([\w-]+)/i)
+                 || text.match(/(?:envía|manda|escribe|publica)\s+["']?(.+?)["']?\s+(?:a|en)\s+#?([\w-]+)/i);
+  if (sendMatch) {
+    const mensaje  = sendMatch[1].trim();
+    const canalNom = sendMatch[2].trim();
+    const typing   = addMessage("💬 Enviando mensaje a Slack...", "bot typing");
+    try {
+      // Primero buscar el ID del canal por nombre
+      const chData = await slackAction("listChannels");
+      const canal  = (chData.channels || []).find(c => c.name.toLowerCase() === canalNom.toLowerCase());
+      if (!canal) { typing.remove(); addMessage(`💬 No encontré el canal #${canalNom} en tu workspace.`, "bot error"); return true; }
+      await slackAction("sendMessage", { channel: canal.id, message: mensaje });
+      typing.remove();
+      addMessage(`✅ Mensaje enviado a #${canal.name}: "${mensaje}"`, "bot");
+    } catch(e) { typing.remove(); addMessage("⚠️ Error enviando mensaje a Slack.", "bot error"); }
+    return true;
+  }
+
+  // Leer mensajes: "mensajes de #canal" / "qué dicen en #general"
+  const readMatch = lower.match(/(?:mensajes?|conversaci[oó]n|qu[eé] dicen?|muestra|ver)\s+(?:de|en|del?)\s+#?([\w-]+)/i);
+  if (readMatch) {
+    const canalNom = readMatch[1].trim();
+    const typing   = addMessage("💬 Leyendo mensajes de Slack...", "bot typing");
+    try {
+      const chData = await slackAction("listChannels");
+      const canal  = (chData.channels || []).find(c => c.name.toLowerCase() === canalNom.toLowerCase());
+      if (!canal) { typing.remove(); addMessage(`💬 No encontré el canal #${canalNom}.`, "bot error"); return true; }
+      const msgData = await slackAction("getMessages", { channel: canal.id, limit: 10 });
+      typing.remove();
+      if (!msgData.messages || msgData.messages.length === 0) {
+        addMessage(`💬 No hay mensajes recientes en #${canal.name}.`, "bot");
+      } else {
+        const resumen = `💬 Últimos mensajes en #${canal.name}:\n` +
+          msgData.messages.map(m => `• ${m.text || "(sin texto)"} — ${m.ts}`).join("\n");
+        addMessage(resumen, "bot");
+      }
+    } catch(e) { typing.remove(); addMessage("⚠️ Error leyendo mensajes de Slack.", "bot error"); }
+    return true;
+  }
+
+  // Listar canales: "canales de slack" / "qué canales tengo"
+  if (/canales?\s+(?:de\s+)?slack|qué canales/i.test(lower)) {
+    const typing = addMessage("💬 Obteniendo canales de Slack...", "bot typing");
+    try {
+      const chData = await slackAction("listChannels");
+      typing.remove();
+      const lista = (chData.channels || []).map(c => `• #${c.name} (${c.members} miembros)`).join("\n");
+      addMessage(`💬 Canales en tu workspace:\n${lista}`, "bot");
+    } catch(e) { typing.remove(); addMessage("⚠️ Error obteniendo canales.", "bot error"); }
+    return true;
+  }
+
+  return false;
+}
 
 function showAppConnectModal(toggleId, info) {
   const existing = document.getElementById("appConnectOverlay");
@@ -4808,7 +4888,75 @@ window.confirmAppConnect = async function(toggleId, name) {
     return;
   }
 
-  // ── OTRAS APPS: lista de espera ────────────────────────────────────────
+  // ── SLACK: conexión real (solo premium) ───────────────────────────────────
+  if (toggleId === "toggle-slack") {
+    if (overlay) overlay.remove();
+
+    // Bloquear si no es premium
+    if (!isPremium) {
+      showPaywall();
+      return;
+    }
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/slack`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "listChannels" })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.channels) {
+        slackConnected = true;
+
+        // Guardar en Firestore
+        if (currentUser && !currentUser.isAnonymous) {
+          try {
+            await setDoc(doc(db, "integrations", currentUser.uid), {
+              slack: true, slackConnectedAt: new Date().toISOString()
+            }, { merge: true });
+          } catch(e) {}
+        }
+
+        const channelsHtml = data.channels.slice(0, 4).map(c =>
+          `<div style="padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:0.78rem;color:var(--text);">💬 #${c.name} <span style="color:var(--muted);font-size:0.7rem;">(${c.members} miembros)</span></div>`
+        ).join("") || `<div style="font-size:0.78rem;color:var(--muted);">No se encontraron canales.</div>`;
+
+        const modal = document.createElement("div");
+        modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;";
+        modal.innerHTML = `
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;width:100%;max-width:400px;padding:28px 24px;text-align:center;animation:fadeUp 0.25s ease;">
+            <div style="font-size:2.5rem;margin-bottom:12px;">💬</div>
+            <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px;">¡Slack conectado!</div>
+            <div style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;">ZettaxAI ahora puede acceder a tu workspace.</div>
+            <div style="text-align:left;display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">${channelsHtml}</div>
+            <div style="background:rgba(0,196,140,0.1);border:1px solid var(--success);border-radius:10px;padding:10px;font-size:0.78rem;color:var(--success);margin-bottom:16px;">
+              💡 Prueba: <em>"Muestra los mensajes de #general"</em> o <em>"Envía un mensaje a #nuevo-canal"</em>
+            </div>
+            <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:11px;border-radius:10px;border:none;background:var(--accent);color:#000;font-size:0.88rem;font-weight:700;cursor:pointer;">¡Listo, empezar!</button>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      } else {
+        throw new Error(data.error || "Error al conectar");
+      }
+    } catch(e) {
+      const errModal = document.createElement("div");
+      errModal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;";
+      errModal.innerHTML = `
+        <div style="background:var(--card);border:1px solid var(--danger);border-radius:18px;width:100%;max-width:360px;padding:28px 24px;text-align:center;">
+          <div style="font-size:2rem;margin-bottom:12px;">⚠️</div>
+          <div style="font-size:0.9rem;font-weight:700;color:var(--danger);margin-bottom:8px;">Error al conectar Slack</div>
+          <div style="font-size:0.8rem;color:var(--muted);margin-bottom:16px;">${e.message}<br><br>Verifica que el SLACK_TOKEN esté configurado en Vercel.</div>
+          <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:10px;border-radius:10px;border:none;background:var(--card);border:1px solid var(--border);color:var(--text);cursor:pointer;">Cerrar</button>
+        </div>
+      `;
+      document.body.appendChild(errModal);
+    }
+    return;
+  }
+
+
   if (currentUser && !currentUser.isAnonymous) {
     try {
       await setDoc(doc(db, "integrations_waitlist", currentUser.uid), {
@@ -5344,6 +5492,14 @@ window.send = async () => {
   // Verificar si el mensaje es para Notion
   const handledByNotion = await checkNotionIntent(text);
   if (handledByNotion) {
+    sendBtn.disabled = false;
+    input.focus();
+    return;
+  }
+
+  // Verificar si el mensaje es para Slack
+  const handledBySlack = await checkSlackIntent(text);
+  if (handledBySlack) {
     sendBtn.disabled = false;
     input.focus();
     return;
