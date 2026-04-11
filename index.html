@@ -2629,7 +2629,7 @@
 <script>
   (function() {
     if (localStorage.getItem("zettax_session") === "1") {
-      // Inyectar estilos inline para mostrar todo de inmediato, sin esperar DOMContentLoaded
+      // Mostrar app y sidebar de inmediato
       var style = document.createElement("style");
       style.id = "zettax-quick-session-style";
       style.textContent = [
@@ -2638,6 +2638,35 @@
         "#sidebar  { display: flex !important; }"
       ].join(" ");
       document.head.appendChild(style);
+
+      // Mostrar botón ☰ de inmediato
+      document.addEventListener("DOMContentLoaded", function() {
+        var btn = document.getElementById("mobilMenuBtn");
+        if (btn) btn.style.display = "flex";
+
+        // Restaurar avatar del usuario sin esperar a Firebase
+        try {
+          var profile = JSON.parse(localStorage.getItem("zettax_profile") || "{}");
+          var photoURL = profile.photoURL || "";
+          var initial  = profile.initial  || "?";
+
+          var applyAvatar = function(imgId, letterId) {
+            var img = document.getElementById(imgId);
+            var ltr = document.getElementById(letterId);
+            if (!img || !ltr) return;
+            if (photoURL) {
+              img.src = photoURL;
+              img.style.display = "block";
+              ltr.style.display = "none";
+            } else {
+              img.style.display = "none";
+              ltr.style.display = "flex";
+              ltr.textContent   = initial;
+            }
+          };
+          applyAvatar("userAvatarImg", "userAvatarLetter");
+        } catch(e) {}
+      });
     }
   })();
 </script>
@@ -3483,6 +3512,11 @@ function updateUserProfile(user) {
   const photoURL    = user.photoURL || "";
   const initial     = user.isAnonymous ? "?" : (email.charAt(0).toUpperCase() || "?");
 
+  // Guardar en localStorage para mostrarlo instantáneamente en la próxima carga
+  try {
+    localStorage.setItem("zettax_profile", JSON.stringify({ photoURL, initial }));
+  } catch(e) {}
+
   const setAvatar = (imgId, letterId, photo, letter) => {
     const img = document.getElementById(imgId);
     const ltr = document.getElementById(letterId);
@@ -3579,6 +3613,7 @@ window.logout = async () => {
 
     // Eliminar la sesión guardada
     localStorage.removeItem("zettax_session");
+    localStorage.removeItem("zettax_profile");
 
     // Eliminar el <style> que inyectó el script rápido (tiene !important y bloquea loginDiv)
     const quickStyle = document.getElementById("zettax-quick-session-style");
