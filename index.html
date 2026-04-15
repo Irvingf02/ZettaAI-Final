@@ -2618,6 +2618,115 @@
   /* Ocultar la vieja barra flotante */
   #imgStyleBar { display: none !important; }
 
+  /* ── PANEL DE VIDEO ──────────────────────────────────────────────────────── */
+  #videoPanel {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin: 0 0 8px;
+    animation: fadeUp 0.2s ease;
+  }
+  #videoPanel.show { display: flex; }
+
+  .videopanel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .videopanel-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .videopanel-skip {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.78rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.15s;
+  }
+  .videopanel-skip:hover { color: var(--accent); }
+
+  .videopanel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+  }
+
+  .videopanel-card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  .videopanel-card:hover { border-color: var(--accent); background: rgba(0,212,255,0.05); }
+  .videopanel-card.selected { border-color: var(--accent); background: rgba(0,212,255,0.1); }
+  .videopanel-card .vp-emoji { font-size: 1.6rem; line-height: 1; }
+  .videopanel-card .vp-label { font-size: 0.65rem; font-weight: 600; color: var(--muted); }
+  .videopanel-card.selected .vp-label { color: var(--accent); }
+
+  /* Chip de tipo de video seleccionado */
+  #videoTypeChip {
+    display: none; align-items: center; gap: 5px;
+    background: rgba(0,212,255,0.12);
+    border: 1px solid rgba(0,212,255,0.4);
+    border-radius: 20px; padding: 3px 8px 3px 5px;
+    font-size: 0.73rem; font-weight: 600; color: var(--accent);
+    white-space: nowrap; flex-shrink: 0;
+  }
+  #videoTypeChip.show { display: flex; }
+  #videoTypeChip .chip-remove {
+    background: none; border: none; color: var(--accent);
+    font-size: 0.65rem; cursor: pointer; padding: 0; line-height: 1; opacity: 0.6;
+  }
+  #videoTypeChip .chip-remove:hover { opacity: 1; }
+
+  .videopanel-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .videopanel-option-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+  }
+  .videopanel-option-group { display: flex; flex-direction: column; flex: 1; min-width: 120px; }
+  .videopanel-option-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .videopanel-opt-btn {
+    padding: 5px 11px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .videopanel-opt-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .videopanel-opt-btn.active { border-color: var(--accent); background: rgba(0,212,255,0.1); color: var(--accent); }
+
+  @media (max-width: 500px) {
+    .videopanel-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
   @media (max-width: 500px) {
     .imgstyle-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
   }
@@ -2810,6 +2919,7 @@
     <button class="mode-btn"        id="btn-ideas"   onclick="setMode('ideas')">💡 Ideas</button>
     <button class="mode-btn"        id="btn-tarea"   onclick="setMode('tarea')">🎓 Tarea</button>
     <button class="mode-btn"        id="btn-imagen"  onclick="setMode('imagen')">🎨 Imagen</button>
+    <button class="mode-btn"        id="btn-video"   onclick="setMode('video')">🎬 Video</button>
     <button class="mode-btn"        id="btn-codigo"  onclick="setMode('codigo')">💻 Código</button>
     <button class="btn-pro"         onclick="showPaywall()">✨ Ser PRO</button>
   </div>
@@ -2831,6 +2941,16 @@
       <div class="imgstyle-grid" id="imgStyleGrid"><!-- inyectado por JS --></div>
     </div>
 
+    <!-- PANEL DE VIDEO (inline, zona 1) -->
+    <div id="videoPanel">
+      <div class="videopanel-header">
+        <div class="videopanel-title">🎬 Configura tu video</div>
+        <button class="videopanel-skip" onclick="closeVideoPanel()">Omitir ›</button>
+      </div>
+      <div class="videopanel-grid" id="videoPanelGrid"><!-- inyectado por JS --></div>
+      <div class="videopanel-options" id="videoPanelOptions"><!-- inyectado por JS --></div>
+    </div>
+
     <div id="messages"></div>
     <div class="input-area">
       <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf,.txt" onchange="handleFile(event)">
@@ -2840,6 +2960,12 @@
         <span class="chip-emoji" id="chipEmoji"></span>
         <span id="chipName"></span>
         <button class="chip-remove" onclick="cancelImgStyle()" title="Quitar estilo">✕</button>
+      </div>
+      <!-- Chip de tipo de video seleccionado (zona 2) -->
+      <div id="videoTypeChip">
+        <span id="videoChipEmoji"></span>
+        <span id="videoChipName"></span>
+        <button class="chip-remove" onclick="cancelVideoType()" title="Quitar tipo">✕</button>
       </div>
       <input class="chat-input" id="input" placeholder="Escribe un mensaje..."
         onkeypress="if(event.key==='Enter' && !event.shiftKey) send()" />
@@ -3165,6 +3291,7 @@
         <div class="activity-stat"><div class="stat-num" id="act-ideas">0</div><div class="stat-label">💡 Ideas</div></div>
         <div class="activity-stat"><div class="stat-num" id="act-tarea">0</div><div class="stat-label">🎓 Tareas</div></div>
         <div class="activity-stat"><div class="stat-num" id="act-imagen">0</div><div class="stat-label">🎨 Imágenes</div></div>
+        <div class="activity-stat"><div class="stat-num" id="act-video">0</div><div class="stat-label">🎬 Videos</div></div>
         <div class="activity-stat"><div class="stat-num" id="act-codigo">0</div><div class="stat-label">💻 Código</div></div>
       </div>
       <div class="activity-section-title">Historial de conversaciones</div>
@@ -3189,7 +3316,7 @@
 
       <button class="help-article" onclick="helpArticle('modos')">
         <span class="help-article-icon">📄</span>
-        <span class="help-article-text">Cómo usar los modos de ZettaxAI (Chat, Resumir, Ideas, Tarea, Imagen, Código)</span>
+        <span class="help-article-text">Cómo usar los modos de ZettaxAI (Chat, Resumir, Ideas, Tarea, Imagen, Video, Código)</span>
       </button>
 
       <button class="help-article" onclick="helpArticle('limites')">
@@ -3459,6 +3586,7 @@ const LIMITES = {
   ideas:   20,
   tarea:   15,
   imagen:  5,
+  video:   5,
   codigo:  10
 };
 
@@ -3474,16 +3602,26 @@ let isPremium   = false;
 let userPlan    = "free";
 let mode        = "chat";
 let chatHistory = [];
-let contadores  = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0, codigo: 0 };
+let contadores  = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0, video: 0, codigo: 0 };
 let fechaHoy    = new Date().toISOString().slice(0, 10);
 let misCosasImages = (() => {
   try { return JSON.parse(localStorage.getItem("zettax_mis_imagenes") || "[]"); }
   catch { return []; }
 })();
 
+let misCosasVideos = (() => {
+  try { return JSON.parse(localStorage.getItem("zettax_mis_videos") || "[]"); }
+  catch { return []; }
+})();
+
 function guardarMisCosas() {
   try { localStorage.setItem("zettax_mis_imagenes", JSON.stringify(misCosasImages)); }
   catch (e) { console.warn("No se pudo guardar en localStorage:", e); }
+}
+
+function guardarMisCosasVideos() {
+  try { localStorage.setItem("zettax_mis_videos", JSON.stringify(misCosasVideos)); }
+  catch (e) { console.warn("No se pudo guardar videos en localStorage:", e); }
 }
 
 function showConfirm({ icon = "🗑️", title, message, okLabel = "Eliminar", onOk }) {
@@ -4345,6 +4483,7 @@ window.showActivity = async function() {
   document.getElementById("act-ideas").textContent   = contadores.ideas   || 0;
   document.getElementById("act-tarea").textContent   = contadores.tarea   || 0;
   document.getElementById("act-imagen").textContent  = contadores.imagen  || 0;
+  document.getElementById("act-video").textContent   = contadores.video   || 0;
   document.getElementById("act-codigo").textContent  = contadores.codigo  || 0;
 
   // Cargar historial de chats
@@ -5111,11 +5250,11 @@ window.helpArticle = function(id) {
   const articulos = {
     modos: {
       titulo: "Modos de ZettaxAI",
-      texto: "💬 Chat — Preguntas y consultas generales. Respuestas rápidas y directas.\n\n📝 Resumir — Pega cualquier texto largo y obtén un resumen claro y conciso.\n\n💡 Ideas — Escribe un tema y recibe ideas creativas y originales al instante.\n\n🎓 Tarea — Explica conceptos académicos o resuelve dudas escolares paso a paso.\n\n🎨 Imagen — Describe lo que quieres crear y la IA generará una imagen única.\n\n💻 Código — Escribe, explica y depura código en cualquier lenguaje."
+      texto: "💬 Chat — Preguntas y consultas generales. Respuestas rápidas y directas.\n\n📝 Resumir — Pega cualquier texto largo y obtén un resumen claro y conciso.\n\n💡 Ideas — Escribe un tema y recibe ideas creativas y originales al instante.\n\n🎓 Tarea — Explica conceptos académicos o resuelve dudas escolares paso a paso.\n\n🎨 Imagen — Describe lo que quieres crear y la IA generará una imagen única.\n\n🎬 Video — Describe el video que quieres generar y la IA lo creará por ti.\n\n💻 Código — Escribe, explica y depura código en cualquier lenguaje."
     },
     limites: {
       titulo: "Límites y planes",
-      texto: "Plan gratuito:\n• 20 chats / día\n• 10 resúmenes / día\n• 20 ideas / día\n• 15 tareas / día\n• 5 imágenes / día\n• 10 consultas de código / día (máx. 50 líneas)\n\nPlan GO ($100/mes): Mensajes ilimitados, 20 imágenes/día, hasta 150 líneas de código.\n\nPlan PLUS ($250/mes): Todo de GO + 50 imágenes/día, hasta 300 líneas, respuestas más largas.\n\nPlan ULTRA ($500/mes): Todo ilimitado + soporte 24/7 dedicado."
+      texto: "Plan gratuito:\n• 20 chats / día\n• 10 resúmenes / día\n• 20 ideas / día\n• 15 tareas / día\n• 5 imágenes / día\n• 5 videos / día\n• 10 consultas de código / día (máx. 50 líneas)\n\nPlan GO ($100/mes): Mensajes ilimitados, 20 imágenes/día, 20 videos/día, hasta 150 líneas de código.\n\nPlan PLUS ($250/mes): Todo de GO + 50 imágenes/día, 50 videos/día, hasta 300 líneas, respuestas más largas.\n\nPlan ULTRA ($500/mes): Todo ilimitado + soporte 24/7 dedicado."
     },
     historial: {
       titulo: "Historial de conversaciones",
@@ -5226,6 +5365,7 @@ const MODOS = {
   ideas:   { emoji: "💡", title: "Generador de Ideas",  desc: "Ideas creativas y originales",    premium: false },
   tarea:   { emoji: "🎓", title: "Tutor de Tareas",     desc: "Explica conceptos fácilmente",    premium: false },
   imagen:  { emoji: "🎨", title: "Crear Imagen",        desc: "Genera imágenes con IA",          premium: false },
+  video:   { emoji: "🎬", title: "Crear Video",         desc: "Genera y crea videos con IA",     premium: false },
   codigo:  { emoji: "💻", title: "Asistente de Código", desc: "Escribe, explica y depura código", premium: false }
 };
 
@@ -5243,12 +5383,17 @@ window.setMode = (m) => {
   closeImgStyle();
   if (selectedImgStyle) cancelImgStyle();
 
+  // Limpiar panel y chip de video si cambias de modo
+  closeVideoPanel();
+  if (selectedVideoType) cancelVideoType();
+
   const placeholders = {
     chat: "Escribe un mensaje...",
     resumen: "Pega el texto que quieres resumir...",
     ideas: "¿Sobre qué tema quieres ideas?",
     tarea: "¿Qué tema o tarea necesitas explicar?",
     imagen: "Describe la imagen que quieres crear...",
+    video: "Describe el video que quieres crear...",
     codigo: "¿Qué código necesitas? Describe o pega tu código aquí..."
   };
   document.getElementById("input").placeholder = placeholders[m] || "Escribe un mensaje...";
@@ -5256,6 +5401,11 @@ window.setMode = (m) => {
   // Mostrar selector de estilo al activar modo imagen
   if (m === "imagen") {
     openImgStyle();
+  }
+
+  // Mostrar panel de video al activar modo video
+  if (m === "video") {
+    openVideoPanel();
   }
 };
 
@@ -5333,6 +5483,109 @@ window.cancelImgStyle = function() {
   document.getElementById("input").placeholder = "Describe la imagen que quieres crear...";
 };
 
+// ── PANEL DE VIDEO ─────────────────────────────────────────────────────────
+const VIDEO_TYPES = [
+  { name: "Cortometraje",   emoji: "🎞️" },
+  { name: "Animación",      emoji: "✨" },
+  { name: "Timelapse",      emoji: "⏩" },
+  { name: "Documental",     emoji: "🎙️" },
+  { name: "Publicidad",     emoji: "📣" },
+  { name: "Videoclip",      emoji: "🎵" },
+  { name: "Tutorial",       emoji: "📚" },
+  { name: "Cinematic",      emoji: "🎬" },
+  { name: "Stop Motion",    emoji: "🪆" },
+];
+
+const VIDEO_DURACIONES = ["5 seg", "10 seg", "15 seg", "30 seg"];
+const VIDEO_RATIOS     = ["16:9", "9:16", "1:1", "4:3"];
+
+let selectedVideoType     = null;
+let selectedVideoDuracion = null;
+let selectedVideoRatio    = null;
+
+window.openVideoPanel = function() {
+  const grid = document.getElementById("videoPanelGrid");
+  const opts = document.getElementById("videoPanelOptions");
+  if (!grid || !opts) return;
+
+  grid.innerHTML = VIDEO_TYPES.map(function(v) {
+    const sel = selectedVideoType && selectedVideoType.name === v.name;
+    return '<div class="videopanel-card' + (sel ? ' selected' : '') + '" onclick="selectVideoType(\'' + v.name + '\')">'
+      + '<div class="vp-emoji">' + v.emoji + '</div>'
+      + '<div class="vp-label">' + v.name + '</div>'
+      + '</div>';
+  }).join("");
+
+  opts.innerHTML =
+    '<div class="videopanel-option-group">'
+    + '<div class="videopanel-option-label">Duración</div>'
+    + '<div class="videopanel-option-btns">'
+    + VIDEO_DURACIONES.map(function(d) {
+        const active = selectedVideoDuracion === d ? " active" : "";
+        return '<button class="videopanel-opt-btn' + active + '" onclick="selectVideoDuracion(\'' + d + '\')">' + d + '</button>';
+      }).join("")
+    + '</div></div>'
+    + '<div class="videopanel-option-group">'
+    + '<div class="videopanel-option-label">Relación de aspecto</div>'
+    + '<div class="videopanel-option-btns">'
+    + VIDEO_RATIOS.map(function(r) {
+        const active = selectedVideoRatio === r ? " active" : "";
+        return '<button class="videopanel-opt-btn' + active + '" onclick="selectVideoRatio(\'' + r + '\')">' + r + '</button>';
+      }).join("")
+    + '</div></div>';
+
+  document.getElementById("videoPanel").classList.add("show");
+};
+
+window.closeVideoPanel = function() {
+  document.getElementById("videoPanel").classList.remove("show");
+};
+
+window.selectVideoType = function(name) {
+  selectedVideoType = VIDEO_TYPES.find(function(v) { return v.name === name; });
+  if (!selectedVideoType) return;
+
+  // Actualizar visual del grid
+  document.querySelectorAll(".videopanel-card").forEach(function(c) { c.classList.remove("selected"); });
+  document.querySelectorAll(".videopanel-card").forEach(function(c) {
+    if (c.querySelector(".vp-label") && c.querySelector(".vp-label").textContent === name) {
+      c.classList.add("selected");
+    }
+  });
+
+  // Chip en input
+  document.getElementById("videoChipEmoji").textContent = selectedVideoType.emoji;
+  document.getElementById("videoChipName").textContent  = selectedVideoType.name;
+  document.getElementById("videoTypeChip").classList.add("show");
+
+  closeVideoPanel();
+  document.getElementById("input").placeholder = "Describe tu video de tipo " + selectedVideoType.name + "...";
+  document.getElementById("input").focus();
+};
+
+window.selectVideoDuracion = function(d) {
+  selectedVideoDuracion = d;
+  // Redibujar opciones
+  document.querySelectorAll(".videopanel-opt-btn").forEach(function(b) {
+    if (VIDEO_DURACIONES.includes(b.textContent)) b.classList.toggle("active", b.textContent === d);
+  });
+};
+
+window.selectVideoRatio = function(r) {
+  selectedVideoRatio = r;
+  document.querySelectorAll(".videopanel-opt-btn").forEach(function(b) {
+    if (VIDEO_RATIOS.includes(b.textContent)) b.classList.toggle("active", b.textContent === r);
+  });
+};
+
+window.cancelVideoType = function() {
+  selectedVideoType     = null;
+  selectedVideoDuracion = null;
+  selectedVideoRatio    = null;
+  document.getElementById("videoTypeChip").classList.remove("show");
+  document.getElementById("input").placeholder = "Describe el video que quieres crear...";
+};
+
 // sendImgStyled ya no se usa: el estilo se aplica desde send() via selectedImgStyle
 
 function addMessage(text, role, extra = "") {
@@ -5374,7 +5627,12 @@ window.send = async () => {
   // Si hay estilo de imagen seleccionado, anteponerlo al prompt
   const text = (mode === "imagen" && selectedImgStyle)
     ? "Estilo " + selectedImgStyle.name + ": " + rawText
-    : rawText;
+    : (mode === "video" && selectedVideoType)
+      ? "[Video " + selectedVideoType.name
+        + (selectedVideoDuracion ? " · " + selectedVideoDuracion : "")
+        + (selectedVideoRatio    ? " · " + selectedVideoRatio    : "")
+        + "] " + rawText
+      : rawText;
 
   if (limiteAlcanzado(mode)) {
     showPaywall();
@@ -5386,6 +5644,7 @@ window.send = async () => {
     resumen: { palabrasProhibidas: [], mensaje: "📝 Este apartado es solo para resumir textos. Pega el texto que quieres resumir." },
     ideas:   { palabrasProhibidas: [], mensaje: "💡 Este apartado es solo para generar ideas. Escribe un tema sobre el que quieras ideas." },
     imagen:  { palabrasProhibidas: [], mensaje: "🎨 Este apartado es solo para crear imágenes. Describe visualmente lo que quieres." },
+    video:   { palabrasProhibidas: [], mensaje: "🎬 Este apartado es solo para crear videos. Describe el video que quieres generar." },
     chat:    { palabrasProhibidas: [], mensaje: "💬 Para tareas, resúmenes, ideas o imágenes usa el apartado correspondiente." }
   };
 
@@ -5404,6 +5663,13 @@ window.send = async () => {
       return true;
     },
     imagen: () => true,
+    video: (t) => {
+      if (t.trim().split(/\s+/).filter(Boolean).length < 3) {
+        addMessage("🎬 Describe mejor el video que quieres crear, por ejemplo: 'un timelapse de un atardecer en la ciudad'.", "bot error");
+        return false;
+      }
+      return true;
+    },
     codigo: (t) => {
       if (t.trim().split(/\s+/).filter(Boolean).length < 3) {
         addMessage("💻 Describe mejor lo que necesitas, por ejemplo: 'función en Python que ordene una lista'.", "bot error");
@@ -5431,6 +5697,11 @@ window.send = async () => {
   // Limpiar chip de estilo después de enviar
   if (selectedImgStyle) {
     cancelImgStyle();
+  }
+
+  // Limpiar chip de video después de enviar
+  if (selectedVideoType) {
+    cancelVideoType();
   }
 
   if (mode === "imagen") {
@@ -5480,7 +5751,47 @@ window.send = async () => {
     return;
   }
 
-  chatHistory.push({ role: "user", content: text });
+  if (mode === "video") {
+    const typing = addMessage("🎬 Procesando solicitud de video...", "bot typing");
+    try {
+      // Guardar en historial de videos (local)
+      misCosasVideos.push({ prompt: text, date: new Date().toLocaleDateString("es-MX") });
+      guardarMisCosasVideos();
+
+      // Simulación: en producción aquí iría el llamado al backend de generación de video
+      await new Promise(r => setTimeout(r, 1800));
+      typing.remove();
+
+      const div = document.createElement("div");
+      div.className = "msg bot";
+      div.innerHTML = `
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;max-width:100%;">
+          <div style="font-size:1.8rem;text-align:center;margin-bottom:10px;">🎬</div>
+          <div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:0.9rem;">Solicitud de video recibida</div>
+          <div style="font-size:0.8rem;color:var(--muted);line-height:1.6;margin-bottom:12px;">"${text.substring(0, 80)}${text.length > 80 ? '...' : ''}"</div>
+          <div style="background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:10px;font-size:0.75rem;color:var(--accent);line-height:1.7;">
+            ⚙️ <strong>Estado:</strong> En procesamiento<br>
+            🎞️ <strong>Duración estimada:</strong> 5–15 segundos<br>
+            📩 <strong>Entrega:</strong> Recibirás el video cuando esté listo
+          </div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:8px;">🚀 La generación de video con IA estará completamente disponible próximamente con el backend conectado.</div>
+        </div>`;
+      const msgBox = document.getElementById("messages");
+      msgBox.appendChild(div);
+      msgBox.scrollTop = msgBox.scrollHeight;
+
+      if (!currentUser.isAnonymous) {
+        await incrementarContador("video");
+      }
+    } catch (e) {
+      document.querySelector(".typing") && document.querySelector(".typing").remove();
+      addMessage("⚠️ Error procesando la solicitud de video.", "bot error");
+    } finally {
+      sendBtn.disabled = false;
+      input.focus();
+    }
+    return;
+  }
   if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
 
   // Verificar si el mensaje es para Notion
