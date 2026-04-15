@@ -3421,9 +3421,12 @@
           ✅ Ideas ilimitadas<br>
           ✅ Tareas ilimitadas<br>
           ✅ 20 imágenes/día<br>
+          ✅ 🎬 20 videos/día — calidad estándar<br>
+          ✅ 🎬 Duración hasta 10 seg<br>
+          ✅ 🎬 Relaciones 16:9 y 9:16<br>
           ✅ 💻 20 consultas de código/día<br>
           ✅ 💻 Hasta 150 líneas de código<br>
-          ✅ 💻 Código con comentarios y ejemplos<br>
+          ✅ 📓 Notion conectado<br>
           ✅ Calidad estándar mejorada<br>
           ✅ Sin anuncios
         </div>
@@ -3437,14 +3440,16 @@
         <div class="plan-price">$250<span>/mes</span></div>
         <div class="plan-features">
           ✅ Todo de GO incluido<br>
-          ✅ 50 imágenes/día<br>
+          ✅ 50 imágenes/día — alta calidad<br>
+          ✅ 🎬 50 videos/día — alta calidad HD<br>
+          ✅ 🎬 Duración hasta 30 seg<br>
+          ✅ 🎬 Todos los formatos (16:9, 9:16, 1:1, 4:3)<br>
+          ✅ 🎬 Estilos cinematográficos avanzados<br>
           ✅ 💻 35 consultas de código/día<br>
           ✅ 💻 Hasta 300 líneas de código<br>
-          ✅ 💻 Código con pruebas y buenas prácticas<br>
+          ✅ 📓 Notion + 💬 Slack conectados<br>
           ✅ Respuestas más largas<br>
-          ✅ Alta calidad en todo<br>
           ✅ Prioridad en respuestas<br>
-          ✅ Historial ilimitado<br>
           ✅ Soporte prioritario
         </div>
         <button class="btn-subscribe" style="padding:9px; font-size:0.82rem; margin-top:8px; background:linear-gradient(135deg,var(--gold),var(--gold2));" onclick="payPremium('plus')">Elegir PLUS</button>
@@ -3456,12 +3461,15 @@
         <div class="plan-price">$500<span>/mes</span></div>
         <div class="plan-features">
           ✅ Todo de PLUS incluido<br>
-          ✅ Imágenes ilimitadas<br>
+          ✅ Imágenes ilimitadas — máxima calidad<br>
+          ✅ 🎬 Videos ilimitados — calidad 4K cinematic<br>
+          ✅ 🎬 Duración hasta 60 seg<br>
+          ✅ 🎬 Todos los formatos + edición IA<br>
+          ✅ 🎬 Música y efectos de sonido generados<br>
           ✅ 💻 50 consultas de código/día<br>
           ✅ 💻 Hasta 600 líneas de código<br>
-          ✅ 💻 Código de arquitectura profesional<br>
-          ✅ Máxima calidad IA<br>
-          ✅ Respuestas ultra detalladas<br>
+          ✅ 📓 Notion + 💬 Slack + Google Workspace<br>
+          ✅ Máxima calidad IA en todo<br>
           ✅ Acceso anticipado a funciones<br>
           ✅ Soporte 24/7 dedicado<br>
           ✅ API access (próximamente)
@@ -3595,6 +3603,13 @@ const LIMITES_CODIGO = {
   go:    { consultas: 20, lineas: 150 },
   plus:  { consultas: 35, lineas: 300 },
   ultra: { consultas: 50, lineas: 600 }
+};
+
+const LIMITES_VIDEO = {
+  free:  { cantidad: 5,  duracion: "5 seg",  calidad: "básica" },
+  go:    { cantidad: 20, duracion: "10 seg", calidad: "estándar" },
+  plus:  { cantidad: 50, duracion: "30 seg", calidad: "HD" },
+  ultra: { cantidad: -1, duracion: "60 seg", calidad: "4K cinematic" }
 };
 
 let currentUser = null;
@@ -5254,7 +5269,7 @@ window.helpArticle = function(id) {
     },
     limites: {
       titulo: "Límites y planes",
-      texto: "Plan gratuito:\n• 20 chats / día\n• 10 resúmenes / día\n• 20 ideas / día\n• 15 tareas / día\n• 5 imágenes / día\n• 5 videos / día\n• 10 consultas de código / día (máx. 50 líneas)\n\nPlan GO ($100/mes): Mensajes ilimitados, 20 imágenes/día, 20 videos/día, hasta 150 líneas de código.\n\nPlan PLUS ($250/mes): Todo de GO + 50 imágenes/día, 50 videos/día, hasta 300 líneas, respuestas más largas.\n\nPlan ULTRA ($500/mes): Todo ilimitado + soporte 24/7 dedicado."
+      texto: "Plan gratuito:\n• 20 chats / día\n• 10 resúmenes / día\n• 20 ideas / día\n• 15 tareas / día\n• 5 imágenes / día\n• 5 videos / día (calidad básica, hasta 5 seg)\n• 10 consultas de código / día (máx. 50 líneas)\n\nPlan GO ($100/mes):\n• Mensajes, resúmenes, ideas y tareas ilimitados\n• 20 imágenes/día\n• 🎬 20 videos/día — calidad estándar, hasta 10 seg, formatos 16:9 y 9:16\n• 💻 20 consultas de código / día (máx. 150 líneas)\n• 📓 Notion conectado\n\nPlan PLUS ($250/mes):\n• Todo de GO incluido\n• 50 imágenes/día — alta calidad\n• 🎬 50 videos/día — calidad HD, hasta 30 seg, todos los formatos + estilos cinematográficos\n• 💻 35 consultas de código / día (máx. 300 líneas)\n• 📓 Notion + 💬 Slack conectados\n• Soporte prioritario\n\nPlan ULTRA ($500/mes):\n• Todo de PLUS incluido\n• Imágenes ilimitadas — máxima calidad\n• 🎬 Videos ilimitados — calidad 4K cinematic, hasta 60 seg, edición IA, música y efectos generados\n• 💻 50 consultas de código / día (máx. 600 líneas)\n• 📓 Notion + 💬 Slack + Google Workspace\n• Soporte 24/7 dedicado"
     },
     historial: {
       titulo: "Historial de conversaciones",
@@ -5266,7 +5281,7 @@ window.helpArticle = function(id) {
     },
     premium: {
       titulo: "Planes Premium",
-      texto: "El plan gratuito tiene límites diarios por función. Si alcanzas el límite, espera hasta el día siguiente o actualiza tu plan.\n\nCon cualquier plan de pago (GO, PLUS o ULTRA) obtienes mensajes ilimitados y acceso extendido a imágenes y código.\n\nEl pago es mensual y se procesa de forma segura con Stripe."
+      texto: "El plan gratuito tiene límites diarios por función. Si alcanzas el límite, espera hasta el día siguiente o actualiza tu plan.\n\nCon cualquier plan de pago (GO, PLUS o ULTRA) obtienes mensajes ilimitados y acceso extendido a imágenes, videos y código.\n\n🎬 Videos: cada plan desbloquea mayor calidad, más duración y más formatos. ULTRA incluye generación 4K cinematic con música y edición IA.\n\n📓 Notion está incluido desde el plan GO. 💬 Slack se activa con PLUS. Google Workspace con ULTRA.\n\nEl pago es mensual y se procesa de forma segura con Stripe."
     },
     privacidad: {
       titulo: "Privacidad",
@@ -5758,6 +5773,8 @@ window.send = async () => {
       misCosasVideos.push({ prompt: text, date: new Date().toLocaleDateString("es-MX") });
       guardarMisCosasVideos();
 
+      const cfgVideo = LIMITES_VIDEO[userPlan] || LIMITES_VIDEO.free;
+
       // Simulación: en producción aquí iría el llamado al backend de generación de video
       await new Promise(r => setTimeout(r, 1800));
       typing.remove();
@@ -5771,7 +5788,8 @@ window.send = async () => {
           <div style="font-size:0.8rem;color:var(--muted);line-height:1.6;margin-bottom:12px;">"${text.substring(0, 80)}${text.length > 80 ? '...' : ''}"</div>
           <div style="background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:10px;font-size:0.75rem;color:var(--accent);line-height:1.7;">
             ⚙️ <strong>Estado:</strong> En procesamiento<br>
-            🎞️ <strong>Duración estimada:</strong> 5–15 segundos<br>
+            🎞️ <strong>Duración:</strong> hasta ${cfgVideo.duracion}<br>
+            ✨ <strong>Calidad:</strong> ${cfgVideo.calidad}<br>
             📩 <strong>Entrega:</strong> Recibirás el video cuando esté listo
           </div>
           <div style="font-size:0.7rem;color:var(--muted);margin-top:8px;">🚀 La generación de video con IA estará completamente disponible próximamente con el backend conectado.</div>
