@@ -3586,7 +3586,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { 
-  getFirestore, 
+  initializeFirestore, 
   doc, 
   getDoc, 
   setDoc,
@@ -3613,7 +3613,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true
+});
 
 const BACKEND_URL = "https://zettax-ai-pnhu.vercel.app/api";
 
