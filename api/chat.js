@@ -5,8 +5,8 @@ const rateLimitMap = new Map();
 
 // Modelos de Groq por plan
 const GROQ_MODELS = {
-  free:  "llama3-8b-8192",
-  go:    "llama3-8b-8192",
+  free:  "llama-3.1-8b-instant",
+  go:    "llama-3.1-8b-instant",
   plus:  "llama-3.3-70b-versatile",
   ultra: "llama-3.3-70b-versatile"
 };
