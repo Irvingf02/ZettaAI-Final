@@ -14,11 +14,16 @@ export function setCors(res) {
 // ── REALTIME DATABASE REST API ────────────────────────────────────────────────
 const RTDB_URL = "https://zettaai-f26f9-default-rtdb.firebaseio.com";
 
+let cachedToken = null;
+let tokenExpiry = 0;
+
 async function getAccessToken() {
+  const now = Math.floor(Date.now() / 1000);
+  if (cachedToken && now < tokenExpiry - 60) return cachedToken;
+
   const sa = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
   sa.private_key = sa.private_key.replace(/\\n/g, "\n");
 
-  const now = Math.floor(Date.now() / 1000);
   const encode = obj => btoa(JSON.stringify(obj)).replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_");
   const unsigned = `${encode({alg:"RS256",typ:"JWT"})}.${encode({
     iss: sa.client_email, sub: sa.client_email,
@@ -38,31 +43,48 @@ async function getAccessToken() {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${unsigned}.${sig}`
   });
-  const { access_token } = await tokenRes.json();
-  return access_token;
+  const json = await tokenRes.json();
+  
+  if (json.access_token) {
+    cachedToken = json.access_token;
+    tokenExpiry = now + 3600;
+    return cachedToken;
+  }
+  
+  console.error("Error getting token:", json);
+  return null;
 }
 
 export const db = {
   async get(path) {
     const token = await getAccessToken();
-    const res = await fetch(`${RTDB_URL}/${path}.json?auth=${token}`);
-    return await res.json();
+    if (!token) return null;
+    const res = await fetch(`${RTDB_URL}/${path}.json?access_token=${token}`);
+    const data = await res.json();
+    if (data && data.error) { console.error("RTDB get error:", data.error); return null; }
+    return data;
   },
   async set(path, data) {
     const token = await getAccessToken();
-    await fetch(`${RTDB_URL}/${path}.json?auth=${token}`, {
+    if (!token) return;
+    const res = await fetch(`${RTDB_URL}/${path}.json?access_token=${token}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
+    const json = await res.json();
+    if (json && json.error) console.error("RTDB set error:", json.error);
   },
   async update(path, data) {
     const token = await getAccessToken();
-    await fetch(`${RTDB_URL}/${path}.json?auth=${token}`, {
+    if (!token) return;
+    const res = await fetch(`${RTDB_URL}/${path}.json?access_token=${token}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
+    const json = await res.json();
+    if (json && json.error) console.error("RTDB update error:", json.error);
   }
 };
 
