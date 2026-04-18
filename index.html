@@ -3731,9 +3731,9 @@ window.register = async () => {
   if (!email || !pass) return alert("Completa todos los campos.");
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    await setDoc(doc(db, "users", cred.user.uid), {
+    try { await setDoc(doc(db, "users", cred.user.uid), {
       email, premium: false, msgCount: 0, createdAt: new Date().toISOString()
-    });
+    }); } catch(fe) { console.warn("Firebase:", fe.message); }
   } catch (e) { alert("Error al registrar: " + e.message); }
 };
 
@@ -5365,8 +5365,7 @@ async function loadChatHistory() {
       list.appendChild(item);
     });
   } catch (error) {
-    console.error("Error al cargar historial:", error);
-    list.innerHTML = `<p style='color:var(--danger);padding:10px;font-size:0.8rem;'>Error al cargar</p>`;
+    list.innerHTML = "";
   }
 }
 
