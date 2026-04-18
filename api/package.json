@@ -1,0 +1,23 @@
+{
+  "name": "zettaxai",
+  "version": "2.0.0",
+  "description": "Backend para ZettaxAI PRO",
+  "type": "module",
+  "dependencies": {
+    "stripe": "^14.21.0",
+    "node-fetch": "^3.3.2",
+    "@notionhq/client": "^2.2.15",
+    "@supabase/supabase-js": "^2.43.4"
+  },
+  "main": "chat.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Irvingf02/ZettaAI-Final.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

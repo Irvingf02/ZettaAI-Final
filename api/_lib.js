@@ -1,4 +1,11 @@
 import Stripe from "stripe";
+import { createClient } from "@supabase/supabase-js";
+
+// ── SUPABASE ──────────────────────────────────────────────────────────────────
+const supabase = createClient(
+  "https://sesynbplerejxdadecpl.supabase.co",
+  process.env.SUPABASE_SERVICE_KEY
+);
 
 // ── STRIPE ────────────────────────────────────────────────────────────────────
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -11,80 +18,27 @@ export function setCors(res) {
   res.setHeader("Access-Control-Allow-Credentials", "true");
 }
 
-// ── REALTIME DATABASE REST API ────────────────────────────────────────────────
-const RTDB_URL = "https://zettaai-f26f9-default-rtdb.firebaseio.com";
-
-let cachedToken = null;
-let tokenExpiry = 0;
-
-async function getAccessToken() {
-  const now = Math.floor(Date.now() / 1000);
-  if (cachedToken && now < tokenExpiry - 60) return cachedToken;
-
-  const sa = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-  sa.private_key = sa.private_key.replace(/\\n/g, "\n");
-
-  const encode = obj => btoa(JSON.stringify(obj)).replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_");
-  const unsigned = `${encode({alg:"RS256",typ:"JWT"})}.${encode({
-    iss: sa.client_email, sub: sa.client_email,
-    aud: "https://oauth2.googleapis.com/token",
-    iat: now, exp: now + 3600,
-    scope: "https://www.googleapis.com/auth/firebase.database https://www.googleapis.com/auth/userinfo.email"
-  })}`;
-
-  const keyData = sa.private_key.replace(/-----[^-]+-----/g,"").replace(/\n/g,"");
-  const binaryKey = Uint8Array.from(atob(keyData), c => c.charCodeAt(0));
-  const cryptoKey = await crypto.subtle.importKey("pkcs8", binaryKey.buffer, {name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"}, false, ["sign"]);
-  const signature = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", cryptoKey, new TextEncoder().encode(unsigned));
-  const sig = btoa(String.fromCharCode(...new Uint8Array(signature))).replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_");
-
-  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${unsigned}.${sig}`
-  });
-  const json = await tokenRes.json();
-  
-  if (json.access_token) {
-    cachedToken = json.access_token;
-    tokenExpiry = now + 3600;
-    return cachedToken;
-  }
-  
-  console.error("Error getting token:", json);
-  return null;
-}
-
+// ── DB (Supabase) ─────────────────────────────────────────────────────────────
 export const db = {
-  async get(path) {
-    const token = await getAccessToken();
-    if (!token) return null;
-    const res = await fetch(`${RTDB_URL}/${path}.json?access_token=${token}`);
-    const data = await res.json();
-    if (data && data.error) { console.error("RTDB get error:", data.error); return null; }
+  async getUser(uid) {
+    const { data } = await supabase.from("users").select("*").eq("id", uid).single();
     return data;
   },
-  async set(path, data) {
-    const token = await getAccessToken();
-    if (!token) return;
-    const res = await fetch(`${RTDB_URL}/${path}.json?access_token=${token}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    const json = await res.json();
-    if (json && json.error) console.error("RTDB set error:", json.error);
+  async upsertUser(uid, fields) {
+    await supabase.from("users").upsert({ id: uid, ...fields }, { onConflict: "id" });
   },
-  async update(path, data) {
-    const token = await getAccessToken();
-    if (!token) return;
-    const res = await fetch(`${RTDB_URL}/${path}.json?access_token=${token}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    const json = await res.json();
-    if (json && json.error) console.error("RTDB update error:", json.error);
+  async getChats(userId) {
+    const { data } = await supabase.from("chats").select("*").eq("user_id", userId).order("timestamp", { ascending: false }).limit(20);
+    return data || [];
+  },
+  async upsertChat(chatId, userId, title, messages) {
+    await supabase.from("chats").upsert({ id: chatId, user_id: userId, title, messages, timestamp: Date.now() }, { onConflict: "id" });
+  },
+  async deleteChat(chatId) {
+    await supabase.from("chats").delete().eq("id", chatId);
+  },
+  async deleteAllChats(userId) {
+    await supabase.from("chats").delete().eq("user_id", userId);
   }
 };
 
@@ -107,10 +61,10 @@ export const MODOS_IA = {
 export async function getUserPlan(uid) {
   if (!uid) return { isPremium: false, plan: "free" };
   try {
-    const data = await db.get(`users/${uid}`);
+    const data = await db.getUser(uid);
     if (!data) return { isPremium: false, plan: "free" };
-    const plan = data.plan || (data.premium === true ? "go" : "free");
-    return { isPremium: plan !== "free", plan };
+    const plan = data.plan || "free";
+    return { isPremium: plan !== "free" && data.premium === true, plan };
   } catch (e) {
     return { isPremium: false, plan: "free" };
   }
