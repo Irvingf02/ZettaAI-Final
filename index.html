@@ -5858,16 +5858,6 @@ window.send = async () => {
     chatHistory.push({ role: "assistant", content: data.reply });
 
     if (!currentUser.isAnonymous) {
-      try {
-        const chatRef = doc(collection(db, "chats"));
-        await setDoc(chatRef, {
-          userId: currentUser.uid,
-          title: text.substring(0, 50),
-          timestamp: new Date(),
-          messages: chatHistory
-        });
-      } catch (e) { console.error("Error guardando chat:", e); }
-
       await incrementarContador(mode);
     }
   } catch (e) {
