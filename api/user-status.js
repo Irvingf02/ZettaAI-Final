@@ -2,6 +2,10 @@ import { setCors, db } from "./_lib.js";
 
 export default async function handler(req, res) {
   setCors(res);
+  // Evitar caché
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+
   if (req.method === "OPTIONS") return res.status(204).end();
 
   // GET — leer estado y contadores del usuario
@@ -12,10 +16,10 @@ export default async function handler(req, res) {
     try {
       const snap = await db.collection("users").doc(userId).get();
       if (!snap.exists) {
-        return res.json({ premium: false, plan: "free", fecha: "", cnt_chat: 0, cnt_resumen: 0, cnt_ideas: 0, cnt_tarea: 0, cnt_imagen: 0, cnt_codigo: 0 });
+        return res.status(200).json({ premium: false, plan: "free", fecha: "", cnt_chat: 0, cnt_resumen: 0, cnt_ideas: 0, cnt_tarea: 0, cnt_imagen: 0, cnt_codigo: 0 });
       }
       const data = snap.data();
-      return res.json({
+      return res.status(200).json({
         premium:     data.premium     || false,
         plan:        data.plan        || "free",
         status:      data.subscriptionStatus || "inactive",
@@ -50,7 +54,7 @@ export default async function handler(req, res) {
         updatedAt:   new Date().toISOString()
       }, { merge: true });
 
-      return res.json({ ok: true });
+      return res.status(200).json({ ok: true });
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
