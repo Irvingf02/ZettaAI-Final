@@ -4513,21 +4513,15 @@ window.showActivity = async function() {
 
   if (currentUser && !currentUser.isAnonymous) {
     try {
-      const q = query(
-        collection(db, "chats"),
-        where("userId", "==", currentUser.uid),
-        orderBy("timestamp", "desc"),
-        limit(50)
-      );
-      const snap = await getDocs(q);
+      const res = await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}`);
+      const json = await res.json();
       listEl.innerHTML = "";
 
-      if (snap.empty) {
+      if (!json.chats || json.chats.length === 0) {
         listEl.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);'>No hay conversaciones aún.</p>";
       } else {
-        snap.forEach((docSnap) => {
-          const data = docSnap.data();
-          const fecha = data.timestamp?.toDate ? data.timestamp.toDate().toLocaleDateString("es-MX") : "";
+        json.chats.forEach((data) => {
+          const fecha = data.timestamp ? new Date(data.timestamp).toLocaleDateString("es-MX") : "";
           const titulo = (data.title || "Chat sin título").substring(0, 45);
           const item = document.createElement("div");
           item.className = "activity-chat-item";
@@ -4535,7 +4529,7 @@ window.showActivity = async function() {
             <span style="font-size:1rem;">💬</span>
             <span class="chat-title">${titulo}</span>
             <span class="chat-date">${fecha}</span>
-            <button class="chat-delete" title="Borrar" onclick="deleteSingleChat('${docSnap.id}', event)">🗑️</button>
+            <button class="chat-delete" title="Borrar" onclick="deleteSingleChat('${data.id}', event)">🗑️</button>
           `;
           item.onclick = (e) => {
             if (e.target.classList.contains("chat-delete")) return;
@@ -4568,7 +4562,7 @@ window.deleteSingleChat = async function(chatId, event) {
     okLabel: "Borrar",
     onOk: async () => {
       try {
-        await deleteDoc(doc(db, "chats", chatId));
+        await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}&chatId=${chatId}`, { method: "DELETE" });
         event.target.closest(".activity-chat-item").remove();
       } catch (e) {
         addMessage("Error al borrar: " + e.message, "bot error");
@@ -4586,11 +4580,7 @@ window.deleteAllChats = async function() {
     okLabel: "Borrar todo",
     onOk: async () => {
       try {
-        const q = query(collection(db, "chats"), where("userId", "==", currentUser.uid));
-        const snap = await getDocs(q);
-        const batch = writeBatch(db);
-        snap.forEach(d => batch.delete(d.ref));
-        await batch.commit();
+        await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}`, { method: "DELETE" });
         document.getElementById("activity-chats-list").innerHTML = "<p style='font-size:0.8rem;color:var(--muted);'>No hay conversaciones aún.</p>";
         chatHistory = [];
         document.getElementById("messages").innerHTML = "";
@@ -5339,27 +5329,18 @@ async function loadChatHistory() {
   if (!list) return;
   list.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);padding:10px;'>Cargando...</p>";
   try {
-    const q = query(
-      collection(db, "chats"),
-      where("userId", "==", currentUser.uid),
-      orderBy("timestamp", "desc"),
-      limit(20)
-    );
-    const snap = await getDocs(q);
+    const res = await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}`);
+    const data = await res.json();
     list.innerHTML = "";
-    if (snap.empty) {
-      list.innerHTML = "";
-      return;
-    }
-    snap.forEach((docSnap) => {
-      const data = docSnap.data();
+    if (!data.chats || data.chats.length === 0) return;
+    data.chats.forEach((chat) => {
       const item = document.createElement("div");
       item.className = "sidebar-item";
       item.style.cursor = "pointer";
-      const titulo = (data.title || "Chat nuevo").substring(0, 25) + ((data.title || "").length > 25 ? "..." : "");
+      const titulo = (chat.title || "Chat nuevo").substring(0, 25) + ((chat.title || "").length > 25 ? "..." : "");
       item.innerHTML = `<span class="icon">💬</span><span class="text">${titulo}</span>`;
       item.onclick = () => {
-        loadSpecificChat(docSnap.id, data.messages || []);
+        loadSpecificChat(chat.id, chat.messages || []);
         if (window.innerWidth < 1024) toggleSidebar();
       };
       list.appendChild(item);
@@ -5857,6 +5838,17 @@ window.send = async () => {
     chatHistory.push({ role: "assistant", content: data.reply });
 
     if (!currentUser.isAnonymous) {
+      const chatId = currentUser.uid + "_" + Date.now();
+      fetch(`${BACKEND_URL}/chats`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: currentUser.uid,
+          chatId,
+          title: text.substring(0, 50),
+          messages: chatHistory
+        })
+      }).catch(e => console.warn("Error guardando chat:", e));
       await incrementarContador(mode);
     }
   } catch (e) {
