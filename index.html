@@ -3586,7 +3586,10 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { 
-  getFirestore, 
+  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
   doc, 
   getDoc, 
   setDoc,
@@ -3613,7 +3616,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
 
 const BACKEND_URL = "https://zettax-ai-pnhu.vercel.app/api";
 
@@ -3996,24 +4001,27 @@ async function refreshPremiumStatus() {
   }
 
   try {
-    const res  = await fetch(`${BACKEND_URL}/user-status?userId=${currentUser.uid}`);
-    const data = await res.json();
-
-    userPlan  = data.plan    || "free";
-    isPremium = data.premium === true;
-
-    const savedDate = data.fecha || "";
-    if (savedDate === fechaHoy) {
-      contadores = {
-        chat:    data.cnt_chat    || 0,
-        resumen: data.cnt_resumen || 0,
-        ideas:   data.cnt_ideas   || 0,
-        tarea:   data.cnt_tarea   || 0,
-        imagen:  data.cnt_imagen  || 0,
-        codigo:  data.cnt_codigo  || 0
-      };
+    const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      userPlan  = data.plan || (data.premium === true ? "go" : "free");
+      isPremium = userPlan !== "free" && data.premium === true;
+      const savedDate = data.fecha || "";
+      if (savedDate === fechaHoy) {
+        contadores = {
+          chat:    data.cnt_chat    || 0,
+          resumen: data.cnt_resumen || 0,
+          ideas:   data.cnt_ideas   || 0,
+          tarea:   data.cnt_tarea   || 0,
+          imagen:  data.cnt_imagen  || 0,
+          codigo:  data.cnt_codigo  || 0
+        };
+      } else {
+        contadores = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0, codigo: 0 };
+      }
     } else {
-      contadores = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0, codigo: 0 };
+      isPremium = false;
+      userPlan  = "free";
     }
   } catch (e) {
     console.error("Error obteniendo estado:", e);
@@ -4027,21 +4035,15 @@ async function incrementarContador(modo) {
   if (isPremium || !currentUser || currentUser.isAnonymous) return;
   contadores[modo] = (contadores[modo] || 0) + 1;
   try {
-    await fetch(`${BACKEND_URL}/user-status`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId:      currentUser.uid,
-        email:       currentUser.email || "",
-        fecha:       fechaHoy,
-        cnt_chat:    contadores.chat    || 0,
-        cnt_resumen: contadores.resumen || 0,
-        cnt_ideas:   contadores.ideas   || 0,
-        cnt_tarea:   contadores.tarea   || 0,
-        cnt_imagen:  contadores.imagen  || 0,
-        cnt_codigo:  contadores.codigo  || 0
-      })
-    });
+    await setDoc(doc(db, "users", currentUser.uid), {
+      fecha:       fechaHoy,
+      cnt_chat:    contadores.chat    || 0,
+      cnt_resumen: contadores.resumen || 0,
+      cnt_ideas:   contadores.ideas   || 0,
+      cnt_tarea:   contadores.tarea   || 0,
+      cnt_imagen:  contadores.imagen  || 0,
+      cnt_codigo:  contadores.codigo  || 0
+    }, { merge: true });
   } catch (e) { console.error("Error guardando contador:", e); }
   updateUI();
 }
