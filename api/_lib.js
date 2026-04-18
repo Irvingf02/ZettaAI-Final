@@ -1,4 +1,14 @@
 import Stripe from "stripe";
+import admin from "firebase-admin";
+
+// ── FIREBASE ADMIN + FIRESTORE ────────────────────────────────────────────────
+if (!admin.apps.length) {
+  const sa = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+  sa.private_key = sa.private_key.replace(/\\n/g, "\n");
+  admin.initializeApp({ credential: admin.credential.cert(sa) });
+}
+
+export const db = admin.firestore();
 
 // ── STRIPE ────────────────────────────────────────────────────────────────────
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -10,61 +20,6 @@ export function setCors(res) {
   res.setHeader("Access-Control-Allow-Headers",     "Content-Type, Authorization, stripe-signature");
   res.setHeader("Access-Control-Allow-Credentials", "true");
 }
-
-// ── REALTIME DATABASE REST API ────────────────────────────────────────────────
-const RTDB_URL = "https://zettaai-f26f9-default-rtdb.firebaseio.com";
-
-async function getAccessToken() {
-  const sa = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-  sa.private_key = sa.private_key.replace(/\\n/g, "\n");
-
-  const now = Math.floor(Date.now() / 1000);
-  const encode = obj => btoa(JSON.stringify(obj)).replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_");
-  const unsigned = `${encode({alg:"RS256",typ:"JWT"})}.${encode({
-    iss: sa.client_email, sub: sa.client_email,
-    aud: "https://oauth2.googleapis.com/token",
-    iat: now, exp: now + 3600,
-    scope: "https://www.googleapis.com/auth/firebase.database https://www.googleapis.com/auth/userinfo.email"
-  })}`;
-
-  const keyData = sa.private_key.replace(/-----[^-]+-----/g,"").replace(/\n/g,"");
-  const binaryKey = Uint8Array.from(atob(keyData), c => c.charCodeAt(0));
-  const cryptoKey = await crypto.subtle.importKey("pkcs8", binaryKey.buffer, {name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"}, false, ["sign"]);
-  const signature = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", cryptoKey, new TextEncoder().encode(unsigned));
-  const sig = btoa(String.fromCharCode(...new Uint8Array(signature))).replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_");
-
-  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${unsigned}.${sig}`
-  });
-  const { access_token } = await tokenRes.json();
-  return access_token;
-}
-
-export const db = {
-  async get(path) {
-    const token = await getAccessToken();
-    const res = await fetch(`${RTDB_URL}/${path}.json?auth=${token}`);
-    return await res.json();
-  },
-  async set(path, data) {
-    const token = await getAccessToken();
-    await fetch(`${RTDB_URL}/${path}.json?auth=${token}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-  },
-  async update(path, data) {
-    const token = await getAccessToken();
-    await fetch(`${RTDB_URL}/${path}.json?auth=${token}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-  }
-};
 
 // ── PLAN CONFIG ───────────────────────────────────────────────────────────────
 export const PLAN_CONFIG = {
@@ -85,8 +40,9 @@ export const MODOS_IA = {
 export async function getUserPlan(uid) {
   if (!uid) return { isPremium: false, plan: "free" };
   try {
-    const data = await db.get(`users/${uid}`);
-    if (!data) return { isPremium: false, plan: "free" };
+    const snap = await db.collection("users").doc(uid).get();
+    if (!snap.exists) return { isPremium: false, plan: "free" };
+    const data = snap.data();
     const plan = data.plan || (data.premium === true ? "go" : "free");
     return { isPremium: plan !== "free", plan };
   } catch (e) {
