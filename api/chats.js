@@ -12,9 +12,11 @@ export default async function handler(req, res) {
     try {
       const data = await db.get(`chats/${userId}`);
       if (!data) return res.status(200).json({ chats: [] });
-      const chats = Object.entries(data).map(([id, chat]) => ({ id, ...chat }));
-      chats.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-      return res.status(200).json({ chats: chats.slice(0, 20) });
+      const chats = Object.entries(data)
+        .map(([id, chat]) => ({ id, ...chat }))
+        .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+        .slice(0, 20);
+      return res.status(200).json({ chats });
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
@@ -26,7 +28,7 @@ export default async function handler(req, res) {
     if (!userId || !chatId) return res.status(400).json({ error: "Se requiere userId y chatId." });
     try {
       await db.update(`chats/${userId}/${chatId}`, {
-        title:     title || "Chat nuevo",
+        title:     (title || "Chat nuevo").substring(0, 50),
         messages:  messages || [],
         timestamp: Date.now()
       });
@@ -36,7 +38,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // DELETE — borrar chat
+  // DELETE — borrar chat o todos
   if (req.method === "DELETE") {
     const { userId, chatId } = req.query;
     if (!userId) return res.status(400).json({ error: "Se requiere userId." });
