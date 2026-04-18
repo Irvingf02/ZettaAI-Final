@@ -3586,10 +3586,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { 
-  getFirestore,
-  initializeFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,
+  getFirestore, 
   doc, 
   getDoc, 
   setDoc,
@@ -3616,9 +3613,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
-const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
-});
+const db = getFirestore(app);
 
 const BACKEND_URL = "https://zettax-ai-pnhu.vercel.app/api";
 
@@ -4001,27 +3996,24 @@ async function refreshPremiumStatus() {
   }
 
   try {
-    const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-    if (userDoc.exists()) {
-      const data = userDoc.data();
-      userPlan  = data.plan || (data.premium === true ? "go" : "free");
-      isPremium = userPlan !== "free" && data.premium === true;
-      const savedDate = data.fecha || "";
-      if (savedDate === fechaHoy) {
-        contadores = {
-          chat:    data.cnt_chat    || 0,
-          resumen: data.cnt_resumen || 0,
-          ideas:   data.cnt_ideas   || 0,
-          tarea:   data.cnt_tarea   || 0,
-          imagen:  data.cnt_imagen  || 0,
-          codigo:  data.cnt_codigo  || 0
-        };
-      } else {
-        contadores = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0, codigo: 0 };
-      }
+    const res  = await fetch(`${BACKEND_URL}/user-status?userId=${currentUser.uid}`);
+    const data = await res.json();
+
+    userPlan  = data.plan    || "free";
+    isPremium = data.premium === true;
+
+    const savedDate = data.fecha || "";
+    if (savedDate === fechaHoy) {
+      contadores = {
+        chat:    data.cnt_chat    || 0,
+        resumen: data.cnt_resumen || 0,
+        ideas:   data.cnt_ideas   || 0,
+        tarea:   data.cnt_tarea   || 0,
+        imagen:  data.cnt_imagen  || 0,
+        codigo:  data.cnt_codigo  || 0
+      };
     } else {
-      isPremium = false;
-      userPlan  = "free";
+      contadores = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0, codigo: 0 };
     }
   } catch (e) {
     console.error("Error obteniendo estado:", e);
@@ -4035,15 +4027,21 @@ async function incrementarContador(modo) {
   if (isPremium || !currentUser || currentUser.isAnonymous) return;
   contadores[modo] = (contadores[modo] || 0) + 1;
   try {
-    await setDoc(doc(db, "users", currentUser.uid), {
-      fecha:       fechaHoy,
-      cnt_chat:    contadores.chat    || 0,
-      cnt_resumen: contadores.resumen || 0,
-      cnt_ideas:   contadores.ideas   || 0,
-      cnt_tarea:   contadores.tarea   || 0,
-      cnt_imagen:  contadores.imagen  || 0,
-      cnt_codigo:  contadores.codigo  || 0
-    }, { merge: true });
+    await fetch(`${BACKEND_URL}/user-status`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId:      currentUser.uid,
+        email:       currentUser.email || "",
+        fecha:       fechaHoy,
+        cnt_chat:    contadores.chat    || 0,
+        cnt_resumen: contadores.resumen || 0,
+        cnt_ideas:   contadores.ideas   || 0,
+        cnt_tarea:   contadores.tarea   || 0,
+        cnt_imagen:  contadores.imagen  || 0,
+        cnt_codigo:  contadores.codigo  || 0
+      })
+    });
   } catch (e) { console.error("Error guardando contador:", e); }
   updateUI();
 }
@@ -4515,21 +4513,15 @@ window.showActivity = async function() {
 
   if (currentUser && !currentUser.isAnonymous) {
     try {
-      const q = query(
-        collection(db, "chats"),
-        where("userId", "==", currentUser.uid),
-        orderBy("timestamp", "desc"),
-        limit(50)
-      );
-      const snap = await getDocs(q);
+      const res = await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}`);
+      const json = await res.json();
       listEl.innerHTML = "";
 
-      if (snap.empty) {
+      if (!json.chats || json.chats.length === 0) {
         listEl.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);'>No hay conversaciones aún.</p>";
       } else {
-        snap.forEach((docSnap) => {
-          const data = docSnap.data();
-          const fecha = data.timestamp?.toDate ? data.timestamp.toDate().toLocaleDateString("es-MX") : "";
+        json.chats.forEach((data) => {
+          const fecha = data.timestamp ? new Date(data.timestamp).toLocaleDateString("es-MX") : "";
           const titulo = (data.title || "Chat sin título").substring(0, 45);
           const item = document.createElement("div");
           item.className = "activity-chat-item";
@@ -4537,7 +4529,7 @@ window.showActivity = async function() {
             <span style="font-size:1rem;">💬</span>
             <span class="chat-title">${titulo}</span>
             <span class="chat-date">${fecha}</span>
-            <button class="chat-delete" title="Borrar" onclick="deleteSingleChat('${docSnap.id}', event)">🗑️</button>
+            <button class="chat-delete" title="Borrar" onclick="deleteSingleChat('${data.id}', event)">🗑️</button>
           `;
           item.onclick = (e) => {
             if (e.target.classList.contains("chat-delete")) return;
@@ -4570,7 +4562,7 @@ window.deleteSingleChat = async function(chatId, event) {
     okLabel: "Borrar",
     onOk: async () => {
       try {
-        await deleteDoc(doc(db, "chats", chatId));
+        await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}&chatId=${chatId}`, { method: "DELETE" });
         event.target.closest(".activity-chat-item").remove();
       } catch (e) {
         addMessage("Error al borrar: " + e.message, "bot error");
@@ -4588,11 +4580,7 @@ window.deleteAllChats = async function() {
     okLabel: "Borrar todo",
     onOk: async () => {
       try {
-        const q = query(collection(db, "chats"), where("userId", "==", currentUser.uid));
-        const snap = await getDocs(q);
-        const batch = writeBatch(db);
-        snap.forEach(d => batch.delete(d.ref));
-        await batch.commit();
+        await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}`, { method: "DELETE" });
         document.getElementById("activity-chats-list").innerHTML = "<p style='font-size:0.8rem;color:var(--muted);'>No hay conversaciones aún.</p>";
         chatHistory = [];
         document.getElementById("messages").innerHTML = "";
@@ -5341,27 +5329,18 @@ async function loadChatHistory() {
   if (!list) return;
   list.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);padding:10px;'>Cargando...</p>";
   try {
-    const q = query(
-      collection(db, "chats"),
-      where("userId", "==", currentUser.uid),
-      orderBy("timestamp", "desc"),
-      limit(20)
-    );
-    const snap = await getDocs(q);
+    const res = await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}`);
+    const data = await res.json();
     list.innerHTML = "";
-    if (snap.empty) {
-      list.innerHTML = "";
-      return;
-    }
-    snap.forEach((docSnap) => {
-      const data = docSnap.data();
+    if (!data.chats || data.chats.length === 0) return;
+    data.chats.forEach((chat) => {
       const item = document.createElement("div");
       item.className = "sidebar-item";
       item.style.cursor = "pointer";
-      const titulo = (data.title || "Chat nuevo").substring(0, 25) + ((data.title || "").length > 25 ? "..." : "");
+      const titulo = (chat.title || "Chat nuevo").substring(0, 25) + ((chat.title || "").length > 25 ? "..." : "");
       item.innerHTML = `<span class="icon">💬</span><span class="text">${titulo}</span>`;
       item.onclick = () => {
-        loadSpecificChat(docSnap.id, data.messages || []);
+        loadSpecificChat(chat.id, chat.messages || []);
         if (window.innerWidth < 1024) toggleSidebar();
       };
       list.appendChild(item);
@@ -5859,6 +5838,17 @@ window.send = async () => {
     chatHistory.push({ role: "assistant", content: data.reply });
 
     if (!currentUser.isAnonymous) {
+      const chatId = currentUser.uid + "_" + Date.now();
+      fetch(`${BACKEND_URL}/chats`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: currentUser.uid,
+          chatId,
+          title: text.substring(0, 50),
+          messages: chatHistory
+        })
+      }).catch(e => console.warn("Error guardando chat:", e));
       await incrementarContador(mode);
     }
   } catch (e) {
