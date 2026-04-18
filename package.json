@@ -1,14 +1,26 @@
 {
-  "name": "ZettaxAI",
+  "name": "zettaxai",
   "version": "2.0.0",
   "description": "Backend para ZettaxAI PRO",
   "type": "module",
-  
-  "dependencies": {
-  
-    "firebase-admin": "^12.1.0",
+  "dependencies":{
     "stripe": "^14.21.0",
     "node-fetch": "^3.3.2",
     "@notionhq/client": "^2.2.15"
-  }
+  },
+  "main": "chat.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Irvingf02/ZettaAI-Final.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Irvingf02/ZettaAI-Final/issues"
+  },
+  "homepage": "https://github.com/Irvingf02/ZettaAI-Final#readme"
 }
