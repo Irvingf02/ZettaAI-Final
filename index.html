@@ -4694,15 +4694,15 @@ const APPS_DATA = {
       ],
     },
     {
-      groupName: "Firebase",
-      groupDesc: "Autenticación y base de datos en tiempo real para tus conversaciones",
-      groupIcons: ["🔥"],
-      toggleId: "toggle-firebase",
+      groupName: "Supabase",
+      groupDesc: "Base de datos y autenticación segura para tus conversaciones",
+      groupIcons: ["⚡"],
+      toggleId: "toggle-supabase",
       defaultOn: true,
       locked: true,
       subApps: [
         { icon: "🔑", name: "Firebase Auth", handle: "@Auth", link: false },
-        { icon: "🗄️", name: "Firestore DB", handle: "@Firestore", link: false },
+        { icon: "🗄️", name: "Supabase DB", handle: "@Supabase", link: false },
       ]
     },
     {
@@ -4815,7 +4815,7 @@ window.switchAppsTab = function(tab) {
 window.toggleApp = function(id, on) {
   const appInfo = {
     "toggle-suite":      { name: "ZettaxAI Suite",    external: false },
-    "toggle-firebase":   { name: "Firebase",           external: false },
+    "toggle-supabase":   { name: "Supabase",           external: false },
     "toggle-stripe":     { name: "Stripe Pagos",       external: false },
     "toggle-gworkspace": { name: "Google Workspace",   external: true,  icon: "🗂️", desc: "Conecta tu Google Calendar, Gmail, Docs y Drive para obtener respuestas más inteligentes.", ready: false },
     "toggle-notion":     { name: "Notion",             external: true,  icon: "📓", desc: "Accede y organiza tus notas y bases de datos de Notion directamente desde ZettaxAI.",        ready: true  },
