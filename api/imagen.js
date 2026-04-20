@@ -1,5 +1,14 @@
 import { setCors, getUserPlan } from "./_lib.js";
 
+function hashPrompt(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === "OPTIONS") return res.status(204).end();
@@ -11,7 +20,6 @@ export default async function handler(req, res) {
   const { plan } = await getUserPlan(uid);
 
   try {
-    // Usar Groq para mejorar el prompt antes de enviarlo a Pollinations
     const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -28,7 +36,7 @@ export default async function handler(req, res) {
           { role: "user", content: prompt }
         ],
         max_tokens: 200,
-        temperature: 0.5
+        temperature: 0
       })
     });
 
@@ -38,7 +46,8 @@ export default async function handler(req, res) {
       enhancedPrompt = groqData.choices?.[0]?.message?.content || prompt;
     }
 
-    const seed = Math.floor(Math.random() * 1000000);
+    // Seed basado en el prompt para consistencia
+    const seed = hashPrompt(enhancedPrompt);
     const encodedPrompt = encodeURIComponent(enhancedPrompt);
     const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
 
