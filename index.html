@@ -4694,14 +4694,25 @@ const APPS_DATA = {
       ],
     },
     {
+      groupName: "Firebase Auth",
+      groupDesc: "Inicio de sesión con Google, email y más",
+      groupIcons: ["🔥"],
+      toggleId: "toggle-firebase",
+      defaultOn: true,
+      locked: true,
+      subApps: [
+        { icon: "🔑", name: "Firebase Auth", handle: "@Auth", link: false },
+        { icon: "🌐", name: "Google Login", handle: "@Google", link: false },
+      ]
+    },
+    {
       groupName: "Supabase",
-      groupDesc: "Base de datos y autenticación segura para tus conversaciones",
+      groupDesc: "Base de datos para contadores, chats y planes",
       groupIcons: ["⚡"],
       toggleId: "toggle-supabase",
       defaultOn: true,
       locked: true,
       subApps: [
-        { icon: "🔑", name: "Firebase Auth", handle: "@Auth", link: false },
         { icon: "🗄️", name: "Supabase DB", handle: "@Supabase", link: false },
       ]
     },
