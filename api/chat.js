@@ -3,10 +3,10 @@ import { setCors, getUserPlan, PLAN_CONFIG, MODOS_IA } from "./_lib.js";
 const RATE_LIMITS = { free: 30, go: 300, plus: 600, ultra: 2000 };
 const rateLimitMap = new Map();
 
-// Modelos de Groq por plan
+// Todos los planes usan el modelo más preciso
 const GROQ_MODELS = {
-  free:  "llama-3.1-8b-instant",
-  go:    "llama-3.1-8b-instant",
+  free:  "llama-3.3-70b-versatile",
+  go:    "llama-3.3-70b-versatile",
   plus:  "llama-3.3-70b-versatile",
   ultra: "llama-3.3-70b-versatile"
 };
