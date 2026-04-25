@@ -3673,6 +3673,7 @@ let isPremium   = false;
 let userPlan    = "free";
 let mode        = "chat";
 let chatHistory = [];
+let activeChatId = null;
 let contadores  = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0, video: 0, codigo: 0 };
 let fechaHoy    = new Date().toISOString().slice(0, 10);
 let misCosasImages = (() => {
@@ -4158,6 +4159,7 @@ window.newChat = function() {
   document.getElementById("messages").innerHTML = "";
   document.getElementById("input").value = "";
   chatHistory = [];
+  activeChatId = null;
   const sidebar = document.getElementById("sidebar");
   const mobileBtn = document.getElementById("mobilMenuBtn");
   if (sidebar && sidebar.classList.contains("sidebar-open")) {
@@ -5398,6 +5400,7 @@ function loadSpecificChat(chatId, messages) {
   const box = document.getElementById("messages");
   box.innerHTML = "";
   chatHistory = [];
+  activeChatId = chatId;
   messages.forEach(m => {
     addMessage(m.content, m.role === "user" ? "user" : "bot");
     chatHistory.push(m);
@@ -5882,7 +5885,8 @@ window.send = async () => {
     chatHistory.push({ role: "assistant", content: data.reply });
 
     if (!currentUser.isAnonymous) {
-      const chatId = currentUser.uid + "_" + Date.now();
+      if (!activeChatId) activeChatId = currentUser.uid + "_" + Date.now();
+      const chatId = activeChatId;
       fetch(`${BACKEND_URL}/chats`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
