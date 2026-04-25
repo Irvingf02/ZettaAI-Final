@@ -6006,6 +6006,13 @@ window.payPremium = async (plan) => {
     alert("❌ Error al procesar el pago:\n\n" + e.message);
   }
 };
+
+function mostrarModalEliminar(onConfirm) {
+  const modal = document.getElementById("modal-eliminar-chat");
+  modal.style.display = "flex";
+  document.getElementById("modal-eliminar-cancel").onclick = () => { modal.style.display = "none"; };
+  document.getElementById("modal-eliminar-confirm").onclick = async () => { modal.style.display = "none"; await onConfirm(); };
+}
 </script>
 
 <!-- Modal eliminar chat -->
