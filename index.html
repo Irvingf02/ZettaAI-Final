@@ -5382,62 +5382,14 @@ async function loadChatHistory() {
     json.chats.forEach((chat) => {
       const item = document.createElement("div");
       item.className = "sidebar-item";
-      item.style.cssText = "cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding-right:6px;position:relative;";
-      const titulo = (chat.title || "Chat nuevo").substring(0, 22) + ((chat.title || "").length > 22 ? "..." : "");
-
-      item.innerHTML = `
-        <div class="chat-item-main" style="display:flex;align-items:center;gap:8px;flex:1;overflow:hidden;">
-          <span class="icon">&#x1F4AC;</span>
-          <span class="text" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${titulo}</span>
-        </div>
-        <button class="chat-menu-btn" title="Opciones" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:2px 5px;border-radius:4px;opacity:0;transition:opacity 0.2s;flex-shrink:0;letter-spacing:1px;">&#8943;</button>
-        <div class="chat-menu-dropdown" style="display:none;position:absolute;right:8px;top:110%;background:var(--surface,#1e1e2e);border:1px solid var(--border,#333);border-radius:8px;z-index:9999;min-width:150px;box-shadow:0 4px 16px rgba(0,0,0,0.4);">
-          <div class="chat-menu-option" data-action="rename" style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:0.9rem;">&#x270F;&#xFE0F; Renombrar</div>
-          <div class="chat-menu-option" data-action="delete" style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:0.9rem;color:#e74c3c;">&#x1F5D1;&#xFE0F; Eliminar</div>
-        </div>
-      `;
-
-      item.addEventListener("mouseenter", () => item.querySelector(".chat-menu-btn").style.opacity = "1");
-      item.addEventListener("mouseleave", () => item.querySelector(".chat-menu-btn").style.opacity = "0");
-
-      item.querySelector(".chat-menu-btn").addEventListener("click", (e) => {
-        e.stopPropagation();
-        document.querySelectorAll(".chat-menu-dropdown").forEach(d => { if (d !== item.querySelector(".chat-menu-dropdown")) d.style.display = "none"; });
-        const dd = item.querySelector(".chat-menu-dropdown");
-        dd.style.display = dd.style.display === "none" ? "block" : "none";
-      });
-
-      item.querySelectorAll(".chat-menu-option").forEach(opt => {
-        opt.addEventListener("click", async (e) => {
-          e.stopPropagation();
-          item.querySelector(".chat-menu-dropdown").style.display = "none";
-          if (opt.dataset.action === "delete") {
-            if (!confirm("\u00bfEliminar este chat?")) return;
-            await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}&chatId=${chat.id}`, { method: "DELETE" });
-            item.remove();
-          } else if (opt.dataset.action === "rename") {
-            const nuevoNombre = prompt("Nuevo nombre:", chat.title || "Chat nuevo");
-            if (!nuevoNombre) return;
-            await fetch(`${BACKEND_URL}/chats`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ userId: currentUser.uid, chatId: chat.id, title: nuevoNombre, messages: chat.messages || [] })
-            });
-            item.querySelector(".text").textContent = nuevoNombre.substring(0, 22) + (nuevoNombre.length > 22 ? "..." : "");
-          }
-        });
-      });
-
-      item.querySelector(".chat-item-main").addEventListener("click", () => {
+      item.style.cursor = "pointer";
+      const titulo = (chat.title || "Chat nuevo").substring(0, 25) + ((chat.title || "").length > 25 ? "..." : "");
+      item.innerHTML = `<span class="icon">💬</span><span class="text">${titulo}</span>`;
+      item.onclick = () => {
         loadSpecificChat(chat.id, chat.messages || []);
         if (window.innerWidth < 1024) toggleSidebar();
-      });
-
+      };
       list.appendChild(item);
-    });
-
-    document.addEventListener("click", () => {
-      document.querySelectorAll(".chat-menu-dropdown").forEach(d => d.style.display = "none");
     });
   } catch (error) {
     list.innerHTML = "";
@@ -6006,5 +5958,18 @@ window.payPremium = async (plan) => {
   }
 };
 </script>
+
+<!-- Modal eliminar chat -->
+<div id="modal-eliminar-chat" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;display:none;align-items:center;justify-content:center;">
+  <div style="background:var(--surface,#1e1e2e);border-radius:14px;padding:28px 32px;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.5);text-align:left;">
+    <h3 style="margin:0 0 10px;font-size:1.1rem;color:var(--text,#fff);">Eliminar chat</h3>
+    <p style="margin:0 0 24px;color:var(--muted,#aaa);font-size:0.95rem;">¿Está seguro de que desea eliminar este chat?</p>
+    <div style="display:flex;gap:12px;justify-content:flex-end;">
+      <button id="modal-eliminar-cancel" style="padding:9px 20px;border-radius:8px;border:1px solid var(--border,#444);background:transparent;color:var(--text,#fff);cursor:pointer;font-size:0.95rem;">Cancelar</button>
+      <button id="modal-eliminar-confirm" style="padding:9px 20px;border-radius:8px;border:none;background:#e74c3c;color:#fff;cursor:pointer;font-size:0.95rem;font-weight:600;">Eliminar</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
