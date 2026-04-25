@@ -5417,14 +5417,14 @@ async function loadChatHistory() {
               item.remove();
             });
           } else if (opt.dataset.action === "rename") {
-            const nuevoNombre = prompt("Nuevo nombre:", chat.title || "Chat nuevo");
-            if (!nuevoNombre) return;
-            await fetch(`${BACKEND_URL}/chats`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ userId: currentUser.uid, chatId: chat.id, title: nuevoNombre, messages: chat.messages || [] })
+            mostrarModalRenombrar(chat.title || "Chat nuevo", async (nuevoNombre) => {
+              await fetch(`${BACKEND_URL}/chats`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: currentUser.uid, chatId: chat.id, title: nuevoNombre, messages: chat.messages || [] })
+              });
+              item.querySelector(".text").textContent = nuevoNombre.substring(0, 22) + (nuevoNombre.length > 22 ? "..." : "");
             });
-            item.querySelector(".text").textContent = nuevoNombre.substring(0, 22) + (nuevoNombre.length > 22 ? "..." : "");
           }
         });
       });
@@ -6007,6 +6007,25 @@ window.payPremium = async (plan) => {
   }
 };
 
+function mostrarModalRenombrar(nombreActual, onConfirm) {
+  const modal = document.getElementById("modal-renombrar-chat");
+  const input = document.getElementById("modal-renombrar-input");
+  input.value = nombreActual;
+  modal.style.display = "flex";
+  setTimeout(() => input.focus(), 100);
+  document.getElementById("modal-renombrar-cancel").onclick = () => { modal.style.display = "none"; };
+  document.getElementById("modal-renombrar-confirm").onclick = async () => {
+    const nuevo = input.value.trim();
+    if (!nuevo) return;
+    modal.style.display = "none";
+    await onConfirm(nuevo);
+  };
+  input.onkeydown = (e) => {
+    if (e.key === "Enter") document.getElementById("modal-renombrar-confirm").click();
+    if (e.key === "Escape") modal.style.display = "none";
+  };
+}
+
 function mostrarModalEliminar(onConfirm) {
   const modal = document.getElementById("modal-eliminar-chat");
   modal.style.display = "flex";
@@ -6014,6 +6033,19 @@ function mostrarModalEliminar(onConfirm) {
   document.getElementById("modal-eliminar-confirm").onclick = async () => { modal.style.display = "none"; await onConfirm(); };
 }
 </script>
+
+
+<!-- Modal renombrar chat -->
+<div id="modal-renombrar-chat" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;align-items:center;justify-content:center;">
+  <div style="background:var(--surface,#1e1e2e);border-radius:14px;padding:28px 32px;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+    <h3 style="margin:0 0 10px;font-size:1.1rem;color:var(--text,#fff);">Renombrar chat</h3>
+    <input id="modal-renombrar-input" type="text" placeholder="Nuevo nombre..." style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border,#444);background:var(--bg,#13131a);color:var(--text,#fff);font-size:0.95rem;margin-bottom:20px;box-sizing:border-box;outline:none;"/>
+    <div style="display:flex;gap:12px;justify-content:flex-end;">
+      <button id="modal-renombrar-cancel" style="padding:9px 20px;border-radius:8px;border:1px solid var(--border,#444);background:transparent;color:var(--text,#fff);cursor:pointer;font-size:0.95rem;">Cancelar</button>
+      <button id="modal-renombrar-confirm" style="padding:9px 20px;border-radius:8px;border:none;background:var(--accent,#6c63ff);color:#fff;cursor:pointer;font-size:0.95rem;font-weight:600;">Guardar</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal eliminar chat -->
 <div id="modal-eliminar-chat" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;align-items:center;justify-content:center;">
