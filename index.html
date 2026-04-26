@@ -2891,6 +2891,10 @@
     <span class="icon">✏️</span>
     <span class="text">Nuevo chat</span>
   </button>
+  <button class="sidebar-item" onclick="abrirBuscador()" style="margin-top:2px;">
+    <span class="icon">🔍</span>
+    <span class="text">Buscar</span>
+  </button>
   <div class="sidebar-section">
     <button class="sidebar-item" onclick="showFavorites()">
       <span class="icon">⭐</span>
@@ -5379,6 +5383,7 @@ async function loadChatHistory() {
     const json = await res.json();
     list.innerHTML = "";
     if (!json.chats || json.chats.length === 0) return;
+    window._todosLosChats = json.chats;
     json.chats.forEach((chat) => {
       const item = document.createElement("div");
       item.className = "sidebar-item";
@@ -5859,7 +5864,6 @@ window.send = async () => {
   if (validaciones[mode] && !validaciones[mode](text)) return;
 
   addMessage(text + (pendingFile ? `\n📎 ${pendingFile.name}` : ""), "user");
-  chatHistory.push({ role: "user", content: text });
   input.value       = "";
   input.placeholder = "Escribe un mensaje...";
   pendingFile       = null;
@@ -6100,6 +6104,51 @@ function mostrarModalRenombrar(nombreActual, onConfirm) {
   };
 }
 
+
+function abrirBuscador() {
+  const modal = document.getElementById("modal-buscar");
+  modal.style.display = "flex";
+  setTimeout(() => document.getElementById("buscar-input").focus(), 100);
+  filtrarChats("");
+}
+
+function cerrarBuscador() {
+  document.getElementById("modal-buscar").style.display = "none";
+  document.getElementById("buscar-input").value = "";
+}
+
+function filtrarChats(query) {
+  const resultados = document.getElementById("buscar-resultados");
+  if (!window._todosLosChats || window._todosLosChats.length === 0) {
+    resultados.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted,#888);font-size:0.9rem;">No hay chats guardados.</div>';
+    return;
+  }
+  const q = query.toLowerCase().trim();
+  const filtrados = q ? window._todosLosChats.filter(c => (c.title || "").toLowerCase().includes(q)) : window._todosLosChats;
+  if (filtrados.length === 0) {
+    resultados.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted,#888);font-size:0.9rem;">Sin resultados.</div>';
+    return;
+  }
+  resultados.innerHTML = filtrados.map(c => `
+    <div onclick="seleccionarChatBuscado('${c.id}')" style="padding:12px 18px;cursor:pointer;display:flex;align-items:center;gap:10px;border-radius:8px;margin:2px 8px;" 
+         onmouseover="this.style.background='var(--hover,rgba(255,255,255,0.05))'" 
+         onmouseout="this.style.background='none'">
+      <span style="color:var(--muted,#888);">💬</span>
+      <span style="flex:1;color:var(--text,#fff);font-size:0.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.title || "Chat nuevo"}</span>
+    </div>
+  `).join("");
+}
+
+function seleccionarChatBuscado(chatId) {
+  cerrarBuscador();
+  const chat = window._todosLosChats.find(c => c.id === chatId);
+  if (chat) loadSpecificChat(chat.id, chat.messages || []);
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") cerrarBuscador();
+});
+
 function mostrarModalEliminar(onConfirm) {
   const modal = document.getElementById("modal-eliminar-chat");
   modal.style.display = "flex";
@@ -6117,6 +6166,21 @@ function mostrarModalEliminar(onConfirm) {
     <div style="display:flex;gap:12px;justify-content:flex-end;">
       <button id="modal-renombrar-cancel" style="padding:9px 20px;border-radius:8px;border:1px solid var(--border,#444);background:transparent;color:var(--text,#fff);cursor:pointer;font-size:0.95rem;">Cancelar</button>
       <button id="modal-renombrar-confirm" style="padding:9px 20px;border-radius:8px;border:none;background:var(--accent,#6c63ff);color:#fff;cursor:pointer;font-size:0.95rem;font-weight:600;">Guardar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal Buscador de chats -->
+<div id="modal-buscar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;align-items:flex-start;justify-content:center;padding-top:80px;">
+  <div style="background:var(--surface,#1e1e2e);border-radius:14px;width:90%;max-width:480px;box-shadow:0 8px 32px rgba(0,0,0,0.5);overflow:hidden;">
+    <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border,#333);gap:10px;">
+      <span style="font-size:1.1rem;color:var(--muted,#888);">🔍</span>
+      <input id="buscar-input" type="text" placeholder="Buscar chats..." style="flex:1;background:none;border:none;outline:none;color:var(--text,#fff);font-size:1rem;" oninput="filtrarChats(this.value)"/>
+      <button onclick="cerrarBuscador()" style="background:none;border:none;color:var(--muted,#888);cursor:pointer;font-size:1.1rem;">✕</button>
+    </div>
+    <div id="buscar-resultados" style="max-height:380px;overflow-y:auto;padding:8px 0;">
+      <div style="padding:20px;text-align:center;color:var(--muted,#888);font-size:0.9rem;">Escribe para buscar...</div>
     </div>
   </div>
 </div>
