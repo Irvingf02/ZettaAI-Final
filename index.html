@@ -5859,6 +5859,7 @@ window.send = async () => {
   if (validaciones[mode] && !validaciones[mode](text)) return;
 
   addMessage(text + (pendingFile ? `\n📎 ${pendingFile.name}` : ""), "user");
+  chatHistory.push({ role: "user", content: text });
   input.value       = "";
   input.placeholder = "Escribe un mensaje...";
   pendingFile       = null;
