@@ -6112,10 +6112,21 @@ function mostrarModalEliminar(onConfirm) {
   document.getElementById("modal-eliminar-confirm").onclick = async () => { modal.style.display = "none"; await onConfirm(); };
 }
 
-function abrirBuscador() {
+async function abrirBuscador() {
   const modal = document.getElementById("modal-buscar");
   modal.style.cssText = "display:flex;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;align-items:flex-start;justify-content:center;padding-top:80px;";
+  document.getElementById("buscar-cerrar-btn").onclick = cerrarBuscador;
+  document.getElementById("buscar-input").value = "";
+  document.getElementById("buscar-resultados").innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted,#888);font-size:0.9rem;">Cargando...</div>';
   setTimeout(() => document.getElementById("buscar-input").focus(), 100);
+  // Cargar chats frescos si no están disponibles
+  if (!window._todosLosChats || window._todosLosChats.length === 0) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}`);
+      const json = await res.json();
+      window._todosLosChats = json.chats || [];
+    } catch(e) { window._todosLosChats = []; }
+  }
   filtrarChats("");
 }
 function cerrarBuscador() {
@@ -6170,7 +6181,7 @@ function seleccionarChatBuscado(chatId) {
     <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border,#333);gap:10px;">
       <span style="font-size:1.1rem;color:var(--muted,#888);">🔍</span>
       <input id="buscar-input" type="text" placeholder="Buscar chats..." style="flex:1;background:none;border:none;outline:none;color:var(--text,#fff);font-size:1rem;" oninput="filtrarChats(this.value)"/>
-      <button onclick="cerrarBuscador()" style="background:none;border:none;color:var(--muted,#888);cursor:pointer;font-size:1.1rem;">✕</button>
+      <button id="buscar-cerrar-btn" style="background:none;border:none;color:var(--muted,#888);cursor:pointer;font-size:1.1rem;">✕</button>
     </div>
     <div id="buscar-resultados" style="max-height:380px;overflow-y:auto;padding:8px 0;">
       <div style="padding:20px;text-align:center;color:var(--muted,#888);font-size:0.9rem;">Escribe para buscar...</div>
