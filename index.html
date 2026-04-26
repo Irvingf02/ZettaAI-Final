@@ -5688,17 +5688,90 @@ window.cancelVideoType = function() {
 function addMessage(text, role, extra = "") {
   const div = document.createElement("div");
   div.className = `msg ${role}`;
-  div.textContent = text;
+
+  const contentDiv = document.createElement("div");
+  contentDiv.className = "msg-content";
+  contentDiv.textContent = text;
+  div.appendChild(contentDiv);
+
   if (extra) {
     const meta = document.createElement("div");
     meta.className = "msg-meta";
     meta.textContent = extra;
     div.appendChild(meta);
   }
+
+  const isUser = role === "user";
+  const isBot  = role === "bot";
+
+  if (isUser || isBot) {
+    const actions = document.createElement("div");
+    actions.className = "msg-actions";
+    actions.style.cssText = "display:flex;align-items:center;gap:6px;margin-top:4px;opacity:0;transition:opacity 0.2s;";
+
+    if (isUser) {
+      const now = new Date();
+      const hora = now.getHours().toString().padStart(2,"0") + ":" + now.getMinutes().toString().padStart(2,"0");
+      actions.innerHTML = `
+        <span style="font-size:0.75rem;color:var(--muted,#888);margin-right:4px;">${hora}</span>
+        <button title="Reintentar" onclick="reintentarMensaje(this)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:1rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x21BA;</button>
+        <button title="Editar" onclick="editarMensaje(this)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x270F;&#xFE0F;</button>
+        <button title="Copiar" onclick="copiarMensaje(this)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x1F4CB;</button>
+      `;
+    } else {
+      actions.innerHTML = `
+        <button title="Copiar" onclick="copiarMensaje(this)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x1F4CB;</button>
+        <button title="Me gusta" onclick="this.style.color='#4caf50'" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x1F44D;</button>
+        <button title="No me gusta" onclick="this.style.color='#e74c3c'" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x1F44E;</button>
+        <button title="Reintentar" onclick="reintentarMensaje(this)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:1rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x21BA;</button>
+      `;
+    }
+
+    div.appendChild(actions);
+    div.addEventListener("mouseenter", () => actions.style.opacity = "1");
+    div.addEventListener("mouseleave", () => actions.style.opacity = "0");
+  }
+
   const box = document.getElementById("messages");
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
   return div;
+}
+
+function copiarMensaje(btn) {
+  const text = btn.closest(".msg").querySelector(".msg-content").textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = "✅";
+    setTimeout(() => btn.innerHTML = "&#x1F4CB;", 1500);
+  });
+}
+
+function reintentarMensaje(btn) {
+  const msg = btn.closest(".msg");
+  const isUser = msg.classList.contains("user");
+  if (isUser) {
+    const text = msg.querySelector(".msg-content").textContent;
+    msg.remove();
+    document.getElementById("input").value = text;
+    window.send();
+  } else {
+    const allMsgs = document.querySelectorAll(".msg.user");
+    if (allMsgs.length > 0) {
+      const last = allMsgs[allMsgs.length - 1];
+      const text = last.querySelector(".msg-content").textContent;
+      msg.remove();
+      document.getElementById("input").value = text;
+      window.send();
+    }
+  }
+}
+
+function editarMensaje(btn) {
+  const msg = btn.closest(".msg");
+  const text = msg.querySelector(".msg-content").textContent;
+  document.getElementById("input").value = text;
+  document.getElementById("input").focus();
+  msg.remove();
 }
 
 let pendingFile = null; // Archivo pendiente para enviar con el siguiente mensaje
