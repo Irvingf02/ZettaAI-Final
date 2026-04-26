@@ -6105,18 +6105,23 @@ function mostrarModalRenombrar(nombreActual, onConfirm) {
 }
 
 
+function mostrarModalEliminar(onConfirm) {
+  const modal = document.getElementById("modal-eliminar-chat");
+  modal.style.display = "flex";
+  document.getElementById("modal-eliminar-cancel").onclick = () => { modal.style.display = "none"; };
+  document.getElementById("modal-eliminar-confirm").onclick = async () => { modal.style.display = "none"; await onConfirm(); };
+}
+
 function abrirBuscador() {
   const modal = document.getElementById("modal-buscar");
   modal.style.cssText = "display:flex;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;align-items:flex-start;justify-content:center;padding-top:80px;";
   setTimeout(() => document.getElementById("buscar-input").focus(), 100);
   filtrarChats("");
 }
-
 function cerrarBuscador() {
   document.getElementById("modal-buscar").style.display = "none";
   document.getElementById("buscar-input").value = "";
 }
-
 function filtrarChats(query) {
   const resultados = document.getElementById("buscar-resultados");
   if (!window._todosLosChats || window._todosLosChats.length === 0) {
@@ -6130,30 +6135,18 @@ function filtrarChats(query) {
     return;
   }
   resultados.innerHTML = filtrados.map(c => `
-    <div onclick="seleccionarChatBuscado('${c.id}')" style="padding:12px 18px;cursor:pointer;display:flex;align-items:center;gap:10px;border-radius:8px;margin:2px 8px;" 
-         onmouseover="this.style.background='var(--hover,rgba(255,255,255,0.05))'" 
+    <div onclick="seleccionarChatBuscado('${c.id}')" style="padding:12px 18px;cursor:pointer;display:flex;align-items:center;gap:10px;border-radius:8px;margin:2px 8px;"
+         onmouseover="this.style.background='rgba(255,255,255,0.05)'"
          onmouseout="this.style.background='none'">
-      <span style="color:var(--muted,#888);">💬</span>
+      <span style="color:var(--muted,#888);">&#x1F4AC;</span>
       <span style="flex:1;color:var(--text,#fff);font-size:0.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.title || "Chat nuevo"}</span>
     </div>
   `).join("");
 }
-
 function seleccionarChatBuscado(chatId) {
   cerrarBuscador();
   const chat = window._todosLosChats.find(c => c.id === chatId);
   if (chat) loadSpecificChat(chat.id, chat.messages || []);
-}
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") cerrarBuscador();
-});
-
-function mostrarModalEliminar(onConfirm) {
-  const modal = document.getElementById("modal-eliminar-chat");
-  modal.style.display = "flex";
-  document.getElementById("modal-eliminar-cancel").onclick = () => { modal.style.display = "none"; };
-  document.getElementById("modal-eliminar-confirm").onclick = async () => { modal.style.display = "none"; await onConfirm(); };
 }
 </script>
 
