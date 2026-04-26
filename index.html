@@ -6107,7 +6107,7 @@ function mostrarModalRenombrar(nombreActual, onConfirm) {
 
 function abrirBuscador() {
   const modal = document.getElementById("modal-buscar");
-  modal.style.display = "flex";
+  modal.style.cssText = "display:flex;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;align-items:flex-start;justify-content:center;padding-top:80px;";
   setTimeout(() => document.getElementById("buscar-input").focus(), 100);
   filtrarChats("");
 }
@@ -6172,7 +6172,7 @@ function mostrarModalEliminar(onConfirm) {
 
 
 <!-- Modal Buscador de chats -->
-<div id="modal-buscar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;align-items:flex-start;justify-content:center;padding-top:80px;">
+<div id="modal-buscar" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;align-items:flex-start;justify-content:center;padding-top:80px;">
   <div style="background:var(--surface,#1e1e2e);border-radius:14px;width:90%;max-width:480px;box-shadow:0 8px 32px rgba(0,0,0,0.5);overflow:hidden;">
     <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border,#333);gap:10px;">
       <span style="font-size:1.1rem;color:var(--muted,#888);">🔍</span>
