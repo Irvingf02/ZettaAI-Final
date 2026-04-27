@@ -5904,10 +5904,10 @@ window.send = async () => {
         const topBar = document.createElement("div");
         topBar.style.cssText = "position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:linear-gradient(to bottom,rgba(0,0,0,0.6),transparent);z-index:2;border-radius:12px 12px 0 0;";
         topBar.innerHTML = `
-          <button onclick="this.closest('.msg').remove()" style="background:rgba(0,0,0,0.5);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">&#x2715;</button>
-          <div style="display:flex;gap:8px;">
-            <a href="${data.imageUrl}" download="zettaxai-imagen.jpg" style="background:rgba(0,0,0,0.5);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;text-decoration:none;">&#x2193;</button>
-            <button onclick="abrirMenuImagen(this,'${text.substring(0,60).replace(/'/g,"\'")}')" style="background:rgba(0,0,0,0.5);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;">&#x22EF;</button>
+          <button onclick="this.closest('.msg').remove()" style="background:rgba(0,0,0,0.55);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">&#x2715;</button>
+          <div style="display:flex;gap:12px;">
+            <a href="${data.imageUrl}" download="zettaxai-imagen.jpg" style="background:rgba(0,0,0,0.55);color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;text-decoration:none;">&#x2193;</a>
+            <button onclick="abrirMenuImagen(this,'${text.substring(0,60).replace(/'/g,"\'")}')" style="background:rgba(0,0,0,0.55);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;">&#x22EF;</button>
           </div>
         `;
 
