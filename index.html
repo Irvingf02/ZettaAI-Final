@@ -6141,22 +6141,12 @@ function mostrarModalEliminar(onConfirm) {
 </div>
 
 <script>
-async function abrirBuscador() {
+function abrirBuscador() {
   const modal = document.getElementById("modal-buscar");
-  modal.style.display = "block";
+  modal.style.cssText = "display:block;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:99999;";
   const input = document.getElementById("buscar-input");
   input.value = "";
-  document.getElementById("buscar-resultados").innerHTML = '<div style="padding:16px;color:#aaa;text-align:center;font-size:0.9rem;">Cargando...</div>';
   setTimeout(() => input.focus(), 50);
-  try {
-    const uid = currentUser ? currentUser.uid : null;
-    if (!uid) { document.getElementById("buscar-resultados").innerHTML = '<div style="padding:16px;color:#aaa;text-align:center;font-size:0.9rem;">Inicia sesión para ver chats.</div>'; return; }
-    const res = await fetch(BACKEND_URL + "/chats?userId=" + uid);
-    const json = await res.json();
-    window._todosLosChats = json.chats || [];
-  } catch(e) {
-    window._todosLosChats = [];
-  }
   filtrarChats("");
 }
 
