@@ -4544,7 +4544,7 @@ window.showActivity = async function() {
 
   // Cargar historial de chats
   const listEl = document.getElementById("activity-chats-list");
-  listEl.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);'>Cargando...</p>";
+  if (listEl) listEl.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);'>Cargando...</p>";
 
   if (currentUser && !currentUser.isAnonymous) {
     try {
@@ -4622,7 +4622,7 @@ window.deleteAllChats = async function() {
     onOk: async () => {
       try {
         await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}`, { method: "DELETE" });
-        document.getElementById("activity-chats-list").innerHTML = "<p style='font-size:0.8rem;color:var(--muted);'>No hay conversaciones aún.</p>";
+        if (document.getElementById("activity-chats-list")) document.getElementById("activity-chats-list").innerHTML = "<p style='font-size:0.8rem;color:var(--muted);'>No hay conversaciones aún.</p>";
         chatHistory = [];
         document.getElementById("messages").innerHTML = "";
       } catch (e) {
