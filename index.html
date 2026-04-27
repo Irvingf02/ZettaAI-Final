@@ -677,6 +677,11 @@
 
   .msg.error { border-color: var(--danger); color: var(--danger); }
 
+  .msg-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
   .msg-meta {
     font-family: 'DM Mono', monospace;
     font-size: 0.6rem;
@@ -5693,11 +5698,7 @@ window.cancelVideoType = function() {
 function addMessage(text, role, extra = "") {
   const div = document.createElement("div");
   div.className = `msg ${role}`;
-
-  const contentDiv = document.createElement("div");
-  contentDiv.className = "msg-content";
-  contentDiv.textContent = text;
-  div.appendChild(contentDiv);
+  div.textContent = text;
 
   if (extra) {
     const meta = document.createElement("div");
@@ -5744,7 +5745,7 @@ function addMessage(text, role, extra = "") {
 }
 
 function copiarMensaje(btn) {
-  const text = btn.closest(".msg").querySelector(".msg-content").textContent;
+  const text = btn.closest(".msg").childNodes[0]?.textContent || btn.closest(".msg").textContent;
   navigator.clipboard.writeText(text).then(() => {
     btn.textContent = "✅";
     setTimeout(() => btn.innerHTML = "&#x1F4CB;", 1500);
@@ -5755,7 +5756,7 @@ function reintentarMensaje(btn) {
   const msg = btn.closest(".msg");
   const isUser = msg.classList.contains("user");
   if (isUser) {
-    const text = msg.querySelector(".msg-content").textContent;
+    const text = msg.childNodes[0]?.nodeValue || msg.firstChild?.textContent || msg.textContent;
     msg.remove();
     document.getElementById("input").value = text;
     window.send();
@@ -5763,7 +5764,7 @@ function reintentarMensaje(btn) {
     const allMsgs = document.querySelectorAll(".msg.user");
     if (allMsgs.length > 0) {
       const last = allMsgs[allMsgs.length - 1];
-      const text = last.querySelector(".msg-content").textContent;
+      const text = last.childNodes[0]?.nodeValue || last.firstChild?.textContent || last.textContent;
       msg.remove();
       document.getElementById("input").value = text;
       window.send();
@@ -5773,7 +5774,7 @@ function reintentarMensaje(btn) {
 
 function editarMensaje(btn) {
   const msg = btn.closest(".msg");
-  const text = msg.querySelector(".msg-content").textContent;
+  const text = msg.childNodes[0]?.nodeValue || msg.firstChild?.textContent || msg.textContent;
   document.getElementById("input").value = text;
   document.getElementById("input").focus();
   msg.remove();
@@ -5988,6 +5989,7 @@ window.send = async () => {
     return;
   }
 
+  chatHistory.push({ role: "user", content: text });
   const typing = addMessage("IA escribiendo...", "bot typing");
 
   try {
