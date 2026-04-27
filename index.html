@@ -5898,15 +5898,36 @@ window.send = async () => {
 
         const div = document.createElement("div");
         div.className = "msg bot";
+        div.style.cssText = "position:relative;padding:0;overflow:hidden;border-radius:12px;background:transparent;border:none;";
+
+        // Barra superior
+        const topBar = document.createElement("div");
+        topBar.style.cssText = "position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:linear-gradient(to bottom,rgba(0,0,0,0.6),transparent);z-index:2;border-radius:12px 12px 0 0;";
+        topBar.innerHTML = `
+          <button onclick="this.closest('.msg').remove()" style="background:rgba(0,0,0,0.5);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">&#x2715;</button>
+          <div style="display:flex;gap:8px;">
+            <a href="${data.imageUrl}" download="zettaxai-imagen.jpg" style="background:rgba(0,0,0,0.5);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;text-decoration:none;">&#x2193;</button>
+            <button onclick="abrirMenuImagen(this,'${text.substring(0,60).replace(/'/g,"\'")}')" style="background:rgba(0,0,0,0.5);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;">&#x22EF;</button>
+          </div>
+        `;
+
         const img = document.createElement("img");
         img.src = data.imageUrl;
-        img.style.cssText = "max-width:100%; border-radius:10px; margin-top:6px; display:block;";
+        img.style.cssText = "width:100%;border-radius:12px;display:block;";
         img.alt = text;
-        const caption = document.createElement("div");
-        caption.className = "msg-meta";
-        caption.textContent = "🎨 " + text.substring(0, 60);
+
+        // Barra inferior
+        const bottomBar = document.createElement("div");
+        bottomBar.style.cssText = "position:absolute;bottom:0;left:0;right:0;display:flex;gap:8px;padding:10px;background:linear-gradient(to top,rgba(0,0,0,0.6),transparent);z-index:2;border-radius:0 0 12px 12px;";
+        bottomBar.innerHTML = `
+          <button onclick="editarImagen('${data.imageUrl}')" style="flex:1;padding:9px;border-radius:20px;border:none;background:rgba(30,30,30,0.85);color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600;">Editar</button>
+          <button onclick="compartirImagen('${data.imageUrl}')" style="flex:1;padding:9px;border-radius:20px;border:none;background:rgba(30,30,30,0.85);color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600;">Compartir</button>
+        `;
+
+        div.appendChild(topBar);
         div.appendChild(img);
-        div.appendChild(caption);
+        div.appendChild(bottomBar);
+
         const msgBox = document.getElementById("messages");
         msgBox.appendChild(div);
         msgBox.scrollTop = msgBox.scrollHeight;
@@ -6184,6 +6205,32 @@ function seleccionarChatBuscado(chatId) {
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") { document.getElementById("modal-buscar").style.display = "none"; }
 });
+
+function abrirMenuImagen(btn, prompt) {
+  const modal = document.getElementById("modal-menu-imagen");
+  document.getElementById("modal-menu-imagen-titulo").textContent = prompt;
+  modal.style.display = "flex";
+  document.getElementById("modal-menu-imagen-chat").onclick = () => {
+    modal.style.display = "none";
+    document.getElementById("input").value = prompt;
+    document.getElementById("input").focus();
+  };
+  document.getElementById("modal-menu-imagen-cerrar").onclick = () => modal.style.display = "none";
+}
+
+function editarImagen(url) {
+  document.getElementById("input").value = "Edita esta imagen: " + url;
+  document.getElementById("input").focus();
+}
+
+async function compartirImagen(url) {
+  if (navigator.share) {
+    await navigator.share({ url });
+  } else {
+    navigator.clipboard.writeText(url);
+    alert("URL copiada al portapapeles");
+  }
+}
 </script>
 
 <!-- Modal eliminar chat -->
@@ -6194,6 +6241,25 @@ document.addEventListener("keydown", e => {
     <div style="display:flex;gap:12px;justify-content:flex-end;">
       <button id="modal-eliminar-cancel" style="padding:9px 20px;border-radius:8px;border:1px solid var(--border,#444);background:transparent;color:var(--text,#fff);cursor:pointer;font-size:0.95rem;">Cancelar</button>
       <button id="modal-eliminar-confirm" style="padding:9px 20px;border-radius:8px;border:none;background:#e74c3c;color:#fff;cursor:pointer;font-size:0.95rem;font-weight:600;">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal menú imagen -->
+<div id="modal-menu-imagen" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:99999;align-items:flex-start;justify-content:center;padding-top:40px;">
+  <div style="background:#1e1e2e;border-radius:14px;width:90%;max-width:380px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #333;">
+      <span id="modal-menu-imagen-titulo" style="color:#aaa;font-size:0.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80%;"></span>
+      <span id="modal-menu-imagen-cerrar" style="cursor:pointer;color:#aaa;font-size:1.2rem;padding:0 4px;">&#x2715;</span>
+    </div>
+    <div style="padding:8px 0;">
+      <div id="modal-menu-imagen-chat" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:0.95rem;color:#fff;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='none'">
+        <span>&#x1F4AC;</span> Abrir chat
+      </div>
+      <div style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:0.95rem;color:#fff;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='none'">
+        <span>&#x2139;&#xFE0F;</span> Obtener más información
+      </div>
     </div>
   </div>
 </div>
