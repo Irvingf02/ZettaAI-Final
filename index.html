@@ -3364,11 +3364,14 @@
         <div class="activity-stat"><div class="stat-num" id="act-ideas">0</div><div class="stat-label">💡 Ideas</div></div>
         <div class="activity-stat"><div class="stat-num" id="act-tarea">0</div><div class="stat-label">🎓 Tareas</div></div>
         <div class="activity-stat"><div class="stat-num" id="act-imagen">0</div><div class="stat-label">🎨 Imágenes</div></div>
-        <div class="activity-stat" style="display:none;"><div class="stat-num" id="act-video">0</div><div class="stat-label">🎬 Videos</div></div>
+        <div class="activity-stat"><div class="stat-num" id="act-video">0</div><div class="stat-label">🎬 Videos</div></div>
         <div class="activity-stat"><div class="stat-num" id="act-codigo">0</div><div class="stat-label">💻 Código</div></div>
       </div>
+      <div class="activity-section-title">Historial de conversaciones</div>
+      <div id="activity-chats-list"><p style="font-size:0.8rem;color:var(--muted);">Cargando...</p></div>
     </div>
     <div class="activity-footer">
+      <button class="activity-btn" onclick="downloadHistory()">⬇️ Descargar historial</button>
       <button class="activity-btn danger" onclick="deleteAllChats()">🗑️ Borrar todo</button>
     </div>
   </div>
