@@ -4169,6 +4169,7 @@ window.newChat = function() {
   document.getElementById("input").value = "";
   chatHistory = [];
   activeChatId = null;
+  localStorage.removeItem("zettax_last_chat");
   const sidebar = document.getElementById("sidebar");
   const mobileBtn = document.getElementById("mobilMenuBtn");
   if (sidebar && sidebar.classList.contains("sidebar-open")) {
@@ -5450,6 +5451,13 @@ async function loadChatHistory() {
     document.addEventListener("click", () => {
       document.querySelectorAll(".chat-menu-dropdown").forEach(d => d.style.display = "none");
     });
+
+    // Restaurar último chat abierto
+    const lastChatId = localStorage.getItem("zettax_last_chat");
+    if (lastChatId) {
+      const lastChat = json.chats.find(c => c.id === lastChatId);
+      if (lastChat) loadSpecificChat(lastChat.id, lastChat.messages || []);
+    }
   } catch (error) {
     list.innerHTML = "";
   }
@@ -5460,6 +5468,7 @@ function loadSpecificChat(chatId, messages) {
   box.innerHTML = "";
   chatHistory = [];
   activeChatId = chatId;
+  localStorage.setItem("zettax_last_chat", chatId);
   messages.forEach(m => {
     addMessage(m.content, m.role === "user" ? "user" : "bot");
     chatHistory.push(m);
@@ -6067,6 +6076,7 @@ window.send = async () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: currentUser.uid, chatId, title: text.substring(0, 50), messages: chatHistory })
       }).catch(e => console.warn("Error guardando chat:", e));
+      localStorage.setItem("zettax_last_chat", chatId);
       await incrementarContador(mode);
     }
   } catch (e) {
