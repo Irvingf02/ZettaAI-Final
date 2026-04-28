@@ -5695,7 +5695,7 @@ window.cancelVideoType = function() {
 
 // sendImgStyled ya no se usa: el estilo se aplica desde send() via selectedImgStyle
 
-window.getMsgText = function(msg) {
+function getMsgText(msg) {
   // Obtener solo el texto del mensaje sin los botones
   const clone = msg.cloneNode(true);
   const actions = clone.querySelector(".msg-actions");
@@ -5740,8 +5740,8 @@ function addMessage(text, role, extra = "") {
     } else {
       actions.innerHTML = `
         <button title="Copiar" onclick="copiarMensaje(this)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x1F4CB;</button>
-        <button title="Me gusta" onclick="this.dataset.liked='1';this.style.color='#4caf50'" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="if(!this.dataset.liked)this.style.color='var(--muted,#888)'">&#x1F44D;</button>
-        <button title="No me gusta" onclick="this.dataset.liked='1';this.style.color='#e74c3c'" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="if(!this.dataset.liked)this.style.color='var(--muted,#888)'">&#x1F44E;</button>
+        <button title="Me gusta" onclick="this.style.background='rgba(76,175,80,0.2)';this.style.borderRadius='6px';this.style.transform='scale(1.2)';" style="background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 4px;border-radius:4px;transition:all 0.2s;">&#x1F44D;</button>
+        <button title="No me gusta" onclick="this.style.background='rgba(231,76,60,0.2)';this.style.borderRadius='6px';this.style.transform='scale(1.2)';" style="background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 4px;border-radius:4px;transition:all 0.2s;">&#x1F44E;</button>
         <button title="Reintentar" onclick="reintentarMensaje(this)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:1rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x21BA;</button>
       `;
     }
@@ -5757,7 +5757,7 @@ function addMessage(text, role, extra = "") {
   return div;
 }
 
-window.copiarMensaje = function(btn) {
+function copiarMensaje(btn) {
   const text = getMsgText(btn.closest(".msg"));
   navigator.clipboard.writeText(text).then(() => {
     btn.textContent = "✅";
@@ -5765,7 +5765,7 @@ window.copiarMensaje = function(btn) {
   });
 }
 
-window.reintentarMensaje = function(btn) {
+function reintentarMensaje(btn) {
   const msg = btn.closest(".msg");
   const isUser = msg.classList.contains("user");
   if (isUser) {
@@ -5785,7 +5785,7 @@ window.reintentarMensaje = function(btn) {
   }
 }
 
-window.editarMensaje = function(btn) {
+function editarMensaje(btn) {
   const msg = btn.closest(".msg");
   const text = getMsgText(msg);
   document.getElementById("input").value = text;
