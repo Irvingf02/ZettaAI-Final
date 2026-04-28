@@ -5695,10 +5695,23 @@ window.cancelVideoType = function() {
 
 // sendImgStyled ya no se usa: el estilo se aplica desde send() via selectedImgStyle
 
+function getMsgText(msg) {
+  // Obtener solo el texto del mensaje sin los botones
+  const clone = msg.cloneNode(true);
+  const actions = clone.querySelector(".msg-actions");
+  if (actions) actions.remove();
+  return clone.textContent.trim();
+}
+
 function addMessage(text, role, extra = "") {
   const div = document.createElement("div");
   div.className = `msg ${role}`;
-  div.textContent = text;
+
+  // Texto en span para separarlo de los botones
+  const textSpan = document.createElement("span");
+  textSpan.className = "msg-text";
+  textSpan.textContent = text;
+  div.appendChild(textSpan);
 
   if (extra) {
     const meta = document.createElement("div");
@@ -5745,7 +5758,7 @@ function addMessage(text, role, extra = "") {
 }
 
 function copiarMensaje(btn) {
-  const text = btn.closest(".msg").childNodes[0]?.textContent || btn.closest(".msg").textContent;
+  const text = getMsgText(btn.closest(".msg"));
   navigator.clipboard.writeText(text).then(() => {
     btn.textContent = "✅";
     setTimeout(() => btn.innerHTML = "&#x1F4CB;", 1500);
@@ -5756,7 +5769,7 @@ function reintentarMensaje(btn) {
   const msg = btn.closest(".msg");
   const isUser = msg.classList.contains("user");
   if (isUser) {
-    const text = msg.childNodes[0]?.nodeValue || msg.firstChild?.textContent || msg.textContent;
+    const text = getMsgText(msg);
     msg.remove();
     document.getElementById("input").value = text;
     window.send();
@@ -5764,7 +5777,7 @@ function reintentarMensaje(btn) {
     const allMsgs = document.querySelectorAll(".msg.user");
     if (allMsgs.length > 0) {
       const last = allMsgs[allMsgs.length - 1];
-      const text = last.childNodes[0]?.nodeValue || last.firstChild?.textContent || last.textContent;
+      const text = getMsgText(last);
       msg.remove();
       document.getElementById("input").value = text;
       window.send();
@@ -5774,7 +5787,7 @@ function reintentarMensaje(btn) {
 
 function editarMensaje(btn) {
   const msg = btn.closest(".msg");
-  const text = msg.childNodes[0]?.nodeValue || msg.firstChild?.textContent || msg.textContent;
+  const text = getMsgText(msg);
   document.getElementById("input").value = text;
   document.getElementById("input").focus();
   msg.remove();
