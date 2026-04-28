@@ -5931,6 +5931,17 @@ window.send = async () => {
         const msgBox = document.getElementById("messages");
         msgBox.appendChild(div);
         msgBox.scrollTop = msgBox.scrollHeight;
+
+        // Guardar imagen en historial
+        chatHistory.push({ role: "assistant", content: "🎨 Imagen generada: " + data.imageUrl });
+        if (!currentUser.isAnonymous) {
+          if (!activeChatId) activeChatId = currentUser.uid + "_" + Date.now();
+          fetch(`${BACKEND_URL}/chats`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: text.substring(0, 50), messages: chatHistory })
+          }).catch(e => console.warn("Error guardando chat:", e));
+        }
       } else {
         addMessage(data.reply || "⚠️ No se pudo generar la imagen.", "bot error");
       }
