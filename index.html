@@ -5740,8 +5740,8 @@ function addMessage(text, role, extra = "") {
     } else {
       actions.innerHTML = `
         <button title="Copiar" onclick="copiarMensaje(this)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x1F4CB;</button>
-        <button title="Me gusta" onclick="this.style.color='#4caf50'" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x1F44D;</button>
-        <button title="No me gusta" onclick="this.style.color='#e74c3c'" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x1F44E;</button>
+        <button title="Me gusta" onclick="this.dataset.liked='1';this.style.color='#4caf50'" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="if(!this.dataset.liked)this.style.color='var(--muted,#888)'">&#x1F44D;</button>
+        <button title="No me gusta" onclick="this.dataset.liked='1';this.style.color='#e74c3c'" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="if(!this.dataset.liked)this.style.color='var(--muted,#888)'">&#x1F44E;</button>
         <button title="Reintentar" onclick="reintentarMensaje(this)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:1rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x21BA;</button>
       `;
     }
