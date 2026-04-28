@@ -5705,7 +5705,7 @@ window.cancelVideoType = function() {
 
 // sendImgStyled ya no se usa: el estilo se aplica desde send() via selectedImgStyle
 
-function getMsgText(msg) {
+window.getMsgText = function(msg) {
   // Obtener solo el texto del mensaje sin los botones
   const clone = msg.cloneNode(true);
   const actions = clone.querySelector(".msg-actions");
@@ -5767,7 +5767,7 @@ function addMessage(text, role, extra = "") {
   return div;
 }
 
-function copiarMensaje(btn) {
+window.copiarMensaje = function(btn) {
   const text = getMsgText(btn.closest(".msg"));
   navigator.clipboard.writeText(text).then(() => {
     btn.textContent = "✅";
@@ -5775,7 +5775,7 @@ function copiarMensaje(btn) {
   });
 }
 
-function reintentarMensaje(btn) {
+window.reintentarMensaje = function(btn) {
   const msg = btn.closest(".msg");
   const isUser = msg.classList.contains("user");
   if (isUser) {
@@ -5795,7 +5795,7 @@ function reintentarMensaje(btn) {
   }
 }
 
-function editarMensaje(btn) {
+window.editarMensaje = function(btn) {
   const msg = btn.closest(".msg");
   const text = getMsgText(msg);
   document.getElementById("input").value = text;
