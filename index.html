@@ -5464,6 +5464,7 @@ function loadSpecificChat(chatId, messages) {
     addMessage(m.content, m.role === "user" ? "user" : "bot");
     chatHistory.push(m);
   });
+  setTimeout(restaurarReacciones, 100);
 }
 
 const MODOS = {
@@ -5740,8 +5741,8 @@ function addMessage(text, role, extra = "") {
     } else {
       actions.innerHTML = `
         <button title="Copiar" onclick="copiarMensaje(this)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x1F4CB;</button>
-        <button title="Me gusta" onclick="if(this.dataset.on){this.dataset.on='';this.style.background='none';this.style.transform='scale(1)';}else{this.dataset.on='1';this.style.background='rgba(76,175,80,0.2)';this.style.borderRadius='6px';this.style.transform='scale(1.2)';}" style="background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 4px;border-radius:4px;transition:all 0.2s;">&#x1F44D;</button>
-        <button title="No me gusta" onclick="if(this.dataset.on){this.dataset.on='';this.style.background='none';this.style.transform='scale(1)';}else{this.dataset.on='1';this.style.background='rgba(231,76,60,0.2)';this.style.borderRadius='6px';this.style.transform='scale(1.2)';}" style="background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 4px;border-radius:4px;transition:all 0.2s;">&#x1F44E;</button>
+        <button title="Me gusta" onclick="toggleReaccion(this,'like')" style="background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 4px;border-radius:4px;transition:all 0.2s;">&#x1F44D;</button>
+        <button title="No me gusta" onclick="toggleReaccion(this,'dislike')" style="background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 4px;border-radius:4px;transition:all 0.2s;">&#x1F44E;</button>
         <button title="Reintentar" onclick="reintentarMensaje(this)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:1rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x21BA;</button>
       `;
     }
@@ -6254,6 +6255,57 @@ async function compartirImagen(url) {
     navigator.clipboard.writeText(url);
     alert("URL copiada al portapapeles");
   }
+}
+
+window.toggleReaccion = function(btn, tipo) {
+  const msg = btn.closest(".msg");
+  const allBots = Array.from(document.querySelectorAll(".msg.bot"));
+  const idx = allBots.indexOf(msg);
+  if (idx === -1) return;
+
+  if (btn.dataset.on) {
+    // Quitar reacción
+    btn.dataset.on = "";
+    btn.style.background = "none";
+    btn.style.transform = "scale(1)";
+    if (chatHistory[idx * 2 + 1]) chatHistory[idx * 2 + 1].reaccion = null;
+  } else {
+    // Quitar reacción del otro botón primero
+    const otherBtns = msg.querySelectorAll("button[title='Me gusta'], button[title='No me gusta']");
+    otherBtns.forEach(b => { b.dataset.on = ""; b.style.background = "none"; b.style.transform = "scale(1)"; });
+    // Activar este
+    btn.dataset.on = "1";
+    btn.style.background = tipo === "like" ? "rgba(76,175,80,0.2)" : "rgba(231,76,60,0.2)";
+    btn.style.borderRadius = "6px";
+    btn.style.transform = "scale(1.2)";
+    if (chatHistory[idx * 2 + 1]) chatHistory[idx * 2 + 1].reaccion = tipo;
+  }
+
+  // Guardar en Supabase
+  if (currentUser && !currentUser.isAnonymous && activeChatId) {
+    fetch(`${BACKEND_URL}/chats`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chatHistory[0]?.content?.substring(0,50) || "Chat", messages: chatHistory })
+    }).catch(e => console.warn("Error guardando reacción:", e));
+  }
+};
+
+function restaurarReacciones() {
+  const allBots = document.querySelectorAll(".msg.bot");
+  allBots.forEach((msg, idx) => {
+    const histIdx = idx * 2 + 1;
+    if (chatHistory[histIdx]?.reaccion) {
+      const tipo = chatHistory[histIdx].reaccion;
+      const btn = msg.querySelector(`button[title="${tipo === 'like' ? 'Me gusta' : 'No me gusta'}"]`);
+      if (btn) {
+        btn.dataset.on = "1";
+        btn.style.background = tipo === "like" ? "rgba(76,175,80,0.2)" : "rgba(231,76,60,0.2)";
+        btn.style.borderRadius = "6px";
+        btn.style.transform = "scale(1.2)";
+      }
+    }
+  });
 }
 </script>
 
