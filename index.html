@@ -5846,6 +5846,12 @@ window.editarMensaje = function(btn) {
     const msgIdx = allMsgs.indexOf(msg);
     for (let i = allMsgs.length - 1; i > msgIdx; i--) allMsgs[i].remove();
 
+    // Guardar versiones del mensaje
+    const versions = JSON.parse(msg.dataset.versions || JSON.stringify([text]));
+    if (!versions.includes(newText)) versions.push(newText);
+    msg.dataset.versions = JSON.stringify(versions);
+    msg.dataset.currentVersion = String(versions.length - 1);
+
     // Actualizar chatHistory: cortar hasta el mensaje editado
     const userMsgs = Array.from(document.querySelectorAll(".msg.user"));
     const userIdx = userMsgs.indexOf(msg);
@@ -5873,6 +5879,9 @@ window.editarMensaje = function(btn) {
       typing.remove();
       addMessage(data.reply, "bot");
       chatHistory.push({ role: "assistant", content: data.reply });
+
+      // Mostrar navegador de versiones
+      actualizarNavVersiones(msg);
 
       // Guardar en Supabase
       if (currentUser && !currentUser.isAnonymous && activeChatId) {
@@ -6418,6 +6427,75 @@ window.abrirValoracion = function(tipo) {
   modal.style.display = "flex";
   document.getElementById("valoracion-input").value = "";
   document.getElementById("valoracion-detalle").value = "";
+};
+
+function actualizarNavVersiones(msg) {
+  const versions = JSON.parse(msg.dataset.versions || "[]");
+  if (versions.length < 2) return;
+  const current = parseInt(msg.dataset.currentVersion || "0");
+  const total = versions.length;
+  let nav = msg.querySelector(".version-nav");
+  if (!nav) {
+    nav = document.createElement("div");
+    nav.className = "version-nav";
+    nav.style.cssText = "display:flex;align-items:center;gap:4px;font-size:0.78rem;color:var(--muted,#888);margin-top:4px;";
+    const actions = msg.querySelector(".msg-actions");
+    if (actions) actions.appendChild(nav);
+    else msg.appendChild(nav);
+  }
+  nav.innerHTML = `
+    <button onclick="navegarVersion(this,-1)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.85rem;padding:1px 3px;" ${current===0?"disabled":""}>&#x3C;</button>
+    <span>${current+1}/${total}</span>
+    <button onclick="navegarVersion(this,1)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.85rem;padding:1px 3px;" ${current===total-1?"disabled":""}>&#x3E;</button>
+  `;
+}
+
+window.navegarVersion = async function(btn, dir) {
+  const msg = btn.closest(".msg");
+  const versions = JSON.parse(msg.dataset.versions || "[]");
+  const current = parseInt(msg.dataset.currentVersion || "0");
+  const newIdx = current + dir;
+  if (newIdx < 0 || newIdx >= versions.length) return;
+  msg.dataset.currentVersion = String(newIdx);
+
+  const msgText = msg.querySelector(".msg-text");
+  if (msgText) msgText.textContent = versions[newIdx];
+  actualizarNavVersiones(msg);
+
+  const box = document.getElementById("messages");
+  const allMsgs = Array.from(box.children);
+  const msgIdx = allMsgs.indexOf(msg);
+  for (let i = allMsgs.length - 1; i > msgIdx; i--) allMsgs[i].remove();
+
+  const userMsgs = Array.from(document.querySelectorAll(".msg.user"));
+  const userIdx = userMsgs.indexOf(msg);
+  let count = -1;
+  for (let i = 0; i < chatHistory.length; i++) {
+    if (chatHistory[i].role === "user") count++;
+    if (count === userIdx) { chatHistory = chatHistory.slice(0, i); break; }
+  }
+  chatHistory.push({ role: "user", content: versions[newIdx] });
+
+  const typing = document.createElement("div");
+  typing.className = "msg bot typing";
+  typing.textContent = "IA escribiendo...";
+  box.appendChild(typing);
+  box.scrollTop = box.scrollHeight;
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: versions[newIdx], mode, uid: currentUser.uid, history: chatHistory.slice(-15) })
+    });
+    const data = await res.json();
+    typing.remove();
+    addMessage(data.reply, "bot");
+    chatHistory.push({ role: "assistant", content: data.reply });
+  } catch(e) {
+    typing.remove();
+    addMessage("⚠️ Error al responder.", "bot error");
+  }
 };
 </script>
 
