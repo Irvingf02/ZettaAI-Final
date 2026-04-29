@@ -5750,8 +5750,8 @@ function addMessage(text, role, extra = "") {
     } else {
       actions.innerHTML = `
         <button title="Copiar" onclick="copiarMensaje(this)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.95rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x1F4CB;</button>
-        <button title="Me gusta" onclick="toggleReaccion(this,'like')" style="background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 4px;border-radius:4px;transition:all 0.2s;">&#x1F44D;</button>
-        <button title="No me gusta" onclick="toggleReaccion(this,'dislike')" style="background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 4px;border-radius:4px;transition:all 0.2s;">&#x1F44E;</button>
+        <button title="Me gusta" onclick="window.abrirValoracion('positiva')" style="background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 4px;border-radius:4px;transition:all 0.2s;">&#x1F44D;</button>
+        <button title="No me gusta" onclick="window.abrirValoracion('negativa')" style="background:none;border:none;cursor:pointer;font-size:0.95rem;padding:2px 4px;border-radius:4px;transition:all 0.2s;">&#x1F44E;</button>
         <button title="Reintentar" onclick="reintentarMensaje(this)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:1rem;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='var(--text,#fff)'" onmouseout="this.style.color='var(--muted,#888)'">&#x21BA;</button>
       `;
     }
@@ -6317,6 +6317,22 @@ function restaurarReacciones() {
     }
   });
 }
+
+window.abrirValoracion = function(tipo) {
+  const modal = document.getElementById("modal-valoracion");
+  const positiva = document.getElementById("valoracion-positiva");
+  const negativa = document.getElementById("valoracion-negativa");
+  if (tipo === "positiva") {
+    positiva.style.display = "block";
+    negativa.style.display = "none";
+  } else {
+    positiva.style.display = "none";
+    negativa.style.display = "block";
+  }
+  modal.style.display = "flex";
+  document.getElementById("valoracion-input").value = "";
+  document.getElementById("valoracion-detalle").value = "";
+};
 </script>
 
 <!-- Modal eliminar chat -->
@@ -6346,6 +6362,38 @@ function restaurarReacciones() {
       <div style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:0.95rem;color:#fff;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='none'">
         <span>&#x2139;&#xFE0F;</span> Obtener más información
       </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal valoración -->
+<div id="modal-valoracion" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:99999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:28px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+    <!-- Positiva -->
+    <div id="valoracion-positiva">
+      <h3 style="margin:0 0 8px;font-size:1.1rem;color:#111;">Dar valoración positiva</h3>
+      <p style="margin:0 0 14px;font-size:0.9rem;color:#555;">Por favor, proporcione detalles: (opcional)</p>
+      <textarea id="valoracion-input" placeholder="¿Qué le pareció satisfactorio de esta respuesta?" style="width:100%;padding:12px;border-radius:8px;border:2px solid #4f8ef7;font-size:0.9rem;resize:none;height:90px;box-sizing:border-box;outline:none;"></textarea>
+    </div>
+    <!-- Negativa -->
+    <div id="valoracion-negativa" style="display:none;">
+      <h3 style="margin:0 0 8px;font-size:1.1rem;color:#111;">Dar valoración negativa</h3>
+      <p style="margin:0 0 8px;font-size:0.9rem;color:#555;">¿Qué tipo de problema desea reportar? (opcional)</p>
+      <select style="width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;font-size:0.9rem;margin-bottom:12px;">
+        <option>Seleccionar...</option>
+        <option>Información incorrecta</option>
+        <option>Respuesta incompleta</option>
+        <option>Respuesta inapropiada</option>
+        <option>Otro</option>
+      </select>
+      <p style="margin:0 0 8px;font-size:0.9rem;color:#555;">Por favor, proporcione detalles: (opcional)</p>
+      <textarea id="valoracion-detalle" placeholder="¿Qué aspectos de esta respuesta no le resultaron satisfactorios?" style="width:100%;padding:12px;border-radius:8px;border:1px solid #ccc;font-size:0.9rem;resize:none;height:80px;box-sizing:border-box;outline:none;"></textarea>
+    </div>
+    <p style="font-size:0.78rem;color:#888;margin:14px 0;">Al enviar este informe, se enviará toda la conversación actual a Anthropic para mejorar nuestros modelos en el futuro.</p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="document.getElementById('modal-valoracion').style.display='none'" style="padding:10px 20px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:0.9rem;">Cancelar</button>
+      <button onclick="document.getElementById('modal-valoracion').style.display='none'" style="padding:10px 20px;border-radius:8px;border:none;background:#111;color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600;">Enviar</button>
     </div>
   </div>
 </div>
