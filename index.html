@@ -6273,25 +6273,26 @@ window.toggleReaccion = function(btn, tipo) {
   const idx = allBots.indexOf(msg);
   if (idx === -1) return;
 
+  // Encontrar índice correcto en chatHistory contando solo mensajes assistant
+  let count = -1, histIdx = -1;
+  for (let i = 0; i < chatHistory.length; i++) {
+    if (chatHistory[i].role === "assistant") { count++; if (count === idx) { histIdx = i; break; } }
+  }
+
   if (btn.dataset.on) {
-    // Quitar reacción
     btn.dataset.on = "";
     btn.style.background = "none";
     btn.style.transform = "scale(1)";
-    if (chatHistory[idx * 2 + 1]) chatHistory[idx * 2 + 1].reaccion = null;
+    if (histIdx >= 0) delete chatHistory[histIdx].reaccion;
   } else {
-    // Quitar reacción del otro botón primero
-    const otherBtns = msg.querySelectorAll("button[title='Me gusta'], button[title='No me gusta']");
-    otherBtns.forEach(b => { b.dataset.on = ""; b.style.background = "none"; b.style.transform = "scale(1)"; });
-    // Activar este
+    msg.querySelectorAll("button[title='Me gusta'], button[title='No me gusta']").forEach(b => { b.dataset.on = ""; b.style.background = "none"; b.style.transform = "scale(1)"; });
     btn.dataset.on = "1";
     btn.style.background = tipo === "like" ? "rgba(76,175,80,0.2)" : "rgba(231,76,60,0.2)";
     btn.style.borderRadius = "6px";
     btn.style.transform = "scale(1.2)";
-    if (chatHistory[idx * 2 + 1]) chatHistory[idx * 2 + 1].reaccion = tipo;
+    if (histIdx >= 0) chatHistory[histIdx].reaccion = tipo;
   }
 
-  // Guardar en Supabase
   if (currentUser && !currentUser.isAnonymous && activeChatId) {
     fetch(`${BACKEND_URL}/chats`, {
       method: "POST",
@@ -6303,19 +6304,25 @@ window.toggleReaccion = function(btn, tipo) {
 
 function restaurarReacciones() {
   const allBots = document.querySelectorAll(".msg.bot");
-  allBots.forEach((msg, idx) => {
-    const histIdx = idx * 2 + 1;
-    if (chatHistory[histIdx]?.reaccion) {
-      const tipo = chatHistory[histIdx].reaccion;
-      const btn = msg.querySelector(`button[title="${tipo === 'like' ? 'Me gusta' : 'No me gusta'}"]`);
-      if (btn) {
-        btn.dataset.on = "1";
-        btn.style.background = tipo === "like" ? "rgba(76,175,80,0.2)" : "rgba(231,76,60,0.2)";
-        btn.style.borderRadius = "6px";
-        btn.style.transform = "scale(1.2)";
+  let botCount = 0;
+  for (let i = 0; i < chatHistory.length; i++) {
+    if (chatHistory[i].role === "assistant") {
+      if (chatHistory[i].reaccion) {
+        const msg = allBots[botCount];
+        if (msg) {
+          const tipo = chatHistory[i].reaccion;
+          const btn = msg.querySelector(`button[title="${tipo === 'like' ? 'Me gusta' : 'No me gusta'}"]`);
+          if (btn) {
+            btn.dataset.on = "1";
+            btn.style.background = tipo === "like" ? "rgba(76,175,80,0.2)" : "rgba(231,76,60,0.2)";
+            btn.style.borderRadius = "6px";
+            btn.style.transform = "scale(1.2)";
+          }
+        }
       }
+      botCount++;
     }
-  });
+  }
 }
 </script>
 
