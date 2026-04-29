@@ -5473,7 +5473,7 @@ function loadSpecificChat(chatId, messages) {
     addMessage(m.content, m.role === "user" ? "user" : "bot");
     chatHistory.push(m);
   });
-  setTimeout(restaurarReacciones, 100);
+  setTimeout(restaurarReacciones, 500);
 }
 
 const MODOS = {
