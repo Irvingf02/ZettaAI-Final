@@ -5798,8 +5798,12 @@ window.reintentarMensaje = function(btn) {
 window.editarMensaje = function(btn) {
   const msg = btn.closest(".msg");
   const text = getMsgText(msg);
+  const box = document.getElementById("messages");
 
-  // Crear editor inline
+  // Ocultar contenido del msg sin moverlo del DOM
+  Array.from(msg.childNodes).forEach(n => { if(n.style) n.style.display = "none"; });
+
+  // Crear editor y agregarlo dentro del mismo msg
   const editor = document.createElement("div");
   editor.style.cssText = "display:flex;flex-direction:column;gap:8px;width:100%;";
   editor.innerHTML = `
@@ -5812,35 +5816,37 @@ window.editarMensaje = function(btn) {
       <button class="edit-save" style="padding:8px 18px;border-radius:8px;border:none;background:var(--accent,#6c63ff);color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600;">Guardar</button>
     </div>
   `;
-
-  // Reemplazar el contenido del mensaje con el editor
-  msg.textContent = "";
   msg.appendChild(editor);
 
   const textarea = editor.querySelector("textarea");
   textarea.focus();
   textarea.setSelectionRange(textarea.value.length, textarea.value.length);
 
-  // Cancelar - restaurar texto original
+  // Cancelar - restaurar contenido original
   editor.querySelector(".edit-cancel").onclick = () => {
-    msg.textContent = text;
+    editor.remove();
+    Array.from(msg.childNodes).forEach(n => { if(n.style) n.style.display = ""; });
   };
 
-  // Guardar - editar en su lugar y responder justo debajo
+  // Guardar
   editor.querySelector(".edit-save").onclick = async () => {
     const newText = textarea.value.trim();
     if (!newText) return;
 
-    // Restaurar el mensaje con el nuevo texto en su lugar
-    msg.textContent = newText;
+    // Quitar editor y restaurar visibilidad
+    editor.remove();
+    Array.from(msg.childNodes).forEach(n => { if(n.style) n.style.display = ""; });
 
-    // Eliminar todos los mensajes que venían después de este
-    const box = document.getElementById("messages");
+    // Actualizar solo el texto
+    const msgText = msg.querySelector(".msg-text");
+    if (msgText) msgText.textContent = newText;
+
+    // Eliminar mensajes posteriores
     const allMsgs = Array.from(box.children);
     const msgIdx = allMsgs.indexOf(msg);
     for (let i = allMsgs.length - 1; i > msgIdx; i--) allMsgs[i].remove();
 
-    // Agregar typing justo después
+    // Agregar typing y respuesta justo después
     const typing = document.createElement("div");
     typing.className = "msg bot typing";
     typing.textContent = "IA escribiendo...";
