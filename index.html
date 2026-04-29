@@ -5798,9 +5798,43 @@ window.reintentarMensaje = function(btn) {
 window.editarMensaje = function(btn) {
   const msg = btn.closest(".msg");
   const text = getMsgText(msg);
-  document.getElementById("input").value = text;
-  document.getElementById("input").focus();
-  msg.remove();
+
+  // Crear editor inline
+  const editor = document.createElement("div");
+  editor.style.cssText = "display:flex;flex-direction:column;gap:8px;width:100%;";
+  editor.innerHTML = `
+    <textarea style="width:100%;padding:10px 14px;border-radius:8px;border:2px solid #4f8ef7;background:var(--surface,#1e1e2e);color:var(--text,#fff);font-size:0.88rem;line-height:1.55;resize:none;outline:none;box-sizing:border-box;min-height:60px;">${text}</textarea>
+    <div style="font-size:0.78rem;color:var(--muted,#888);display:flex;align-items:center;gap:6px;">
+      <span>ⓘ</span> Editar este mensaje creará una nueva rama de conversación.
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="edit-cancel" style="padding:8px 18px;border-radius:8px;border:1px solid var(--border,#444);background:transparent;color:var(--text,#fff);cursor:pointer;font-size:0.9rem;">Cancelar</button>
+      <button class="edit-save" style="padding:8px 18px;border-radius:8px;border:none;background:var(--accent,#6c63ff);color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600;">Guardar</button>
+    </div>
+  `;
+
+  // Reemplazar el contenido del mensaje con el editor
+  msg.textContent = "";
+  msg.appendChild(editor);
+
+  const textarea = editor.querySelector("textarea");
+  textarea.focus();
+  textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+  // Cancelar - restaurar texto original
+  editor.querySelector(".edit-cancel").onclick = () => {
+    msg.textContent = text;
+  };
+
+  // Guardar - enviar nuevo mensaje
+  editor.querySelector(".edit-save").onclick = () => {
+    const newText = textarea.value.trim();
+    if (!newText) return;
+    msg.textContent = text; // restaurar por si acaso
+    msg.remove();
+    document.getElementById("input").value = newText;
+    window.send();
+  };
 }
 
 let pendingFile = null; // Archivo pendiente para enviar con el siguiente mensaje
