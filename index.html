@@ -5846,6 +5846,16 @@ window.editarMensaje = function(btn) {
     const msgIdx = allMsgs.indexOf(msg);
     for (let i = allMsgs.length - 1; i > msgIdx; i--) allMsgs[i].remove();
 
+    // Actualizar chatHistory: cortar hasta el mensaje editado
+    const userMsgs = Array.from(document.querySelectorAll(".msg.user"));
+    const userIdx = userMsgs.indexOf(msg);
+    let count = -1;
+    for (let i = 0; i < chatHistory.length; i++) {
+      if (chatHistory[i].role === "user") count++;
+      if (count === userIdx) { chatHistory = chatHistory.slice(0, i); break; }
+    }
+    chatHistory.push({ role: "user", content: newText });
+
     // Agregar typing y respuesta justo después
     const typing = document.createElement("div");
     typing.className = "msg bot typing";
@@ -5863,6 +5873,15 @@ window.editarMensaje = function(btn) {
       typing.remove();
       addMessage(data.reply, "bot");
       chatHistory.push({ role: "assistant", content: data.reply });
+
+      // Guardar en Supabase
+      if (currentUser && !currentUser.isAnonymous && activeChatId) {
+        fetch(`${BACKEND_URL}/chats`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chatHistory[0]?.content?.substring(0,50) || "Chat", messages: chatHistory })
+        }).catch(e => console.warn("Error guardando:", e));
+      }
     } catch(e) {
       typing.remove();
       addMessage("⚠️ Error al responder.", "bot error");
