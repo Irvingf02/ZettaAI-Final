@@ -5470,8 +5470,15 @@ function loadSpecificChat(chatId, messages) {
   activeChatId = chatId;
   localStorage.setItem("zettax_last_chat", chatId);
   messages.forEach(m => {
-    addMessage(m.content, m.role === "user" ? "user" : "bot");
+    const div = addMessage(m.content, m.role === "user" ? "user" : "bot");
     chatHistory.push(m);
+    // Restaurar versiones si existen
+    if (m.role === "user" && m.versions && m.versions.length > 1) {
+      div.dataset.versions = JSON.stringify(m.versions);
+      div.dataset.replies = JSON.stringify(m.replies || []);
+      div.dataset.currentVersion = String(m.currentVersion || m.versions.length - 1);
+      setTimeout(() => actualizarNavVersiones(div), 100);
+    }
   });
   setTimeout(restaurarReacciones, 500);
 }
@@ -5846,12 +5853,6 @@ window.editarMensaje = function(btn) {
     const msgIdx = allMsgs.indexOf(msg);
     for (let i = allMsgs.length - 1; i > msgIdx; i--) allMsgs[i].remove();
 
-    // Guardar versiones del mensaje
-    const versions = JSON.parse(msg.dataset.versions || JSON.stringify([text]));
-    if (!versions.includes(newText)) versions.push(newText);
-    msg.dataset.versions = JSON.stringify(versions);
-    msg.dataset.currentVersion = String(versions.length - 1);
-
     // Actualizar chatHistory: cortar hasta el mensaje editado
     const userMsgs = Array.from(document.querySelectorAll(".msg.user"));
     const userIdx = userMsgs.indexOf(msg);
@@ -5880,8 +5881,24 @@ window.editarMensaje = function(btn) {
       addMessage(data.reply, "bot");
       chatHistory.push({ role: "assistant", content: data.reply });
 
-      // Mostrar navegador de versiones
+      // Guardar versiones y reply en dataset
+      const versions = JSON.parse(msg.dataset.versions || JSON.stringify([text]));
+      if (!versions.includes(newText)) versions.push(newText);
+      msg.dataset.versions = JSON.stringify(versions);
+      const curVer = versions.length - 1;
+      msg.dataset.currentVersion = String(curVer);
+      const replies = JSON.parse(msg.dataset.replies || "[]");
+      replies[curVer] = data.reply;
+      msg.dataset.replies = JSON.stringify(replies);
       actualizarNavVersiones(msg);
+
+      // Guardar versiones en chatHistory
+      const lastUserIdx = chatHistory.map(m=>m.role).lastIndexOf("user");
+      if (lastUserIdx >= 0) {
+        chatHistory[lastUserIdx].versions = versions;
+        chatHistory[lastUserIdx].replies = replies;
+        chatHistory[lastUserIdx].currentVersion = curVer;
+      }
 
       // Guardar en Supabase
       if (currentUser && !currentUser.isAnonymous && activeChatId) {
@@ -6450,23 +6467,26 @@ function actualizarNavVersiones(msg) {
   `;
 }
 
-window.navegarVersion = async function(btn, dir) {
+window.navegarVersion = function(btn, dir) {
   const msg = btn.closest(".msg");
   const versions = JSON.parse(msg.dataset.versions || "[]");
+  const replies = JSON.parse(msg.dataset.replies || "[]");
   const current = parseInt(msg.dataset.currentVersion || "0");
   const newIdx = current + dir;
   if (newIdx < 0 || newIdx >= versions.length) return;
   msg.dataset.currentVersion = String(newIdx);
-
   const msgText = msg.querySelector(".msg-text");
   if (msgText) msgText.textContent = versions[newIdx];
   actualizarNavVersiones(msg);
 
+  // Eliminar respuesta actual y restaurar la guardada
   const box = document.getElementById("messages");
   const allMsgs = Array.from(box.children);
   const msgIdx = allMsgs.indexOf(msg);
   for (let i = allMsgs.length - 1; i > msgIdx; i--) allMsgs[i].remove();
+  if (replies[newIdx]) addMessage(replies[newIdx], "bot");
 
+  // Actualizar chatHistory
   const userMsgs = Array.from(document.querySelectorAll(".msg.user"));
   const userIdx = userMsgs.indexOf(msg);
   let count = -1;
@@ -6475,27 +6495,7 @@ window.navegarVersion = async function(btn, dir) {
     if (count === userIdx) { chatHistory = chatHistory.slice(0, i); break; }
   }
   chatHistory.push({ role: "user", content: versions[newIdx] });
-
-  const typing = document.createElement("div");
-  typing.className = "msg bot typing";
-  typing.textContent = "IA escribiendo...";
-  box.appendChild(typing);
-  box.scrollTop = box.scrollHeight;
-
-  try {
-    const res = await fetch(`${BACKEND_URL}/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: versions[newIdx], mode, uid: currentUser.uid, history: chatHistory.slice(-15) })
-    });
-    const data = await res.json();
-    typing.remove();
-    addMessage(data.reply, "bot");
-    chatHistory.push({ role: "assistant", content: data.reply });
-  } catch(e) {
-    typing.remove();
-    addMessage("⚠️ Error al responder.", "bot error");
-  }
+  if (replies[newIdx]) chatHistory.push({ role: "assistant", content: replies[newIdx] });
 };
 </script>
 
