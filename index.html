@@ -5469,24 +5469,14 @@ function loadSpecificChat(chatId, messages) {
   chatHistory = [];
   activeChatId = chatId;
   localStorage.setItem("zettax_last_chat", chatId);
-  const renderedDivs = [];
   messages.forEach(m => {
     const div = addMessage(m.content, m.role === "user" ? "user" : "bot");
     chatHistory.push(m);
-    renderedDivs.push({ div, m });
-  });
-  renderedDivs.forEach(({ div, m }, i) => {
+    // Restaurar versiones si existen
     if (m.role === "user" && m.versions && m.versions.length > 1) {
-      const replies = m.replies ? [...m.replies] : [];
-      const curVer = m.currentVersion != null ? m.currentVersion : m.versions.length - 1;
-      // Solo llenar replies[curVer] si no vino ya guardado desde Supabase
-      const nextEntry = renderedDivs[i + 1];
-      if (nextEntry && nextEntry.m.role === "assistant" && !replies[curVer]) {
-        replies[curVer] = nextEntry.m.content;
-      }
       div.dataset.versions = JSON.stringify(m.versions);
-      div.dataset.replies = JSON.stringify(replies);
-      div.dataset.currentVersion = String(curVer);
+      div.dataset.replies = JSON.stringify(m.replies || []);
+      div.dataset.currentVersion = String(m.currentVersion || m.versions.length - 1);
       setTimeout(() => actualizarNavVersiones(div), 100);
     }
   });
@@ -5858,13 +5848,18 @@ window.editarMensaje = function(btn) {
     const msgText = msg.querySelector(".msg-text");
     if (msgText) msgText.textContent = newText;
 
-    // Guardar reply original del DOM antes de eliminar mensajes
+    // Guardar respuesta original (versión 0) antes de eliminar mensajes
     const allMsgs = Array.from(box.children);
     const msgIdx = allMsgs.indexOf(msg);
-    const botMsgActual = allMsgs[msgIdx + 1];
-    const originalBotReply = botMsgActual && botMsgActual.classList.contains("bot")
-      ? (botMsgActual.querySelector(".msg-text")?.textContent || "")
-      : "";
+    const existingReply = allMsgs[msgIdx + 1];
+    if (existingReply && existingReply.classList.contains("bot")) {
+      const repliesData = JSON.parse(msg.dataset.replies || "[]");
+      if (!repliesData[0]) {
+        const replyText = existingReply.querySelector(".msg-text");
+        repliesData[0] = replyText ? replyText.textContent : existingReply.textContent.trim();
+        msg.dataset.replies = JSON.stringify(repliesData);
+      }
+    }
 
     // Eliminar mensajes posteriores
     for (let i = allMsgs.length - 1; i > msgIdx; i--) allMsgs[i].remove();
@@ -5904,10 +5899,17 @@ window.editarMensaje = function(btn) {
       const curVer = versions.length - 1;
       msg.dataset.currentVersion = String(curVer);
       const replies = JSON.parse(msg.dataset.replies || "[]");
-      // Guardar reply original (version 0) usando el texto del DOM capturado antes de eliminar
-      if ((replies[0] === undefined || replies[0] === null || replies[0] === "") && originalBotReply) {
-        replies[0] = originalBotReply;
+
+      // Guardar respuesta de la versión anterior (la que había antes de editar)
+      if (curVer === 1 && !replies[0]) {
+        const allMsgsBefore = Array.from(document.getElementById("messages").children);
+        const msgIdxBefore = allMsgsBefore.indexOf(msg);
+        // Buscar la última respuesta bot antes del mensaje actual en el DOM antes de que se eliminara
+        // Ya fue eliminada, así que la tomamos de chatHistory
+        const prevAssistant = chatHistory.filter(m => m.role === "assistant");
+        if (prevAssistant.length > 0) replies[0] = prevAssistant[prevAssistant.length - 1].content;
       }
+
       replies[curVer] = data.reply;
       msg.dataset.replies = JSON.stringify(replies);
       actualizarNavVersiones(msg);
@@ -6494,40 +6496,15 @@ window.navegarVersion = function(btn, dir) {
   const current = parseInt(msg.dataset.currentVersion || "0");
   const newIdx = current + dir;
   if (newIdx < 0 || newIdx >= versions.length) return;
-
-  const box = document.getElementById("messages");
-  const allMsgs = Array.from(box.children);
-  const msgIdx = allMsgs.indexOf(msg);
-
-  // Guardar respuesta actual antes de navegar
-  const nextMsg = allMsgs[msgIdx + 1];
-  if (nextMsg && nextMsg.classList.contains("bot")) {
-    const replyText = nextMsg.querySelector(".msg-text");
-    const replyContent = replyText ? replyText.textContent : "";
-    if (replyContent) {
-      replies[current] = replyContent;
-    } else {
-      // Recuperar de chatHistory si el DOM no tiene contenido
-      const userMsgsTmp = Array.from(document.querySelectorAll(".msg.user"));
-      const userIdxTmp = userMsgsTmp.indexOf(msg);
-      let countTmp = -1;
-      for (let j = 0; j < chatHistory.length; j++) {
-        if (chatHistory[j].role === "user") countTmp++;
-        if (countTmp === userIdxTmp && chatHistory[j+1] && chatHistory[j+1].role === "assistant") {
-          replies[current] = chatHistory[j+1].content;
-          break;
-        }
-      }
-    }
-    msg.dataset.replies = JSON.stringify(replies);
-  }
-
   msg.dataset.currentVersion = String(newIdx);
   const msgText = msg.querySelector(".msg-text");
   if (msgText) msgText.textContent = versions[newIdx];
   actualizarNavVersiones(msg);
 
   // Eliminar respuesta actual y restaurar la guardada
+  const box = document.getElementById("messages");
+  const allMsgs = Array.from(box.children);
+  const msgIdx = allMsgs.indexOf(msg);
   for (let i = allMsgs.length - 1; i > msgIdx; i--) allMsgs[i].remove();
   if (replies[newIdx]) addMessage(replies[newIdx], "bot");
 
@@ -6539,24 +6516,8 @@ window.navegarVersion = function(btn, dir) {
     if (chatHistory[i].role === "user") count++;
     if (count === userIdx) { chatHistory = chatHistory.slice(0, i); break; }
   }
-  const newUserEntry = { role: "user", content: versions[newIdx], versions: versions, replies: JSON.parse(msg.dataset.replies), currentVersion: newIdx };
-  chatHistory.push(newUserEntry);
+  chatHistory.push({ role: "user", content: versions[newIdx] });
   if (replies[newIdx]) chatHistory.push({ role: "assistant", content: replies[newIdx] });
-
-  // Actualizar replies en chatHistory y guardar en Supabase
-  const lastUserIdx = chatHistory.map(m=>m.role).lastIndexOf("user");
-  if (lastUserIdx >= 0) {
-    chatHistory[lastUserIdx].versions = versions;
-    chatHistory[lastUserIdx].replies = JSON.parse(msg.dataset.replies);
-    chatHistory[lastUserIdx].currentVersion = newIdx;
-  }
-  if (currentUser && !currentUser.isAnonymous && activeChatId) {
-    fetch(`${BACKEND_URL}/chats`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chatHistory[0]?.content?.substring(0,50) || "Chat", messages: chatHistory })
-    }).catch(e => console.warn("Error:", e));
-  }
 };
 </script>
 
