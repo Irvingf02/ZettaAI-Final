@@ -3652,6 +3652,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const BACKEND_URL = "https://zettax-ai-pnhu.vercel.app/api";
+window._getBackendUrl = () => BACKEND_URL;
 
 const LIMITES = {
   chat:    20,
@@ -6429,6 +6430,9 @@ window.toggleReaccion = function(btn, tipo) {
   }
 
   // Guardar en Supabase
+  const currentUser = window._getCurrentUser ? window._getCurrentUser() : null;
+  const activeChatId = window._getActiveChatId ? window._getActiveChatId() : null;
+  const BACKEND_URL = window._getBackendUrl ? window._getBackendUrl() : '';
   if (currentUser && !currentUser.isAnonymous && activeChatId) {
     fetch(`${BACKEND_URL}/chats`, {
       method: "POST",
