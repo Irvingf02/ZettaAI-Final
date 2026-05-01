@@ -3682,6 +3682,8 @@ let isPremium   = false;
 let userPlan    = "free";
 let mode        = "chat";
 let chatHistory = [];
+window._getChatHistory = () => chatHistory;
+window._setChatHistory = (h) => { chatHistory = h; };
 let activeChatId = null;
 let contadores  = { chat: 0, resumen: 0, ideas: 0, tarea: 0, imagen: 0, video: 0, codigo: 0 };
 let fechaHoy    = new Date().toISOString().slice(0, 10);
@@ -5479,10 +5481,10 @@ function loadSpecificChat(chatId, messages) {
     if (m.role === "user" && m.versions && m.versions.length > 1) {
       const replies = m.replies ? [...m.replies] : [];
       const curVer = m.currentVersion != null ? m.currentVersion : m.versions.length - 1;
+      // Guardar la respuesta actual en su slot para que no se pierda al navegar
       const nextEntry = renderedDivs[i + 1];
       if (nextEntry && nextEntry.m.role === "assistant") {
-        // Solo llenar el slot si no viene ya guardado de Supabase
-        if (!replies[curVer]) replies[curVer] = nextEntry.m.content;
+        replies[curVer] = nextEntry.m.content;
       }
       div.dataset.versions = JSON.stringify(m.versions);
       div.dataset.replies = JSON.stringify(replies);
@@ -5731,6 +5733,7 @@ window.getMsgText = function(msg) {
 }
 
 function addMessage(text, role, extra = "") {
+  window._addMessage = addMessage;
   const div = document.createElement("div");
   div.className = `msg ${role}`;
 
@@ -6434,6 +6437,7 @@ window.toggleReaccion = function(btn, tipo) {
 };
 
 function restaurarReacciones() {
+  const chatHistory = window._getChatHistory ? window._getChatHistory() : [];
   const allBots = document.querySelectorAll(".msg.bot");
   allBots.forEach((msg, idx) => {
     const histIdx = idx * 2 + 1;
@@ -6529,9 +6533,10 @@ window.navegarVersion = function(btn, dir) {
 
   // Eliminar respuesta actual y restaurar la guardada
   for (let i = allMsgs.length - 1; i > msgIdx; i--) allMsgs[i].remove();
-  if (replies[newIdx]) addMessage(replies[newIdx], "bot");
+  if (replies[newIdx]) window._addMessage(replies[newIdx], "bot");
 
   // Actualizar chatHistory
+  let chatHistory = window._getChatHistory();
   const userMsgs = Array.from(document.querySelectorAll(".msg.user"));
   const userIdx = userMsgs.indexOf(msg);
   let count = -1;
@@ -6542,6 +6547,7 @@ window.navegarVersion = function(btn, dir) {
   const newUserEntry = { role: "user", content: versions[newIdx], versions: versions, replies: JSON.parse(msg.dataset.replies), currentVersion: newIdx };
   chatHistory.push(newUserEntry);
   if (replies[newIdx]) chatHistory.push({ role: "assistant", content: replies[newIdx] });
+  window._setChatHistory(chatHistory);
 
   // Actualizar replies en chatHistory y guardar en Supabase
   const lastUserIdx = chatHistory.map(m=>m.role).lastIndexOf("user");
