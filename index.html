@@ -5858,22 +5858,15 @@ window.editarMensaje = function(btn) {
     const msgText = msg.querySelector(".msg-text");
     if (msgText) msgText.textContent = newText;
 
-    // Guardar respuesta original antes de cortar chatHistory
-    const userMsgsPre = Array.from(document.querySelectorAll(".msg.user"));
-    const userIdxPre = userMsgsPre.indexOf(msg);
-    let countPre = -1;
-    let originalReply = null;
-    for (let i = 0; i < chatHistory.length; i++) {
-      if (chatHistory[i].role === "user") countPre++;
-      if (countPre === userIdxPre && chatHistory[i+1] && chatHistory[i+1].role === "assistant") {
-        originalReply = chatHistory[i+1].content;
-        break;
-      }
-    }
-
-    // Eliminar mensajes posteriores
+    // Guardar reply original del DOM antes de eliminar mensajes
     const allMsgs = Array.from(box.children);
     const msgIdx = allMsgs.indexOf(msg);
+    const botMsgActual = allMsgs[msgIdx + 1];
+    const originalBotReply = botMsgActual && botMsgActual.classList.contains("bot")
+      ? (botMsgActual.querySelector(".msg-text")?.textContent || "")
+      : "";
+
+    // Eliminar mensajes posteriores
     for (let i = allMsgs.length - 1; i > msgIdx; i--) allMsgs[i].remove();
 
     // Actualizar chatHistory: cortar hasta el mensaje editado
@@ -5911,9 +5904,9 @@ window.editarMensaje = function(btn) {
       const curVer = versions.length - 1;
       msg.dataset.currentVersion = String(curVer);
       const replies = JSON.parse(msg.dataset.replies || "[]");
-      // Guardar reply original (version 0) usando el reply guardado antes de cortar chatHistory
-      if ((replies[0] === undefined || replies[0] === null || replies[0] === "") && originalReply) {
-        replies[0] = originalReply;
+      // Guardar reply original (version 0) usando el texto del DOM capturado antes de eliminar
+      if ((replies[0] === undefined || replies[0] === null || replies[0] === "") && originalBotReply) {
+        replies[0] = originalBotReply;
       }
       replies[curVer] = data.reply;
       msg.dataset.replies = JSON.stringify(replies);
