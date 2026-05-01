@@ -6474,15 +6474,25 @@ window.navegarVersion = function(btn, dir) {
   const current = parseInt(msg.dataset.currentVersion || "0");
   const newIdx = current + dir;
   if (newIdx < 0 || newIdx >= versions.length) return;
+
+  const box = document.getElementById("messages");
+  const allMsgs = Array.from(box.children);
+  const msgIdx = allMsgs.indexOf(msg);
+
+  // Guardar respuesta actual antes de navegar
+  const nextMsg = allMsgs[msgIdx + 1];
+  if (nextMsg && nextMsg.classList.contains("bot")) {
+    const replyText = nextMsg.querySelector(".msg-text");
+    replies[current] = replyText ? replyText.textContent : nextMsg.textContent.trim();
+    msg.dataset.replies = JSON.stringify(replies);
+  }
+
   msg.dataset.currentVersion = String(newIdx);
   const msgText = msg.querySelector(".msg-text");
   if (msgText) msgText.textContent = versions[newIdx];
   actualizarNavVersiones(msg);
 
   // Eliminar respuesta actual y restaurar la guardada
-  const box = document.getElementById("messages");
-  const allMsgs = Array.from(box.children);
-  const msgIdx = allMsgs.indexOf(msg);
   for (let i = allMsgs.length - 1; i > msgIdx; i--) allMsgs[i].remove();
   if (replies[newIdx]) addMessage(replies[newIdx], "bot");
 
@@ -6496,6 +6506,21 @@ window.navegarVersion = function(btn, dir) {
   }
   chatHistory.push({ role: "user", content: versions[newIdx] });
   if (replies[newIdx]) chatHistory.push({ role: "assistant", content: replies[newIdx] });
+
+  // Actualizar replies en chatHistory y guardar en Supabase
+  const lastUserIdx = chatHistory.map(m=>m.role).lastIndexOf("user");
+  if (lastUserIdx >= 0) {
+    chatHistory[lastUserIdx].versions = versions;
+    chatHistory[lastUserIdx].replies = JSON.parse(msg.dataset.replies);
+    chatHistory[lastUserIdx].currentVersion = newIdx;
+  }
+  if (currentUser && !currentUser.isAnonymous && activeChatId) {
+    fetch(`${BACKEND_URL}/chats`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chatHistory[0]?.content?.substring(0,50) || "Chat", messages: chatHistory })
+    }).catch(e => console.warn("Error:", e));
+  }
 };
 </script>
 
