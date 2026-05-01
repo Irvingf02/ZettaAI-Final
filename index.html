@@ -5898,6 +5898,15 @@ window.editarMensaje = function(btn) {
       const curVer = versions.length - 1;
       msg.dataset.currentVersion = String(curVer);
       const replies = JSON.parse(msg.dataset.replies || "[]");
+      // Guardar reply original (version 0) si aun no existe
+      if (replies[0] === undefined || replies[0] === null || replies[0] === "") {
+        for (let j = 0; j < chatHistory.length; j++) {
+          if (chatHistory[j].role === "user" && chatHistory[j].content === versions[0] && chatHistory[j+1] && chatHistory[j+1].role === "assistant") {
+            replies[0] = chatHistory[j+1].content;
+            break;
+          }
+        }
+      }
       replies[curVer] = data.reply;
       msg.dataset.replies = JSON.stringify(replies);
       actualizarNavVersiones(msg);
@@ -6493,7 +6502,22 @@ window.navegarVersion = function(btn, dir) {
   const nextMsg = allMsgs[msgIdx + 1];
   if (nextMsg && nextMsg.classList.contains("bot")) {
     const replyText = nextMsg.querySelector(".msg-text");
-    replies[current] = replyText ? replyText.textContent : nextMsg.textContent.trim();
+    const replyContent = replyText ? replyText.textContent : "";
+    if (replyContent) {
+      replies[current] = replyContent;
+    } else {
+      // Recuperar de chatHistory si el DOM no tiene contenido
+      const userMsgsTmp = Array.from(document.querySelectorAll(".msg.user"));
+      const userIdxTmp = userMsgsTmp.indexOf(msg);
+      let countTmp = -1;
+      for (let j = 0; j < chatHistory.length; j++) {
+        if (chatHistory[j].role === "user") countTmp++;
+        if (countTmp === userIdxTmp && chatHistory[j+1] && chatHistory[j+1].role === "assistant") {
+          replies[current] = chatHistory[j+1].content;
+          break;
+        }
+      }
+    }
     msg.dataset.replies = JSON.stringify(replies);
   }
 
