@@ -5858,6 +5858,19 @@ window.editarMensaje = function(btn) {
     const msgText = msg.querySelector(".msg-text");
     if (msgText) msgText.textContent = newText;
 
+    // Guardar respuesta original antes de cortar chatHistory
+    const userMsgsPre = Array.from(document.querySelectorAll(".msg.user"));
+    const userIdxPre = userMsgsPre.indexOf(msg);
+    let countPre = -1;
+    let originalReply = null;
+    for (let i = 0; i < chatHistory.length; i++) {
+      if (chatHistory[i].role === "user") countPre++;
+      if (countPre === userIdxPre && chatHistory[i+1] && chatHistory[i+1].role === "assistant") {
+        originalReply = chatHistory[i+1].content;
+        break;
+      }
+    }
+
     // Eliminar mensajes posteriores
     const allMsgs = Array.from(box.children);
     const msgIdx = allMsgs.indexOf(msg);
@@ -5898,14 +5911,9 @@ window.editarMensaje = function(btn) {
       const curVer = versions.length - 1;
       msg.dataset.currentVersion = String(curVer);
       const replies = JSON.parse(msg.dataset.replies || "[]");
-      // Guardar reply original (version 0) si aun no existe
-      if (replies[0] === undefined || replies[0] === null || replies[0] === "") {
-        for (let j = 0; j < chatHistory.length; j++) {
-          if (chatHistory[j].role === "user" && chatHistory[j].content === versions[0] && chatHistory[j+1] && chatHistory[j+1].role === "assistant") {
-            replies[0] = chatHistory[j+1].content;
-            break;
-          }
-        }
+      // Guardar reply original (version 0) usando el reply guardado antes de cortar chatHistory
+      if ((replies[0] === undefined || replies[0] === null || replies[0] === "") && originalReply) {
+        replies[0] = originalReply;
       }
       replies[curVer] = data.reply;
       msg.dataset.replies = JSON.stringify(replies);
