@@ -5469,14 +5469,24 @@ function loadSpecificChat(chatId, messages) {
   chatHistory = [];
   activeChatId = chatId;
   localStorage.setItem("zettax_last_chat", chatId);
+  const renderedDivs = [];
   messages.forEach(m => {
     const div = addMessage(m.content, m.role === "user" ? "user" : "bot");
     chatHistory.push(m);
-    // Restaurar versiones si existen
+    renderedDivs.push({ div, m });
+  });
+  renderedDivs.forEach(({ div, m }, i) => {
     if (m.role === "user" && m.versions && m.versions.length > 1) {
+      const replies = m.replies ? [...m.replies] : [];
+      const curVer = m.currentVersion != null ? m.currentVersion : m.versions.length - 1;
+      // Guardar la respuesta actual en su slot para que no se pierda al navegar
+      const nextEntry = renderedDivs[i + 1];
+      if (nextEntry && nextEntry.m.role === "assistant") {
+        replies[curVer] = nextEntry.m.content;
+      }
       div.dataset.versions = JSON.stringify(m.versions);
-      div.dataset.replies = JSON.stringify(m.replies || []);
-      div.dataset.currentVersion = String(m.currentVersion || m.versions.length - 1);
+      div.dataset.replies = JSON.stringify(replies);
+      div.dataset.currentVersion = String(curVer);
       setTimeout(() => actualizarNavVersiones(div), 100);
     }
   });
