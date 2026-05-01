@@ -6538,7 +6538,8 @@ window.navegarVersion = function(btn, dir) {
     if (chatHistory[i].role === "user") count++;
     if (count === userIdx) { chatHistory = chatHistory.slice(0, i); break; }
   }
-  chatHistory.push({ role: "user", content: versions[newIdx] });
+  const newUserEntry = { role: "user", content: versions[newIdx], versions: versions, replies: JSON.parse(msg.dataset.replies), currentVersion: newIdx };
+  chatHistory.push(newUserEntry);
   if (replies[newIdx]) chatHistory.push({ role: "assistant", content: replies[newIdx] });
 
   // Actualizar replies en chatHistory y guardar en Supabase
