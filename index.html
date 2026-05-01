@@ -3678,6 +3678,7 @@ const LIMITES_VIDEO = {
 };
 
 let currentUser = null;
+window._getCurrentUser = () => currentUser;
 let isPremium   = false;
 let userPlan    = "free";
 let mode        = "chat";
@@ -5925,8 +5926,7 @@ window.editarMensaje = function(btn) {
       }
 
       // Guardar en Supabase
-      const activeChatId = window._getActiveChatId ? window._getActiveChatId() : null;
-  if (currentUser && !currentUser.isAnonymous && activeChatId) {
+      if (currentUser && !currentUser.isAnonymous && activeChatId) {
         fetch(`${BACKEND_URL}/chats`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -6558,6 +6558,8 @@ window.navegarVersion = function(btn, dir) {
     chatHistory[lastUserIdx].replies = JSON.parse(msg.dataset.replies);
     chatHistory[lastUserIdx].currentVersion = newIdx;
   }
+  const currentUser = window._getCurrentUser ? window._getCurrentUser() : null;
+  const activeChatId = window._getActiveChatId ? window._getActiveChatId() : null;
   if (currentUser && !currentUser.isAnonymous && activeChatId) {
     fetch(`${BACKEND_URL}/chats`, {
       method: "POST",
