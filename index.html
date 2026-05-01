@@ -5479,9 +5479,9 @@ function loadSpecificChat(chatId, messages) {
     if (m.role === "user" && m.versions && m.versions.length > 1) {
       const replies = m.replies ? [...m.replies] : [];
       const curVer = m.currentVersion != null ? m.currentVersion : m.versions.length - 1;
-      // Guardar la respuesta actual en su slot para que no se pierda al navegar
+      // Solo llenar replies[curVer] si no vino ya guardado desde Supabase
       const nextEntry = renderedDivs[i + 1];
-      if (nextEntry && nextEntry.m.role === "assistant") {
+      if (nextEntry && nextEntry.m.role === "assistant" && !replies[curVer]) {
         replies[curVer] = nextEntry.m.content;
       }
       div.dataset.versions = JSON.stringify(m.versions);
