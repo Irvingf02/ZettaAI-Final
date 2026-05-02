@@ -6488,8 +6488,99 @@ function abrirMenuImagen(btn, prompt) {
 }
 
 function editarImagen(url) {
-  document.getElementById("input").value = "Edita esta imagen: " + url;
+  // Crear modal de edición
+  const existing = document.getElementById("modal-editar-imagen");
+  if (existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "modal-editar-imagen";
+  modal.style.cssText = "position:fixed;inset:0;background:#000;z-index:99999;display:flex;flex-direction:column;";
+
+  modal.innerHTML = `
+    <div style="display:flex;align-items:center;padding:16px;position:absolute;top:0;left:0;right:0;z-index:2;">
+      <button onclick="document.getElementById('modal-editar-imagen').remove()" style="background:rgba(40,40,40,0.8);border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;">&#x2190;</button>
+    </div>
+    <img src="${url}" style="width:100%;height:100%;object-fit:contain;" />
+    <div id="editar-img-bottom" style="position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:rgba(0,0,0,0.7);">
+      <div style="display:flex;gap:10px;margin-bottom:10px;">
+        <button onclick="editarImagenSeleccionarAreas('${url}')" style="flex:1;padding:10px;border-radius:20px;border:none;background:rgba(40,40,40,0.9);color:#fff;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;gap:6px;">&#x25CC; Seleccionar áreas</button>
+        <button onclick="editarImagenRelacion('${url}')" style="flex:1;padding:10px;border-radius:20px;border:none;background:rgba(40,40,40,0.9);color:#fff;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;gap:6px;">&#x2750; Cambiar relación</button>
+      </div>
+      <div style="display:flex;align-items:center;background:rgba(40,40,40,0.9);border-radius:24px;padding:10px 16px;">
+        <input id="editar-img-input" placeholder="Describir las ediciones" style="flex:1;background:none;border:none;color:#fff;font-size:0.95rem;outline:none;" />
+        <button onclick="editarImagenDescripcion('${url}')" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1.2rem;">&#x1F3A4;</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+function editarImagenDescripcion(url) {
+  const desc = document.getElementById("editar-img-input")?.value;
+  if (!desc) return;
+  document.getElementById("modal-editar-imagen")?.remove();
+  document.getElementById("input").value = desc + " (imagen de referencia: " + url + ")";
   document.getElementById("input").focus();
+}
+
+function editarImagenSeleccionarAreas(url) {
+  const modal = document.getElementById("modal-editar-imagen");
+  if (!modal) return;
+  const bottom = document.getElementById("editar-img-bottom");
+
+  // Mostrar canvas para seleccionar área
+  const existing = document.getElementById("editar-canvas-wrap");
+  if (existing) { existing.remove(); return; }
+
+  const wrap = document.createElement("div");
+  wrap.id = "editar-canvas-wrap";
+  wrap.style.cssText = "position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;background:#000;";
+  wrap.innerHTML = `
+    <p style="color:#fff;text-align:center;padding:16px;font-size:1rem;">Selecciona un área para editarla</p>
+    <div style="flex:1;position:relative;overflow:hidden;">
+      <img src="${url}" style="width:100%;height:100%;object-fit:contain;" />
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:16px;background:#000;">
+      <button onclick="document.getElementById('editar-canvas-wrap').remove()" style="flex:1;margin-right:8px;padding:12px;border-radius:24px;border:1px solid #555;background:none;color:#fff;cursor:pointer;font-size:0.95rem;">Cancelar</button>
+      <button style="width:40px;height:40px;border-radius:50%;border:none;background:#333;color:#fff;cursor:pointer;font-size:1rem;">&#x21BA;</button>
+      <button style="width:40px;height:40px;border-radius:50%;border:none;background:#333;color:#fff;cursor:pointer;font-size:1rem;">&#x21BB;</button>
+      <button style="flex:1;margin-left:8px;padding:12px;border-radius:24px;border:none;background:#555;color:#888;cursor:pointer;font-size:0.95rem;">Siguiente</button>
+    </div>
+  `;
+  modal.appendChild(wrap);
+}
+
+function editarImagenRelacion(url) {
+  const modal = document.getElementById("modal-editar-imagen");
+  if (!modal) return;
+
+  const existing = document.getElementById("editar-relacion-wrap");
+  if (existing) { existing.remove(); return; }
+
+  const opciones = [
+    { icon: "⬜", label: "Cuadrado 1:1" },
+    { icon: "▬", label: "Horizontal 5:4" },
+    { icon: "▯", label: "Historia 9:16" },
+    { icon: "━", label: "Ultrapanorámico 21:9" },
+    { icon: "▭", label: "Pantalla panorámica..." },
+    { icon: "▬", label: "Horizontal 4:3" },
+    { icon: "▭", label: "Panorámico 3:2" },
+    { icon: "▮", label: "Estándar 4:5" },
+    { icon: "▯", label: "Vertical 3:4" },
+    { icon: "▯", label: "Alto 2:3" },
+  ];
+
+  const wrap = document.createElement("div");
+  wrap.id = "editar-relacion-wrap";
+  wrap.style.cssText = "position:absolute;bottom:0;left:0;right:0;z-index:4;background:rgba(30,30,30,0.97);border-radius:16px 16px 0 0;padding:8px 0 24px;";
+  wrap.innerHTML = opciones.map(o => `
+    <div onclick="document.getElementById('editar-relacion-wrap').remove()" style="display:flex;align-items:center;gap:16px;padding:14px 24px;cursor:pointer;color:#fff;font-size:1rem;">
+      <span style="font-size:1.1rem;">${o.icon}</span> ${o.label}
+    </div>
+  `).join("");
+
+  modal.appendChild(wrap);
 }
 
 async function compartirImagen(url) {
