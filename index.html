@@ -5923,8 +5923,20 @@ window.editarMensaje = function(btn) {
         const versionsImg = JSON.parse(msg.dataset.versions || JSON.stringify([text]));
         if (!versionsImg.includes(newText)) versionsImg.push(newText);
         msg.dataset.versions = JSON.stringify(versionsImg);
-        msg.dataset.currentVersion = String(versionsImg.length - 1);
-        if (!msg.dataset.replies) msg.dataset.replies = "[]";
+        const curVerImg = versionsImg.length - 1;
+        msg.dataset.currentVersion = String(curVerImg);
+        const repliesImg = JSON.parse(msg.dataset.replies || "[]");
+        if (!repliesImg[0]) {
+          const chatHistoryTmp = window._getChatHistory ? window._getChatHistory() : chatHistory;
+          for (let j = 0; j < chatHistoryTmp.length; j++) {
+            if (chatHistoryTmp[j].role === "assistant" && chatHistoryTmp[j].content && chatHistoryTmp[j].content.startsWith("🎨 Imagen generada: ")) {
+              repliesImg[0] = chatHistoryTmp[j].content;
+              break;
+            }
+          }
+        }
+        if (data.imageUrl) repliesImg[curVerImg] = "🎨 Imagen generada: " + data.imageUrl;
+        msg.dataset.replies = JSON.stringify(repliesImg);
         actualizarNavVersiones(msg);
         return;
       }
@@ -6545,11 +6557,13 @@ window.navegarVersion = function(btn, dir) {
   const nextMsg = allMsgs[msgIdx + 1];
   if (nextMsg && nextMsg.classList.contains("bot")) {
     const replyText = nextMsg.querySelector(".msg-text");
+    const replyImg = nextMsg.querySelector("img");
     const replyContent = replyText ? replyText.textContent : "";
     if (replyContent) {
       replies[current] = replyContent;
+    } else if (replyImg) {
+      replies[current] = "🎨 Imagen generada: " + replyImg.src;
     } else {
-      // Recuperar de chatHistory si el DOM no tiene contenido
       const userMsgsTmp = Array.from(document.querySelectorAll(".msg.user"));
       const userIdxTmp = userMsgsTmp.indexOf(msg);
       let countTmp = -1;
@@ -6571,7 +6585,25 @@ window.navegarVersion = function(btn, dir) {
 
   // Eliminar respuesta actual y restaurar la guardada
   for (let i = allMsgs.length - 1; i > msgIdx; i--) allMsgs[i].remove();
-  if (replies[newIdx]) window._addMessage(replies[newIdx], "bot");
+  if (replies[newIdx]) {
+    if (replies[newIdx].startsWith("🎨 Imagen generada: ")) {
+      const imgUrl = replies[newIdx].replace("🎨 Imagen generada: ", "");
+      const imgDiv = document.createElement("div");
+      imgDiv.className = "msg bot";
+      imgDiv.style.cssText = "position:relative;padding:0;overflow:hidden;border-radius:12px;background:transparent;border:none;";
+      const topBar = document.createElement("div");
+      topBar.style.cssText = "position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:linear-gradient(to bottom,rgba(0,0,0,0.6),transparent);z-index:2;border-radius:12px 12px 0 0;";
+      topBar.innerHTML = `<button onclick="this.closest('.msg').remove()" style="background:rgba(0,0,0,0.55);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">&#x2715;</button><div style="display:flex;gap:12px;"><a href="${imgUrl}" download="zettaxai-imagen.jpg" style="background:rgba(0,0,0,0.55);color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;text-decoration:none;">&#x2193;</a></div>`;
+      const img = document.createElement("img");
+      img.src = imgUrl;
+      img.style.cssText = "width:100%;border-radius:12px;display:block;";
+      imgDiv.appendChild(topBar);
+      imgDiv.appendChild(img);
+      document.getElementById("messages").appendChild(imgDiv);
+    } else {
+      window._addMessage(replies[newIdx], "bot");
+    }
+  }
 
   // Actualizar chatHistory
   let chatHistory = window._getChatHistory();
