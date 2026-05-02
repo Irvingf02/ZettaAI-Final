@@ -5506,7 +5506,7 @@ function loadSpecificChat(chatId, messages) {
       const nextEntry = renderedDivs[i + 1];
       if (nextEntry && nextEntry.m.role === "assistant") {
         if (!replies[curVer]) replies[curVer] = nextEntry.m.content;
-        if (!replies[0]) replies[0] = nextEntry.m.content;
+        // replies[0] solo se llena si viene de Supabase, no con la imagen actual
       }
       div.dataset.versions = JSON.stringify(m.versions);
       div.dataset.replies = JSON.stringify(replies);
