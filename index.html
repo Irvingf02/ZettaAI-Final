@@ -6551,42 +6551,68 @@ function editarImagenSeleccionarAreas(url) {
   `;
   modal.appendChild(wrap);
 
-  // Lógica de pincel para seleccionar áreas
+  // Lógica de punto arrastrable para seleccionar área
   const canvas = document.getElementById(canvasId);
   const img = document.getElementById("editar-sel-img");
   setTimeout(() => {
     canvas.width = img.offsetWidth;
     canvas.height = img.offsetHeight;
     const ctx = canvas.getContext("2d");
-    ctx.strokeStyle = "rgba(255,255,255,0.85)";
-    ctx.lineWidth = 28;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    let painting = false;
-    let lastX = 0, lastY = 0;
+    let dotX = canvas.width * 0.1;
+    let dotY = canvas.height * 0.5;
+    let dragging = false;
+
+    function drawDot() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Línea vertical
+      ctx.beginPath();
+      ctx.moveTo(dotX, dotY - 40);
+      ctx.lineTo(dotX, dotY + 40);
+      ctx.strokeStyle = "rgba(255,255,255,0.9)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      // Círculo
+      ctx.beginPath();
+      ctx.arc(dotX, dotY, 14, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,1)";
+      ctx.fill();
+    }
+
+    drawDot();
+
     const getPos = (e) => {
       const r = canvas.getBoundingClientRect();
       const touch = e.touches ? e.touches[0] : e;
       return [touch.clientX - r.left, touch.clientY - r.top];
     };
-    canvas.addEventListener("mousedown", (e) => { painting = true; [lastX, lastY] = getPos(e); });
-    canvas.addEventListener("touchstart", (e) => { e.preventDefault(); painting = true; [lastX, lastY] = getPos(e); });
-    canvas.addEventListener("mousemove", (e) => {
-      if (!painting) return;
+
+    const onStart = (e) => {
       const [x, y] = getPos(e);
-      ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
-      [lastX, lastY] = [x, y];
-    });
-    canvas.addEventListener("touchmove", (e) => {
-      e.preventDefault();
-      if (!painting) return;
+      const dist = Math.hypot(x - dotX, y - dotY);
+      if (dist < 30) { dragging = true; e.preventDefault && e.preventDefault(); }
+    };
+    const onMove = (e) => {
+      if (!dragging) return;
+      e.preventDefault && e.preventDefault();
       const [x, y] = getPos(e);
-      ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
-      [lastX, lastY] = [x, y];
-    });
-    canvas.addEventListener("mouseup", () => { painting = false; });
-    canvas.addEventListener("touchend", () => { painting = false; });
-    document.getElementById("editar-sel-undo").onclick = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+      dotX = Math.max(0, Math.min(canvas.width, x));
+      dotY = Math.max(0, Math.min(canvas.height, y));
+      drawDot();
+    };
+    const onEnd = () => { dragging = false; };
+
+    canvas.addEventListener("mousedown", onStart);
+    canvas.addEventListener("touchstart", onStart, { passive: false });
+    canvas.addEventListener("mousemove", onMove);
+    canvas.addEventListener("touchmove", onMove, { passive: false });
+    canvas.addEventListener("mouseup", onEnd);
+    canvas.addEventListener("touchend", onEnd);
+
+    document.getElementById("editar-sel-undo").onclick = () => {
+      dotX = canvas.width * 0.1;
+      dotY = canvas.height * 0.5;
+      drawDot();
+    };
   }, 100);
 }
 
