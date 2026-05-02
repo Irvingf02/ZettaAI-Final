@@ -5473,6 +5473,8 @@ function loadSpecificChat(chatId, messages) {
   chatHistory = [];
   activeChatId = chatId;
   sessionStorage.setItem("zettax_last_chat", chatId);
+  const savedMode = sessionStorage.getItem("zettax_last_mode");
+  if (savedMode && window.setMode) setTimeout(() => window.setMode(savedMode), 0);
   const renderedDivs = [];
   messages.forEach(m => {
     let div;
@@ -5528,6 +5530,7 @@ const MODOS = {
 window.setMode = (m) => {
   if (MODOS[m].premium && !isPremium) { showPaywall(); return; }
   mode = m;
+  sessionStorage.setItem("zettax_last_mode", m);
   document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
   document.getElementById("btn-" + m).classList.add("active");
   document.getElementById("modeEmoji").textContent = MODOS[m].emoji;
