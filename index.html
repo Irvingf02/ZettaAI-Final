@@ -5948,12 +5948,13 @@ window.editarMensaje = function(btn) {
         msg.dataset.currentVersion = String(curVerImg);
         const repliesImg = JSON.parse(msg.dataset.replies || "[]");
         if (!repliesImg[0]) {
-          const chatHistoryTmp = window._getChatHistory ? window._getChatHistory() : chatHistory;
-          for (let j = 0; j < chatHistoryTmp.length; j++) {
-            if (chatHistoryTmp[j].role === "assistant" && chatHistoryTmp[j].content && chatHistoryTmp[j].content.startsWith("🎨 Imagen generada: ")) {
-              repliesImg[0] = chatHistoryTmp[j].content;
-              break;
-            }
+          // Capturar imagen original del DOM antes de que se haya eliminado
+          const allMsgsTmp = Array.from(document.getElementById("messages").children);
+          const msgIdxTmp = allMsgsTmp.indexOf(msg);
+          const botOriginal = allMsgsTmp[msgIdxTmp + 1];
+          if (botOriginal && botOriginal.classList.contains("bot")) {
+            const imgEl = botOriginal.querySelector("img");
+            if (imgEl) repliesImg[0] = "🎨 Imagen generada: " + imgEl.src;
           }
         }
         if (data.imageUrl) repliesImg[curVerImg] = "🎨 Imagen generada: " + data.imageUrl;
