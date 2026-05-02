@@ -5959,6 +5959,28 @@ window.editarMensaje = function(btn) {
         if (data.imageUrl) repliesImg[curVerImg] = "🎨 Imagen generada: " + data.imageUrl;
         msg.dataset.replies = JSON.stringify(repliesImg);
         actualizarNavVersiones(msg);
+        // Guardar versiones y replies en chatHistory y Supabase
+        const chTmp = window._getChatHistory ? window._getChatHistory() : chatHistory;
+        const userMsgsTmp = Array.from(document.querySelectorAll(".msg.user"));
+        const userIdxTmp = userMsgsTmp.indexOf(msg);
+        let countTmp = -1;
+        for (let j = 0; j < chTmp.length; j++) {
+          if (chTmp[j].role === "user") countTmp++;
+          if (countTmp === userIdxTmp) {
+            chTmp[j].versions = versionsImg;
+            chTmp[j].replies = repliesImg;
+            chTmp[j].currentVersion = curVerImg;
+            break;
+          }
+        }
+        if (window._setChatHistory) window._setChatHistory(chTmp);
+        if (currentUser && !currentUser.isAnonymous && activeChatId) {
+          fetch(`${BACKEND_URL}/chats`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chTmp[0]?.content?.substring(0,50) || "Chat", messages: chTmp })
+          }).catch(e => console.warn("Error guardando:", e));
+        }
         return;
       }
       const res = await fetch(`${BACKEND_URL}/chat`, {
