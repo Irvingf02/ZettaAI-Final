@@ -6527,28 +6527,67 @@ function editarImagenDescripcion(url) {
 function editarImagenSeleccionarAreas(url) {
   const modal = document.getElementById("modal-editar-imagen");
   if (!modal) return;
-  const bottom = document.getElementById("editar-img-bottom");
 
-  // Mostrar canvas para seleccionar área
   const existing = document.getElementById("editar-canvas-wrap");
   if (existing) { existing.remove(); return; }
 
   const wrap = document.createElement("div");
   wrap.id = "editar-canvas-wrap";
   wrap.style.cssText = "position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;background:#000;";
+
+  const canvasId = "editar-sel-canvas";
   wrap.innerHTML = `
     <p style="color:#fff;text-align:center;padding:16px;font-size:1rem;">Selecciona un área para editarla</p>
     <div style="flex:1;position:relative;overflow:hidden;">
-      <img src="${url}" style="width:100%;height:100%;object-fit:contain;" />
+      <img id="editar-sel-img" src="${url}" style="width:100%;height:100%;object-fit:contain;display:block;" />
+      <canvas id="${canvasId}" style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;touch-action:none;"></canvas>
     </div>
-    <div style="display:flex;justify-content:space-between;padding:16px;background:#000;">
-      <button onclick="document.getElementById('editar-canvas-wrap').remove()" style="flex:1;margin-right:8px;padding:12px;border-radius:24px;border:1px solid #555;background:none;color:#fff;cursor:pointer;font-size:0.95rem;">Cancelar</button>
-      <button style="width:40px;height:40px;border-radius:50%;border:none;background:#333;color:#fff;cursor:pointer;font-size:1rem;">&#x21BA;</button>
-      <button style="width:40px;height:40px;border-radius:50%;border:none;background:#333;color:#fff;cursor:pointer;font-size:1rem;">&#x21BB;</button>
-      <button style="flex:1;margin-left:8px;padding:12px;border-radius:24px;border:none;background:#555;color:#888;cursor:pointer;font-size:0.95rem;">Siguiente</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:#000;gap:8px;">
+      <button onclick="document.getElementById('editar-canvas-wrap').remove()" style="flex:1;padding:12px;border-radius:24px;border:1px solid #555;background:none;color:#fff;cursor:pointer;font-size:0.95rem;">Cancelar</button>
+      <button id="editar-sel-undo" style="width:40px;height:40px;border-radius:50%;border:none;background:#333;color:#fff;cursor:pointer;font-size:1rem;">&#x21BA;</button>
+      <button id="editar-sel-redo" style="width:40px;height:40px;border-radius:50%;border:none;background:#333;color:#fff;cursor:pointer;font-size:1rem;">&#x21BB;</button>
+      <button onclick="document.getElementById('editar-canvas-wrap').remove()" style="flex:1;padding:12px;border-radius:24px;border:none;background:#555;color:#aaa;cursor:pointer;font-size:0.95rem;">Siguiente</button>
     </div>
   `;
   modal.appendChild(wrap);
+
+  // Lógica de pincel para seleccionar áreas
+  const canvas = document.getElementById(canvasId);
+  const img = document.getElementById("editar-sel-img");
+  setTimeout(() => {
+    canvas.width = img.offsetWidth;
+    canvas.height = img.offsetHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.strokeStyle = "rgba(255,255,255,0.85)";
+    ctx.lineWidth = 28;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    let painting = false;
+    let lastX = 0, lastY = 0;
+    const getPos = (e) => {
+      const r = canvas.getBoundingClientRect();
+      const touch = e.touches ? e.touches[0] : e;
+      return [touch.clientX - r.left, touch.clientY - r.top];
+    };
+    canvas.addEventListener("mousedown", (e) => { painting = true; [lastX, lastY] = getPos(e); });
+    canvas.addEventListener("touchstart", (e) => { e.preventDefault(); painting = true; [lastX, lastY] = getPos(e); });
+    canvas.addEventListener("mousemove", (e) => {
+      if (!painting) return;
+      const [x, y] = getPos(e);
+      ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+      [lastX, lastY] = [x, y];
+    });
+    canvas.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+      if (!painting) return;
+      const [x, y] = getPos(e);
+      ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+      [lastX, lastY] = [x, y];
+    });
+    canvas.addEventListener("mouseup", () => { painting = false; });
+    canvas.addEventListener("touchend", () => { painting = false; });
+    document.getElementById("editar-sel-undo").onclick = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }, 100);
 }
 
 function editarImagenRelacion(url) {
@@ -6573,14 +6612,37 @@ function editarImagenRelacion(url) {
 
   const wrap = document.createElement("div");
   wrap.id = "editar-relacion-wrap";
-  wrap.style.cssText = "position:absolute;bottom:0;left:0;right:0;z-index:4;background:rgba(30,30,30,0.97);border-radius:16px 16px 0 0;padding:8px 0 24px;";
+  wrap.style.cssText = "position:absolute;bottom:0;left:0;right:0;z-index:4;background:rgba(30,30,30,0.97);border-radius:16px 16px 0 0;padding:8px 0 24px;max-height:60%;overflow-y:auto;";
   wrap.innerHTML = opciones.map(o => `
-    <div onclick="document.getElementById('editar-relacion-wrap').remove()" style="display:flex;align-items:center;gap:16px;padding:14px 24px;cursor:pointer;color:#fff;font-size:1rem;">
+    <div onclick="aplicarRelacionAspecto('${url}','${o.label}')" style="display:flex;align-items:center;gap:16px;padding:14px 24px;cursor:pointer;color:#fff;font-size:1rem;">
       <span style="font-size:1.1rem;">${o.icon}</span> ${o.label}
     </div>
   `).join("");
 
   modal.appendChild(wrap);
+}
+
+function aplicarRelacionAspecto(url, relacion) {
+  document.getElementById("editar-relacion-wrap")?.remove();
+  const img = document.querySelector("#modal-editar-imagen img");
+  if (!img) return;
+  const map = {
+    "Cuadrado 1:1": "1/1",
+    "Horizontal 5:4": "5/4",
+    "Historia 9:16": "9/16",
+    "Ultrapanorámico 21:9": "21/9",
+    "Pantalla panorámica...": "16/9",
+    "Horizontal 4:3": "4/3",
+    "Panorámico 3:2": "3/2",
+    "Estándar 4:5": "4/5",
+    "Vertical 3:4": "3/4",
+    "Alto 2:3": "2/3"
+  };
+  const ratio = map[relacion] || "1/1";
+  img.style.aspectRatio = ratio;
+  img.style.objectFit = "cover";
+  img.style.width = "100%";
+  img.style.height = "auto";
 }
 
 async function compartirImagen(url) {
