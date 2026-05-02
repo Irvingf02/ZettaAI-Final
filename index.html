@@ -5475,7 +5475,24 @@ function loadSpecificChat(chatId, messages) {
   sessionStorage.setItem("zettax_last_chat", chatId);
   const renderedDivs = [];
   messages.forEach(m => {
-    const div = addMessage(m.content, m.role === "user" ? "user" : "bot");
+    let div;
+    if (m.role === "assistant" && m.content && m.content.startsWith("🎨 Imagen generada: ")) {
+      const imgUrl = m.content.replace("🎨 Imagen generada: ", "");
+      div = document.createElement("div");
+      div.className = "msg bot";
+      div.style.cssText = "position:relative;padding:0;overflow:hidden;border-radius:12px;background:transparent;border:none;";
+      const topBar = document.createElement("div");
+      topBar.style.cssText = "position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:linear-gradient(to bottom,rgba(0,0,0,0.6),transparent);z-index:2;border-radius:12px 12px 0 0;";
+      topBar.innerHTML = `<button onclick="this.closest('.msg').remove()" style="background:rgba(0,0,0,0.55);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">&#x2715;</button><div style="display:flex;gap:12px;"><a href="${imgUrl}" download="zettaxai-imagen.jpg" style="background:rgba(0,0,0,0.55);color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;text-decoration:none;">&#x2193;</a></div>`;
+      const img = document.createElement("img");
+      img.src = imgUrl;
+      img.style.cssText = "width:100%;border-radius:12px;display:block;";
+      div.appendChild(topBar);
+      div.appendChild(img);
+      document.getElementById("messages").appendChild(div);
+    } else {
+      div = addMessage(m.content, m.role === "user" ? "user" : "bot");
+    }
     chatHistory.push(m);
     renderedDivs.push({ div, m });
   });
@@ -5486,7 +5503,8 @@ function loadSpecificChat(chatId, messages) {
       // Guardar la respuesta actual en su slot para que no se pierda al navegar
       const nextEntry = renderedDivs[i + 1];
       if (nextEntry && nextEntry.m.role === "assistant") {
-        replies[curVer] = nextEntry.m.content;
+        if (!replies[curVer]) replies[curVer] = nextEntry.m.content;
+        if (!replies[0]) replies[0] = nextEntry.m.content;
       }
       div.dataset.versions = JSON.stringify(m.versions);
       div.dataset.replies = JSON.stringify(replies);
