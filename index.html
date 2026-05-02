@@ -5920,6 +5920,12 @@ window.editarMensaje = function(btn) {
         } else {
           addMessage("⚠️ No se pudo generar la imagen.", "bot error");
         }
+        const versionsImg = JSON.parse(msg.dataset.versions || JSON.stringify([text]));
+        if (!versionsImg.includes(newText)) versionsImg.push(newText);
+        msg.dataset.versions = JSON.stringify(versionsImg);
+        msg.dataset.currentVersion = String(versionsImg.length - 1);
+        if (!msg.dataset.replies) msg.dataset.replies = "[]";
+        actualizarNavVersiones(msg);
         return;
       }
       const res = await fetch(`${BACKEND_URL}/chat`, {
