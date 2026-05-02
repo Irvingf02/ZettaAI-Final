@@ -5491,6 +5491,10 @@ function loadSpecificChat(chatId, messages) {
       img.style.cssText = "width:100%;border-radius:12px;display:block;";
       div.appendChild(topBar);
       div.appendChild(img);
+      const bottomBarLoad = document.createElement("div");
+      bottomBarLoad.style.cssText = "position:absolute;bottom:0;left:0;right:0;display:flex;gap:8px;padding:10px;background:linear-gradient(to top,rgba(0,0,0,0.6),transparent);z-index:2;border-radius:0 0 12px 12px;";
+      bottomBarLoad.innerHTML = `<button onclick="editarImagen('${imgUrl}')" style="flex:1;padding:9px;border-radius:20px;border:none;background:rgba(30,30,30,0.85);color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600;">Editar</button><button onclick="compartirImagen('${imgUrl}')" style="flex:1;padding:9px;border-radius:20px;border:none;background:rgba(30,30,30,0.85);color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600;">Compartir</button>`;
+      div.appendChild(bottomBarLoad);
       document.getElementById("messages").appendChild(div);
     } else {
       div = addMessage(m.content, m.role === "user" ? "user" : "bot");
@@ -6644,6 +6648,10 @@ window.navegarVersion = function(btn, dir) {
       img.style.cssText = "width:100%;border-radius:12px;display:block;";
       imgDiv.appendChild(topBar);
       imgDiv.appendChild(img);
+      const bottomBarNav = document.createElement("div");
+      bottomBarNav.style.cssText = "position:absolute;bottom:0;left:0;right:0;display:flex;gap:8px;padding:10px;background:linear-gradient(to top,rgba(0,0,0,0.6),transparent);z-index:2;border-radius:0 0 12px 12px;";
+      bottomBarNav.innerHTML = `<button onclick="editarImagen('${imgUrl}')" style="flex:1;padding:9px;border-radius:20px;border:none;background:rgba(30,30,30,0.85);color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600;">Editar</button><button onclick="compartirImagen('${imgUrl}')" style="flex:1;padding:9px;border-radius:20px;border:none;background:rgba(30,30,30,0.85);color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600;">Compartir</button>`;
+      imgDiv.appendChild(bottomBarNav);
       document.getElementById("messages").appendChild(imgDiv);
     } else {
       window._addMessage(replies[newIdx], "bot");
