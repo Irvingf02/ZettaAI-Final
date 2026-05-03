@@ -6667,61 +6667,179 @@ function editarImagenSeleccionarAreas(url) {
       imgThumb.src = "";
     };
 
-    // ── Botón 🎤 → grabar audio ─────────────────────────────
-    let mediaRecorder = null;
-    let audioBlob = null;
-    let audioChunks = [];
-    let isRecording = false;
+    // ── Botón 🎤 → reconocimiento de voz en tiempo real ────
+    let recognition = null;
+    let isRecognizing = false;
+    let animFrameId = null;
+    let analyser = null, micStream = null;
     const micBtn = document.getElementById("editar-sel-mic");
     const audioPreview = document.getElementById("editar-sel-audio-preview");
-    const audioLabel   = document.getElementById("editar-sel-audio-label");
 
-    micBtn.onclick = async () => {
-      if (!isRecording) {
-        // Iniciar grabación
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          audioChunks = [];
-          mediaRecorder = new MediaRecorder(stream);
-          mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
-          mediaRecorder.onstop = () => {
-            audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-            const secs = Math.round((Date.now() - recordStart) / 1000);
-            audioLabel.textContent = `Audio grabado (${secs}s)`;
-            audioPreview.style.display = "block";
-            stream.getTracks().forEach(t => t.stop());
-          };
-          mediaRecorder.start();
-          var recordStart = Date.now();
-          isRecording = true;
-          micBtn.textContent = "⏹";
-          micBtn.style.color = "#FF4D6A";
-        } catch(err) {
-          alert("No se pudo acceder al micrófono: " + err.message);
+    // Reutilizamos el div de preview para mostrar la barra de voz
+    audioPreview.innerHTML = `
+      <div id="editar-voz-bar" style="display:flex;align-items:center;gap:10px;background:#1a1a1a;border-radius:20px;padding:8px 14px;">
+        <canvas id="editar-voz-wave" width="180" height="32" style="flex:1;border-radius:6px;"></canvas>
+        <button id="editar-voz-cancel" style="background:none;border:1px solid #555;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;">&#x2715;</button>
+        <button id="editar-voz-ok" style="background:#fff;border:none;color:#000;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;">&#x2713;</button>
+      </div>
+    `;
+
+    function drawWave() {
+      if (!analyser) return;
+      const waveCanvas = document.getElementById("editar-voz-wave");
+      if (!waveCanvas) return;
+      const wCtx = waveCanvas.getContext("2d");
+      const bufLen = analyser.frequencyBinCount;
+      const dataArr = new Uint8Array(bufLen);
+      analyser.getByteTimeDomainData(dataArr);
+      wCtx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+      wCtx.beginPath();
+      wCtx.strokeStyle = "#00C48C";
+      wCtx.lineWidth = 1.5;
+      const sliceW = waveCanvas.width / bufLen;
+      let x = 0;
+      for (let i = 0; i < bufLen; i++) {
+        const v = dataArr[i] / 128.0;
+        const y = (v * waveCanvas.height) / 2;
+        i === 0 ? wCtx.moveTo(x, y) : wCtx.lineTo(x, y);
+        x += sliceW;
+      }
+      wCtx.stroke();
+      animFrameId = requestAnimationFrame(drawWave);
+    }
+
+    async function startVoice() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) { alert("Tu navegador no soporta reconocimiento de voz."); return; }
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioCtx.createMediaStreamSource(micStream);
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+      } catch(e) { alert("No se pudo acceder al micrófono."); return; }
+
+      recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "es-MX";
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      let transcript = "";
+      recognition.onresult = (e) => {
+        transcript = "";
+        for (let i = 0; i < e.results.length; i++) transcript += e.results[i][0].transcript;
+        const inp = document.getElementById("editar-sel-input");
+        if (inp) inp.placeholder = transcript || "Escuchando...";
+      };
+      recognition.start();
+      isRecognizing = true;
+      micBtn.textContent = "🎤";
+      micBtn.style.color = "#FF4D6A";
+      audioPreview.style.display = "block";
+      drawWave();
+
+      document.getElementById("editar-voz-cancel").onclick = () => stopVoice(false);
+      document.getElementById("editar-voz-ok").onclick    = () => stopVoice(true);
+
+      recognition._transcript = () => {
+        let t = "";
+        // fallback: get from input placeholder
+        const inp = document.getElementById("editar-sel-input");
+        return inp ? inp.placeholder : t;
+      };
+      recognition._lastTranscript = "";
+      recognition.onresult = (e) => {
+        let t = "";
+        for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+        recognition._lastTranscript = t;
+        const inp = document.getElementById("editar-sel-input");
+        if (inp) inp.placeholder = t || "Escuchando...";
+      };
+    }
+
+    function stopVoice(accept) {
+      if (recognition) { try { recognition.stop(); } catch(e){} recognition = null; }
+      if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+      if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+      analyser = null;
+      isRecognizing = false;
+      micBtn.textContent = "🎤";
+      micBtn.style.color = "#888";
+      audioPreview.style.display = "none";
+      const inp = document.getElementById("editar-sel-input");
+      if (inp) {
+        if (accept && recognition && recognition._lastTranscript) {
+          inp.value = recognition._lastTranscript;
+          inp.placeholder = "Describir ediciones";
+        } else if (accept) {
+          // transcript ya fue guardado antes de que recognition se pusiera null
+          inp.placeholder = "Describir ediciones";
+        } else {
+          inp.placeholder = "Describir ediciones";
         }
-      } else {
-        // Detener grabación
-        mediaRecorder.stop();
-        isRecording = false;
-        micBtn.textContent = "🎤";
-        micBtn.style.color = "#888";
+      }
+    }
+
+    // Versión corregida: guardar transcript fuera del objeto recognition
+    let _voiceTranscript = "";
+    micBtn.onclick = () => {
+      if (!isRecognizing) {
+        _voiceTranscript = "";
+        startVoice();
+        // Parchar onresult para guardar en _voiceTranscript
+        const waitPatch = setInterval(() => {
+          if (recognition) {
+            recognition.onresult = (e) => {
+              _voiceTranscript = "";
+              for (let i = 0; i < e.results.length; i++) _voiceTranscript += e.results[i][0].transcript;
+              const inp = document.getElementById("editar-sel-input");
+              if (inp) inp.placeholder = _voiceTranscript || "Escuchando...";
+            };
+            clearInterval(waitPatch);
+          }
+        }, 50);
       }
     };
 
-    document.getElementById("editar-sel-audio-remove").onclick = () => {
-      audioBlob = null;
+    // Sobrescribir stopVoice para usar _voiceTranscript
+    const _stopVoice = (accept) => {
+      if (recognition) { try { recognition.stop(); } catch(e){} recognition = null; }
+      if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+      if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+      analyser = null;
+      isRecognizing = false;
+      micBtn.textContent = "🎤";
+      micBtn.style.color = "#888";
       audioPreview.style.display = "none";
+      const inp = document.getElementById("editar-sel-input");
+      if (inp) {
+        inp.placeholder = "Describir ediciones";
+        if (accept && _voiceTranscript) inp.value = _voiceTranscript;
+      }
+      _voiceTranscript = "";
+    };
+    // Reasignar botones con _stopVoice correcto después de que se creen
+    const patchVozBtns = setInterval(() => {
+      const cancelBtn = document.getElementById("editar-voz-cancel");
+      const okBtn     = document.getElementById("editar-voz-ok");
+      if (cancelBtn && okBtn) {
+        cancelBtn.onclick = () => _stopVoice(false);
+        okBtn.onclick     = () => _stopVoice(true);
+        clearInterval(patchVozBtns);
+      }
+    }, 50);
+
+    document.getElementById("editar-sel-audio-remove").onclick = () => {
+      _stopVoice(false);
     };
 
     // ── Botón ↑ → enviar ────────────────────────────────────
     document.getElementById("editar-sel-send").onclick = () => {
       const desc = document.getElementById("editar-sel-input").value.trim();
-      if (!desc && !attachedFile && !audioBlob) return;
+      if (!desc && !attachedFile) return;
 
-      // Construir texto para el input principal
       let textoFinal = desc || "Editar imagen según selección";
       if (attachedFile) textoFinal += ` [foto adjunta: ${attachedFile.name}]`;
-      if (audioBlob)    textoFinal += ` [instrucción de voz adjunta]`;
 
       // Cerrar modal y poner el texto en el input principal
       document.getElementById("editar-canvas-wrap").remove();
