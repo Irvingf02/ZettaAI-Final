@@ -6555,8 +6555,9 @@ function editarImagenSeleccionarAreas(url) {
   const canvas = document.getElementById(canvasId);
   const img = document.getElementById("editar-sel-img");
   setTimeout(() => {
-    canvas.width = img.offsetWidth;
-    canvas.height = img.offsetHeight;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
     const ctx = canvas.getContext("2d");
     let dotX = canvas.width * 0.1;
     let dotY = canvas.height * 0.5;
