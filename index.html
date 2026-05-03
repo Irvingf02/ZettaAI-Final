@@ -6537,49 +6537,55 @@ function editarImagenSeleccionarAreas(url) {
 
   const canvasId = "editar-sel-canvas";
   wrap.innerHTML = `
-    <p style="color:#fff;text-align:center;padding:16px;font-size:1rem;">Selecciona un área para editarla</p>
-    <div style="flex:1;position:relative;overflow:hidden;touch-action:none;">
-      <img id="editar-sel-img" src="${url}" style="width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;" />
-      <canvas id="${canvasId}" style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;touch-action:none;user-select:none;-webkit-user-select:none;"></canvas>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#000;">
+      <button onclick="document.getElementById('editar-canvas-wrap').remove()" style="background:none;border:none;color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;gap:6px;">&#x2715; Editar selección</button>
+      <div style="display:flex;gap:16px;align-items:center;">
+        <button id="editar-sel-undo" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1.2rem;">&#x21BA;</button>
+        <button id="editar-sel-redo" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1.2rem;">&#x21BB;</button>
+        <button onclick="document.getElementById('editar-canvas-wrap').remove()" style="background:none;border:none;color:#fff;cursor:pointer;font-size:0.95rem;">Cancelar</button>
+      </div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:#000;gap:8px;">
-      <button onclick="document.getElementById('editar-canvas-wrap').remove()" style="flex:1;padding:12px;border-radius:24px;border:1px solid #555;background:none;color:#fff;cursor:pointer;font-size:0.95rem;">Cancelar</button>
-      <button id="editar-sel-undo" style="width:40px;height:40px;border-radius:50%;border:none;background:#333;color:#fff;cursor:pointer;font-size:1rem;">&#x21BA;</button>
-      <button id="editar-sel-redo" style="width:40px;height:40px;border-radius:50%;border:none;background:#333;color:#fff;cursor:pointer;font-size:1rem;">&#x21BB;</button>
-      <button onclick="document.getElementById('editar-canvas-wrap').remove()" style="flex:1;padding:12px;border-radius:24px;border:none;background:#555;color:#aaa;cursor:pointer;font-size:0.95rem;">Siguiente</button>
+    <div style="flex:1;position:relative;overflow:hidden;touch-action:none;display:flex;align-items:center;justify-content:center;background:#f0f0f0;">
+      <div style="position:relative;display:inline-block;">
+        <img id="editar-sel-img" src="${url}" style="display:block;max-width:100%;max-height:60vh;object-fit:contain;pointer-events:none;border-radius:8px;" />
+        <canvas id="${canvasId}" style="position:absolute;top:0;left:0;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:8px;"></canvas>
+      </div>
+    </div>
+    <div id="editar-sel-bottom" style="padding:12px 16px;background:#000;">
+      <div style="display:flex;align-items:center;background:#1a1a1a;border-radius:30px;padding:8px 14px;gap:8px;">
+        <span style="color:#555;font-size:1.1rem;">+</span>
+        <input id="editar-sel-input" type="text" placeholder="Describir ediciones" style="flex:1;background:none;border:none;color:#fff;font-size:0.95rem;outline:none;" />
+        <button style="background:none;border:none;color:#555;cursor:pointer;font-size:1.1rem;">&#x1F3A4;</button>
+        <button id="editar-sel-send" style="width:36px;height:36px;border-radius:50%;border:none;background:#fff;color:#000;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">&#x2191;</button>
+      </div>
     </div>
   `;
   modal.appendChild(wrap);
 
-  // Lógica de punto arrastrable para seleccionar área
+  // Lógica de pincel para pintar máscara
   const canvas = document.getElementById(canvasId);
   const img = document.getElementById("editar-sel-img");
-  setTimeout(() => {
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-    const ctx = canvas.getContext("2d");
-    let dotX = canvas.width * 0.1;
-    let dotY = canvas.height * 0.5;
-    let dragging = false;
 
-    function drawDot() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Línea vertical
-      ctx.beginPath();
-      ctx.moveTo(dotX, dotY - 40);
-      ctx.lineTo(dotX, dotY + 40);
-      ctx.strokeStyle = "rgba(255,255,255,0.9)";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      // Círculo
-      ctx.beginPath();
-      ctx.arc(dotX, dotY, 14, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(255,255,255,1)";
-      ctx.fill();
+  setTimeout(() => {
+    canvas.width = img.offsetWidth;
+    canvas.height = img.offsetHeight;
+    const ctx = canvas.getContext("2d");
+    let painting = false;
+    let history = [];
+    let redoStack = [];
+    const BRUSH_SIZE = 28;
+
+    function saveState() {
+      history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+      redoStack = [];
     }
 
-    drawDot();
+    function paint(x, y) {
+      ctx.beginPath();
+      ctx.arc(x, y, BRUSH_SIZE, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(59, 130, 246, 0.55)";
+      ctx.fill();
+    }
 
     const getPos = (e) => {
       const r = canvas.getBoundingClientRect();
@@ -6588,19 +6594,19 @@ function editarImagenSeleccionarAreas(url) {
     };
 
     const onStart = (e) => {
-      const [x, y] = getPos(e);
-      const dist = Math.hypot(x - dotX, y - dotY);
-      if (dist < 30) { dragging = true; e.preventDefault && e.preventDefault(); }
-    };
-    const onMove = (e) => {
-      if (!dragging) return;
+      painting = true;
+      saveState();
       e.preventDefault && e.preventDefault();
       const [x, y] = getPos(e);
-      dotX = Math.max(0, Math.min(canvas.width, x));
-      dotY = Math.max(0, Math.min(canvas.height, y));
-      drawDot();
+      paint(x, y);
     };
-    const onEnd = () => { dragging = false; };
+    const onMove = (e) => {
+      if (!painting) return;
+      e.preventDefault && e.preventDefault();
+      const [x, y] = getPos(e);
+      paint(x, y);
+    };
+    const onEnd = () => { painting = false; };
 
     canvas.addEventListener("mousedown", onStart);
     canvas.addEventListener("touchstart", onStart, { passive: false });
@@ -6610,10 +6616,27 @@ function editarImagenSeleccionarAreas(url) {
     window.addEventListener("touchend", onEnd);
 
     document.getElementById("editar-sel-undo").onclick = () => {
-      dotX = canvas.width * 0.1;
-      dotY = canvas.height * 0.5;
-      drawDot();
+      if (history.length === 0) return;
+      redoStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+      ctx.putImageData(history.pop(), 0, 0);
     };
+    document.getElementById("editar-sel-redo").onclick = () => {
+      if (redoStack.length === 0) return;
+      history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+      ctx.putImageData(redoStack.pop(), 0, 0);
+    };
+
+    // Limpiar listeners al cerrar
+    const observer = new MutationObserver(() => {
+      if (!document.getElementById("editar-canvas-wrap")) {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("touchmove", onMove);
+        window.removeEventListener("mouseup", onEnd);
+        window.removeEventListener("touchend", onEnd);
+        observer.disconnect();
+      }
+    });
+    observer.observe(modal, { childList: true });
   }, 100);
 }
 
