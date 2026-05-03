@@ -6604,10 +6604,10 @@ function editarImagenSeleccionarAreas(url) {
 
     canvas.addEventListener("mousedown", onStart);
     canvas.addEventListener("touchstart", onStart, { passive: false });
-    canvas.addEventListener("mousemove", onMove);
-    canvas.addEventListener("touchmove", onMove, { passive: false });
-    canvas.addEventListener("mouseup", onEnd);
-    canvas.addEventListener("touchend", onEnd);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("mouseup", onEnd);
+    window.addEventListener("touchend", onEnd);
 
     document.getElementById("editar-sel-undo").onclick = () => {
       dotX = canvas.width * 0.1;
