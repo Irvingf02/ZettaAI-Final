@@ -6551,18 +6551,34 @@ function editarImagenSeleccionarAreas(url) {
         <canvas id="${canvasId}" style="position:absolute;top:0;left:0;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:8px;"></canvas>
       </div>
     </div>
+    <!-- Preview imagen adjunta -->
+    <div id="editar-sel-img-preview" style="display:none;padding:8px 16px 0;background:#000;">
+      <div style="position:relative;display:inline-block;">
+        <img id="editar-sel-img-thumb" style="height:60px;border-radius:8px;object-fit:cover;" />
+        <button id="editar-sel-img-remove" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:none;background:#555;color:#fff;cursor:pointer;font-size:0.7rem;display:flex;align-items:center;justify-content:center;padding:0;">&#x2715;</button>
+      </div>
+    </div>
+    <!-- Preview audio grabado -->
+    <div id="editar-sel-audio-preview" style="display:none;padding:8px 16px 0;background:#000;">
+      <div style="display:flex;align-items:center;gap:8px;background:#1a1a1a;border-radius:20px;padding:8px 12px;">
+        <span style="color:#00C48C;font-size:1rem;">🎤</span>
+        <span id="editar-sel-audio-label" style="color:#aaa;font-size:0.85rem;flex:1;">Audio grabado</span>
+        <button id="editar-sel-audio-remove" style="background:none;border:none;color:#555;cursor:pointer;font-size:0.9rem;">&#x2715;</button>
+      </div>
+    </div>
     <div id="editar-sel-bottom" style="padding:12px 16px;background:#000;">
       <div style="display:flex;align-items:center;background:#1a1a1a;border-radius:30px;padding:8px 14px;gap:8px;">
-        <span style="color:#555;font-size:1.1rem;">+</span>
+        <button id="editar-sel-plus" style="background:none;border:none;color:#888;cursor:pointer;font-size:1.2rem;line-height:1;padding:0 2px;">+</button>
         <input id="editar-sel-input" type="text" placeholder="Describir ediciones" style="flex:1;background:none;border:none;color:#fff;font-size:0.95rem;outline:none;" />
-        <button style="background:none;border:none;color:#555;cursor:pointer;font-size:1.1rem;">&#x1F3A4;</button>
+        <button id="editar-sel-mic" style="background:none;border:none;color:#888;cursor:pointer;font-size:1rem;line-height:1;padding:0 2px;">🎤</button>
         <button id="editar-sel-send" style="width:36px;height:36px;border-radius:50%;border:none;background:#fff;color:#000;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">&#x2191;</button>
       </div>
     </div>
+    <input id="editar-sel-file-input" type="file" accept="image/*" style="display:none;" />
   `;
   modal.appendChild(wrap);
 
-  // Lógica de pincel para pintar máscara
+  // ── Pincel ──────────────────────────────────────────────────
   const canvas = document.getElementById(canvasId);
   const img = document.getElementById("editar-sel-img");
 
@@ -6579,34 +6595,20 @@ function editarImagenSeleccionarAreas(url) {
       history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
       redoStack = [];
     }
-
     function paint(x, y) {
       ctx.beginPath();
       ctx.arc(x, y, BRUSH_SIZE, 0, Math.PI * 2);
       ctx.fillStyle = "rgba(59, 130, 246, 0.55)";
       ctx.fill();
     }
-
     const getPos = (e) => {
       const r = canvas.getBoundingClientRect();
       const touch = e.touches ? e.touches[0] : e;
       return [touch.clientX - r.left, touch.clientY - r.top];
     };
-
-    const onStart = (e) => {
-      painting = true;
-      saveState();
-      e.preventDefault && e.preventDefault();
-      const [x, y] = getPos(e);
-      paint(x, y);
-    };
-    const onMove = (e) => {
-      if (!painting) return;
-      e.preventDefault && e.preventDefault();
-      const [x, y] = getPos(e);
-      paint(x, y);
-    };
-    const onEnd = () => { painting = false; };
+    const onStart = (e) => { painting = true; saveState(); e.preventDefault && e.preventDefault(); const [x,y] = getPos(e); paint(x,y); };
+    const onMove  = (e) => { if (!painting) return; e.preventDefault && e.preventDefault(); const [x,y] = getPos(e); paint(x,y); };
+    const onEnd   = () => { painting = false; };
 
     canvas.addEventListener("mousedown", onStart);
     canvas.addEventListener("touchstart", onStart, { passive: false });
@@ -6616,12 +6618,12 @@ function editarImagenSeleccionarAreas(url) {
     window.addEventListener("touchend", onEnd);
 
     document.getElementById("editar-sel-undo").onclick = () => {
-      if (history.length === 0) return;
+      if (!history.length) return;
       redoStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
       ctx.putImageData(history.pop(), 0, 0);
     };
     document.getElementById("editar-sel-redo").onclick = () => {
-      if (redoStack.length === 0) return;
+      if (!redoStack.length) return;
       history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
       ctx.putImageData(redoStack.pop(), 0, 0);
     };
@@ -6637,6 +6639,106 @@ function editarImagenSeleccionarAreas(url) {
       }
     });
     observer.observe(modal, { childList: true });
+
+    // ── Botón + → subir foto ────────────────────────────────
+    let attachedFile = null;
+    const fileInput = document.getElementById("editar-sel-file-input");
+    const imgPreview = document.getElementById("editar-sel-img-preview");
+    const imgThumb   = document.getElementById("editar-sel-img-thumb");
+
+    document.getElementById("editar-sel-plus").onclick = () => fileInput.click();
+
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      attachedFile = file;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        imgThumb.src = ev.target.result;
+        imgPreview.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+      fileInput.value = "";
+    };
+
+    document.getElementById("editar-sel-img-remove").onclick = () => {
+      attachedFile = null;
+      imgPreview.style.display = "none";
+      imgThumb.src = "";
+    };
+
+    // ── Botón 🎤 → grabar audio ─────────────────────────────
+    let mediaRecorder = null;
+    let audioBlob = null;
+    let audioChunks = [];
+    let isRecording = false;
+    const micBtn = document.getElementById("editar-sel-mic");
+    const audioPreview = document.getElementById("editar-sel-audio-preview");
+    const audioLabel   = document.getElementById("editar-sel-audio-label");
+
+    micBtn.onclick = async () => {
+      if (!isRecording) {
+        // Iniciar grabación
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          audioChunks = [];
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
+          mediaRecorder.onstop = () => {
+            audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+            const secs = Math.round((Date.now() - recordStart) / 1000);
+            audioLabel.textContent = `Audio grabado (${secs}s)`;
+            audioPreview.style.display = "block";
+            stream.getTracks().forEach(t => t.stop());
+          };
+          mediaRecorder.start();
+          var recordStart = Date.now();
+          isRecording = true;
+          micBtn.textContent = "⏹";
+          micBtn.style.color = "#FF4D6A";
+        } catch(err) {
+          alert("No se pudo acceder al micrófono: " + err.message);
+        }
+      } else {
+        // Detener grabación
+        mediaRecorder.stop();
+        isRecording = false;
+        micBtn.textContent = "🎤";
+        micBtn.style.color = "#888";
+      }
+    };
+
+    document.getElementById("editar-sel-audio-remove").onclick = () => {
+      audioBlob = null;
+      audioPreview.style.display = "none";
+    };
+
+    // ── Botón ↑ → enviar ────────────────────────────────────
+    document.getElementById("editar-sel-send").onclick = () => {
+      const desc = document.getElementById("editar-sel-input").value.trim();
+      if (!desc && !attachedFile && !audioBlob) return;
+
+      // Construir texto para el input principal
+      let textoFinal = desc || "Editar imagen según selección";
+      if (attachedFile) textoFinal += ` [foto adjunta: ${attachedFile.name}]`;
+      if (audioBlob)    textoFinal += ` [instrucción de voz adjunta]`;
+
+      // Cerrar modal y poner el texto en el input principal
+      document.getElementById("editar-canvas-wrap").remove();
+      document.getElementById("modal-editar-imagen")?.remove();
+
+      const mainInput = document.getElementById("input");
+      if (mainInput) {
+        mainInput.value = textoFinal;
+        mainInput.focus();
+        // Si hay archivo adjunto, simularlo como pendingFile
+        if (attachedFile) {
+          window.pendingFile = attachedFile;
+          mainInput.placeholder = `📎 ${attachedFile.name} — presiona Enviar`;
+        }
+      }
+    };
+
   }, 100);
 }
 
