@@ -6848,12 +6848,12 @@ function editarImagenSeleccionarAreas(url) {
       const mainInput = document.getElementById("input");
       if (mainInput) {
         mainInput.value = textoFinal;
-        mainInput.focus();
-        // Si hay archivo adjunto, simularlo como pendingFile
         if (attachedFile) {
           window.pendingFile = attachedFile;
-          mainInput.placeholder = `📎 ${attachedFile.name} — presiona Enviar`;
         }
+        // Enviar automáticamente
+        if (typeof send === "function") send();
+        else document.getElementById("sendBtn")?.click();
       }
     };
 
