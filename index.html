@@ -6840,21 +6840,16 @@ function editarImagenSeleccionarAreas(url) {
 
       let textoFinal = desc || "Editar imagen según selección";
       if (attachedFile) textoFinal += ` [foto adjunta: ${attachedFile.name}]`;
+      if (attachedFile) window.pendingFile = attachedFile;
 
-      // Cerrar modal y poner el texto en el input principal
-      document.getElementById("editar-canvas-wrap").remove();
+      document.getElementById("editar-canvas-wrap")?.remove();
       document.getElementById("modal-editar-imagen")?.remove();
 
-      const mainInput = document.getElementById("input");
-      if (mainInput) {
-        mainInput.value = textoFinal;
-        if (attachedFile) {
-          window.pendingFile = attachedFile;
-        }
-        // Enviar automáticamente
-        if (typeof send === "function") send();
-        else document.getElementById("sendBtn")?.click();
-      }
+      setTimeout(() => {
+        const mainInput = document.getElementById("input");
+        if (mainInput) mainInput.value = textoFinal;
+        window.send();
+      }, 100);
     };
 
   }, 100);
