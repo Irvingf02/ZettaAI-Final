@@ -6840,19 +6840,14 @@ function editarImagenSeleccionarAreas(url) {
 
       let textoFinal = desc || "Editar imagen según selección";
       if (attachedFile) textoFinal += ` [foto adjunta: ${attachedFile.name}]`;
-      if (attachedFile) window.pendingFile = attachedFile;
-
-      const mainInput = document.getElementById("input");
-      if (mainInput) mainInput.value = textoFinal;
 
       document.getElementById("editar-canvas-wrap")?.remove();
       document.getElementById("modal-editar-imagen")?.remove();
 
-      // Asegurar modo chat para que no bloqueen validaciones de imagen/video
-      const prevMode = window.mode;
-      window.mode = "chat";
       mode = "chat";
-      window.send();
+      const mainInput = document.getElementById("input");
+      if (mainInput) mainInput.value = textoFinal;
+      document.getElementById("sendBtn")?.click();
     };
 
   }, 100);
