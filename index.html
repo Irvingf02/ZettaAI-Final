@@ -6848,6 +6848,10 @@ function editarImagenSeleccionarAreas(url) {
       document.getElementById("editar-canvas-wrap")?.remove();
       document.getElementById("modal-editar-imagen")?.remove();
 
+      // Asegurar modo chat para que no bloqueen validaciones de imagen/video
+      const prevMode = window.mode;
+      window.mode = "chat";
+      mode = "chat";
       window.send();
     };
 
