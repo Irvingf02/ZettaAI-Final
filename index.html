@@ -6870,12 +6870,11 @@ function editarImagenSeleccionarAreas(url) {
         mode = "imagen";
         const mainInput = document.getElementById("input");
         const sendBtn   = document.getElementById("sendBtn");
-        if (mainInput) {
-          mainInput.value = textoFinal;
-          mainInput.placeholder = `📎 imagen-editada.png — ${textoFinal}`;
-        }
+        if (mainInput) mainInput.value = textoFinal;
         if (sendBtn) sendBtn.disabled = false;
-        sendBtn?.click();
+
+        // Llamar send directamente para evitar que el valor del input se pierda
+        setTimeout(() => window.send(), 0);
       }, "image/png");
     };
 
