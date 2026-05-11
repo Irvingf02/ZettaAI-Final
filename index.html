@@ -6846,41 +6846,59 @@ function editarImagenSeleccionarAreas(url) {
 
       if (!desc && !hasSelection) return;
 
-      const textoFinal = desc || "Genera algo diferente e interesante en el área marcada de la imagen, manteniendo el resto igual";
-
-      // Combinar imagen original + máscara
-      const selImg = document.getElementById("editar-sel-img");
-      const offscreen = document.createElement("canvas");
-      offscreen.width  = selImg.naturalWidth  || canvas.width;
-      offscreen.height = selImg.naturalHeight || canvas.height;
-      const offCtx = offscreen.getContext("2d");
-      offCtx.drawImage(selImg, 0, 0, offscreen.width, offscreen.height);
-      if (hasSelection) offCtx.drawImage(canvas, 0, 0, offscreen.width, offscreen.height);
+      const instruccion = desc || "Genera algo diferente e interesante en el área marcada, manteniendo el resto igual";
+      const promptConUrl = instruccion + " (imagen de referencia: " + url + ")";
 
       // Cerrar modal
       document.getElementById("editar-canvas-wrap")?.remove();
       document.getElementById("modal-editar-imagen")?.remove();
 
-      // Mostrar mensaje del usuario en el chat
-      addMessage(textoFinal, "user");
-      chatHistory.push({ role: "user", content: textoFinal });
+      // Encontrar el último mensaje del usuario y agregarle la nueva versión
+      const msgBox = document.getElementById("messages");
+      const allUserMsgs = Array.from(msgBox.querySelectorAll(".msg.user"));
+      const lastUserMsg = allUserMsgs[allUserMsgs.length - 1];
+
+      if (lastUserMsg) {
+        const versions = JSON.parse(lastUserMsg.dataset.versions || JSON.stringify([getMsgText(lastUserMsg)]));
+        const replies  = JSON.parse(lastUserMsg.dataset.replies  || "[]");
+
+        // Guardar respuesta actual antes de reemplazar
+        const allMsgsList = Array.from(msgBox.children);
+        const lastUserIdx = allMsgsList.indexOf(lastUserMsg);
+        const botActual = allMsgsList[lastUserIdx + 1];
+        if (botActual && botActual.classList.contains("bot")) {
+          const replyImg  = botActual.querySelector("img");
+          const replyText = botActual.querySelector(".msg-text");
+          replies[versions.length - 1] = replyImg ? "🎨 Imagen generada: " + replyImg.src : (replyText ? replyText.textContent : "");
+          // Eliminar respuesta anterior del DOM
+          for (let i = allMsgsList.length - 1; i > lastUserIdx; i--) allMsgsList[i].remove();
+        }
+
+        // Agregar nueva versión
+        versions.push(instruccion);
+        const newVerIdx = versions.length - 1;
+        lastUserMsg.dataset.versions = JSON.stringify(versions);
+        lastUserMsg.dataset.replies  = JSON.stringify(replies);
+        lastUserMsg.dataset.currentVersion = String(newVerIdx);
+        const msgText = lastUserMsg.querySelector(".msg-text");
+        if (msgText) msgText.textContent = instruccion;
+      }
 
       // Mostrar typing
-      const msgBox  = document.getElementById("messages");
-      const typing  = addMessage("🎨 Generando imagen...", "bot typing");
+      const typing = addMessage("🎨 Generando imagen...", "bot typing");
       msgBox.scrollTop = msgBox.scrollHeight;
 
       try {
-        const res  = await fetch(`https://zettax-ai-pnhu.vercel.app/api/imagen`, {
+        const res = await fetch(`${BACKEND_URL}/imagen`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: textoFinal, uid: currentUser.uid })
+          body: JSON.stringify({ prompt: promptConUrl, uid: currentUser.uid })
         });
         const data = await res.json();
         typing.remove();
 
         if (data.imageUrl) {
-          misCosasImages.push({ url: data.imageUrl, prompt: textoFinal, date: new Date().toLocaleDateString("es-MX") });
+          misCosasImages.push({ url: data.imageUrl, prompt: instruccion, date: new Date().toLocaleDateString("es-MX") });
           guardarMisCosas();
 
           const div = document.createElement("div");
@@ -6888,11 +6906,11 @@ function editarImagenSeleccionarAreas(url) {
           div.style.cssText = "position:relative;padding:0;overflow:hidden;border-radius:12px;background:transparent;border:none;";
           const topBar = document.createElement("div");
           topBar.style.cssText = "position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:linear-gradient(to bottom,rgba(0,0,0,0.6),transparent);z-index:2;border-radius:12px 12px 0 0;";
-          topBar.innerHTML = `<button onclick="this.closest('.msg').remove()" style="background:rgba(0,0,0,0.55);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">&#x2715;</button><div style="display:flex;gap:12px;"><a href="${data.imageUrl}" download="zettaxai-imagen.jpg" style="background:rgba(0,0,0,0.55);color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;text-decoration:none;">&#x2193;</a><button onclick="abrirMenuImagen(this,'${textoFinal.substring(0,60).replace(/'/g,"\'")}')" style="background:rgba(0,0,0,0.55);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;">&#x22EF;</button></div>`;
+          topBar.innerHTML = `<button onclick="this.closest('.msg').remove()" style="background:rgba(0,0,0,0.55);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">&#x2715;</button><div style="display:flex;gap:12px;"><a href="${data.imageUrl}" download="zettaxai-imagen.jpg" style="background:rgba(0,0,0,0.55);color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;text-decoration:none;">&#x2193;</a><button onclick="abrirMenuImagen(this,'${instruccion.substring(0,60).replace(/'/g,"\'")}')" style="background:rgba(0,0,0,0.55);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;">&#x22EF;</button></div>`;
           const img = document.createElement("img");
           img.src = data.imageUrl;
           img.style.cssText = "width:100%;border-radius:12px;display:block;";
-          img.alt = textoFinal;
+          img.alt = instruccion;
           const bottomBar = document.createElement("div");
           bottomBar.style.cssText = "position:absolute;bottom:0;left:0;right:0;display:flex;gap:8px;padding:10px;background:linear-gradient(to top,rgba(0,0,0,0.6),transparent);z-index:2;border-radius:0 0 12px 12px;";
           bottomBar.innerHTML = `<button onclick="editarImagen('${data.imageUrl}')" style="flex:1;padding:9px;border-radius:20px;border:none;background:rgba(30,30,30,0.85);color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600;">Editar</button><button onclick="compartirImagen('${data.imageUrl}')" style="flex:1;padding:9px;border-radius:20px;border:none;background:rgba(30,30,30,0.85);color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600;">Compartir</button>`;
@@ -6902,12 +6920,21 @@ function editarImagenSeleccionarAreas(url) {
           msgBox.appendChild(div);
           msgBox.scrollTop = msgBox.scrollHeight;
 
+          // Actualizar replies y contador de versiones
+          if (lastUserMsg) {
+            const replies2 = JSON.parse(lastUserMsg.dataset.replies || "[]");
+            const curVer = parseInt(lastUserMsg.dataset.currentVersion || "0");
+            replies2[curVer] = "🎨 Imagen generada: " + data.imageUrl;
+            lastUserMsg.dataset.replies = JSON.stringify(replies2);
+            actualizarNavVersiones(lastUserMsg);
+          }
+
           chatHistory.push({ role: "assistant", content: "🎨 Imagen generada: " + data.imageUrl });
           if (currentUser && !currentUser.isAnonymous && activeChatId) {
-            fetch(`https://zettax-ai-pnhu.vercel.app/api/chats`, {
+            fetch(`${BACKEND_URL}/chats`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: textoFinal.substring(0,50), messages: chatHistory })
+              body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: instruccion.substring(0,50), messages: chatHistory })
             }).catch(e => console.warn("Error guardando:", e));
           }
         } else {
