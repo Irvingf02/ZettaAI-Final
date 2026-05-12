@@ -6885,12 +6885,8 @@ function editarImagenSeleccionarAreas(url) {
           img.src = data.imageUrl;
           img.style.cssText = "width:100%;border-radius:12px;display:block;";
           img.alt = instruccion;
-          const bottomBar = document.createElement("div");
-          bottomBar.style.cssText = "position:absolute;bottom:0;left:0;right:0;display:flex;gap:8px;padding:10px;background:linear-gradient(to top,rgba(0,0,0,0.6),transparent);z-index:2;border-radius:0 0 12px 12px;";
-          bottomBar.innerHTML = `<button onclick="editarImagen('${data.imageUrl}')" style="flex:1;padding:9px;border-radius:20px;border:none;background:rgba(30,30,30,0.85);color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600;">Editar</button><button onclick="compartirImagen('${data.imageUrl}')" style="flex:1;padding:9px;border-radius:20px;border:none;background:rgba(30,30,30,0.85);color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600;">Compartir</button>`;
           imgDiv.appendChild(topBar);
           imgDiv.appendChild(img);
-          imgDiv.appendChild(bottomBar);
           msgBox.appendChild(imgDiv);
           msgBox.scrollTop = msgBox.scrollHeight;
 
