@@ -6570,7 +6570,7 @@ function editarImagenSeleccionarAreas(url) {
       <div style="display:flex;align-items:center;background:#1a1a1a;border-radius:30px;padding:8px 14px;gap:8px;">
         <button id="editar-sel-plus" style="background:none;border:none;color:#888;cursor:pointer;font-size:1.2rem;line-height:1;padding:0 2px;">+</button>
         <input id="editar-sel-input" type="text" placeholder="Describir ediciones" style="flex:1;background:none;border:none;color:#fff;font-size:0.95rem;outline:none;" />
-        <button id="editar-sel-mic" style="display:none;">🎤</button>
+        <button id="editar-sel-mic" style="background:none;border:none;color:#888;cursor:pointer;font-size:1rem;line-height:1;padding:0 2px;">🎤</button>
         <button id="editar-sel-send" style="width:36px;height:36px;border-radius:50%;border:none;background:#fff;color:#000;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">&#x2191;</button>
       </div>
     </div>
@@ -6846,10 +6846,8 @@ function editarImagenSeleccionarAreas(url) {
 
       mode = "chat";
       const mainInput = document.getElementById("input");
-      const sendBtn = document.getElementById("sendBtn");
       if (mainInput) mainInput.value = textoFinal;
-      if (sendBtn) sendBtn.disabled = false;
-      sendBtn?.click();
+      document.getElementById("sendBtn")?.click();
     };
 
   }, 100);
