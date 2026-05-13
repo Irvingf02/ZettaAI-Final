@@ -6834,22 +6834,89 @@ function editarImagenSeleccionarAreas(url) {
     };
 
     // ── Botón ↑ → enviar ────────────────────────────────────
-    document.getElementById("editar-sel-send").onclick = () => {
+    document.getElementById("editar-sel-send").onclick = async () => {
       const desc = document.getElementById("editar-sel-input").value.trim();
-      if (!desc && !attachedFile) return;
 
-      let textoFinal = desc || "Editar imagen según selección";
-      if (attachedFile) textoFinal += ` [foto adjunta: ${attachedFile.name}]`;
+      // Verificar si hay algo pintado en el canvas
+      const ctxData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let hasSelection = false;
+      for (let i = 3; i < ctxData.length; i += 4) {
+        if (ctxData[i] > 0) { hasSelection = true; break; }
+      }
+
+      if (!desc && !hasSelection) return;
+
+      const instruccion = desc || "Genera algo diferente e interesante en el área marcada, manteniendo el resto igual";
+      const newText = instruccion + " (imagen de referencia: " + url + ")";
 
       document.getElementById("editar-canvas-wrap")?.remove();
       document.getElementById("modal-editar-imagen")?.remove();
 
-      mode = "chat";
-      const mainInput = document.getElementById("input");
-      const sendBtn = document.getElementById("sendBtn");
-      if (mainInput) mainInput.value = textoFinal;
-      if (sendBtn) sendBtn.disabled = false;
-      sendBtn?.click();
+      const messages = document.getElementById("messages");
+      const allUserMsgs = Array.from(messages.querySelectorAll(".msg.user"));
+      const msg = allUserMsgs[allUserMsgs.length - 1];
+      const text = msg ? (getMsgText(msg) || instruccion) : instruccion;
+
+      const typing = addMessage("🎨 Generando imagen...", "bot typing");
+      messages.scrollTop = messages.scrollHeight;
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/imagen`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: newText, uid: currentUser.uid })
+        });
+        const data = await res.json();
+        typing.remove();
+
+        if (data.imageUrl) {
+          misCosasImages.push({ url: data.imageUrl, prompt: instruccion, date: new Date().toLocaleDateString("es-MX") });
+          guardarMisCosas();
+
+          const imgDiv = document.createElement("div");
+          imgDiv.className = "msg bot";
+          imgDiv.style.cssText = "position:relative;padding:0;overflow:hidden;border-radius:12px;background:transparent;border:none;";
+          const topBar = document.createElement("div");
+          topBar.style.cssText = "position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:linear-gradient(to bottom,rgba(0,0,0,0.6),transparent);z-index:2;border-radius:12px 12px 0 0;";
+          topBar.innerHTML = `<button onclick="this.closest('.msg').remove()" style="background:rgba(0,0,0,0.55);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">&#x2715;</button><div style="display:flex;gap:12px;"><a href="${data.imageUrl}" download="zettaxai-imagen.jpg" style="background:rgba(0,0,0,0.55);color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;text-decoration:none;">&#x2193;</a><button onclick="abrirMenuImagen(this,'${instruccion.substring(0,60).replace(/'/g,"'")}')" style="background:rgba(0,0,0,0.55);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;">&#x22EF;</button></div>`;
+          const img = document.createElement("img");
+          img.src = data.imageUrl;
+          img.style.cssText = "width:100%;border-radius:12px;display:block;";
+          img.alt = instruccion;
+          imgDiv.appendChild(topBar);
+          imgDiv.appendChild(img);
+          messages.appendChild(imgDiv);
+          messages.scrollTop = messages.scrollHeight;
+
+          // Actualizar versiones igual que window.send
+          if (msg) {
+            const versionsImg = JSON.parse(msg.dataset.versions || JSON.stringify([text]));
+            if (!versionsImg.includes(instruccion)) versionsImg.push(instruccion);
+            msg.dataset.versions = JSON.stringify(versionsImg);
+            const curVerImg = versionsImg.length - 1;
+            msg.dataset.currentVersion = String(curVerImg);
+            const repliesImg = JSON.parse(msg.dataset.replies || "[]");
+            repliesImg[curVerImg] = "🎨 Imagen generada: " + data.imageUrl;
+            msg.dataset.replies = JSON.stringify(repliesImg);
+            actualizarNavVersiones(msg);
+          }
+
+          chatHistory.push({ role: "assistant", content: "🎨 Imagen generada: " + data.imageUrl });
+          if (currentUser && !currentUser.isAnonymous && activeChatId) {
+            fetch(`${BACKEND_URL}/chats`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: instruccion.substring(0,50), messages: chatHistory })
+            }).catch(e => console.warn("Error guardando:", e));
+          }
+        } else {
+          addMessage("⚠️ No se pudo generar la imagen.", "bot error");
+        }
+      } catch(e) {
+        typing.remove();
+        addMessage("⚠️ Error generando imagen.", "bot error");
+        console.error(e);
+      }
     };
 
   }, 100);
