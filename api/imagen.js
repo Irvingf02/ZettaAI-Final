@@ -14,11 +14,40 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).end();
 
-  const { prompt, uid } = req.body;
+  const { prompt, uid, imageB64, maskB64 } = req.body;
   if (!prompt) return res.status(400).json({ reply: "Describe la imagen que quieres crear." });
 
   const { plan } = await getUserPlan(uid);
 
+  // ── Seleccionar áreas: edición con Stable Diffusion Inpainting ──
+  if (imageB64) {
+    try {
+      const sdRes = await fetch("https://irving02-zettax-inpainting.hf.space/run/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: [
+            imageB64,
+            maskB64 || "",
+            prompt
+          ]
+        })
+      });
+
+      if (!sdRes.ok) throw new Error("Error en Stable Diffusion");
+
+      const sdData = await sdRes.json();
+      const resultB64 = sdData.data?.[0];
+      if (!resultB64) throw new Error("No se recibió imagen");
+
+      const imageUrl = `data:image/png;base64,${resultB64}`;
+      return res.json({ imageUrl, plan });
+    } catch (error) {
+      return res.status(500).json({ reply: "Error editando imagen. Intenta de nuevo." });
+    }
+  }
+
+  // ── Generación normal con Pollinations (sin tocar) ──
   try {
     const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
