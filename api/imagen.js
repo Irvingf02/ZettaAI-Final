@@ -14,14 +14,20 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).end();
 
-  const { prompt, uid, imageB64, maskB64 } = req.body;
+  const { prompt, uid, imageUrl: editImageUrl, maskB64 } = req.body;
   if (!prompt) return res.status(400).json({ reply: "Describe la imagen que quieres crear." });
 
   const { plan } = await getUserPlan(uid);
 
   // ── Seleccionar áreas: edición con Stable Diffusion Inpainting ──
-  if (imageB64) {
+  if (editImageUrl) {
     try {
+      // Descargar imagen desde la URL (el backend no tiene restricción CORS)
+      const imgRes = await fetch(editImageUrl);
+      if (!imgRes.ok) throw new Error("No se pudo descargar la imagen");
+      const imgBuffer = await imgRes.arrayBuffer();
+      const imageB64 = Buffer.from(imgBuffer).toString("base64");
+
       const sdRes = await fetch("https://irving02-zettax-inpainting.hf.space/run/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
