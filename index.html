@@ -6849,21 +6849,16 @@ function editarImagenSeleccionarAreas(url) {
 
       const instruccion = desc || "Genera algo diferente e interesante en el área marcada, manteniendo el resto igual";
 
-      // Convertir imagen original a base64
+      // Obtener URL de la imagen original
       const selImg = document.getElementById("editar-sel-img");
-      const offscreen = document.createElement("canvas");
-      offscreen.width  = selImg.naturalWidth  || selImg.offsetWidth;
-      offscreen.height = selImg.naturalHeight || selImg.offsetHeight;
-      const offCtx = offscreen.getContext("2d");
-      offCtx.drawImage(selImg, 0, 0, offscreen.width, offscreen.height);
-      const imageB64 = offscreen.toDataURL("image/png").split(",")[1];
+      const imageUrl = selImg.src;
 
-      // Convertir máscara a base64
+      // Convertir máscara a base64 (canvas propio, sin restricción)
       const maskCanvas = document.createElement("canvas");
-      maskCanvas.width  = offscreen.width;
-      maskCanvas.height = offscreen.height;
+      maskCanvas.width  = canvas.width;
+      maskCanvas.height = canvas.height;
       const maskCtx = maskCanvas.getContext("2d");
-      maskCtx.drawImage(canvas, 0, 0, maskCanvas.width, maskCanvas.height);
+      maskCtx.drawImage(canvas, 0, 0);
       const maskB64 = maskCanvas.toDataURL("image/png").split(",")[1];
 
       document.getElementById("editar-canvas-wrap")?.remove();
@@ -6881,7 +6876,7 @@ function editarImagenSeleccionarAreas(url) {
         const res = await fetch(`${BACKEND_URL}/imagen`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: instruccion, uid: currentUser.uid, imageB64, maskB64 })
+          body: JSON.stringify({ prompt: instruccion, uid: currentUser.uid, imageUrl, maskB64 })
         });
         const data = await res.json();
         typing.remove();
