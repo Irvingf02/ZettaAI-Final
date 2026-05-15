@@ -6829,7 +6829,8 @@ function editarImagenSeleccionarAreas(url) {
       }
     }, 50);
 
-    document.getElementById("editar-sel-audio-remove").onclick = () => {
+    const _audioRemoveBtn = document.getElementById("editar-sel-audio-remove");
+    if (_audioRemoveBtn) _audioRemoveBtn.onclick = () => {
       _stopVoice(false);
     };
 
