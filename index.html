@@ -6869,11 +6869,11 @@ function editarImagenSeleccionarAreas(url) {
       const msg = allUserMsgs[allUserMsgs.length - 1];
       const text = msg ? (getMsgText(msg) || instruccion) : instruccion;
 
-      const typing = (() => { const d = document.createElement("div"); d.className = "msg bot typing"; d.textContent = "🎨 Generando imagen..."; document.getElementById("messages").appendChild(d); return d; })();
+      const typing = addMessage("🎨 Generando imagen...", "bot typing");
       messages.scrollTop = messages.scrollHeight;
 
       try {
-        const res = await fetch(`${BACKEND_URL}/imagen`, {
+        const res = await fetch(`https://zettax-ai-pnhu.vercel.app/api/imagen`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt: instruccion, uid: currentUser.uid, imageUrl, maskB64 })
@@ -6922,11 +6922,11 @@ function editarImagenSeleccionarAreas(url) {
             }).catch(e => console.warn("Error guardando:", e));
           }
         } else {
-          (() => { const d = document.createElement("div"); d.className = "msg bot error"; d.textContent = "⚠️ No se pudo generar la imagen."; document.getElementById("messages").appendChild(d); return d; })();
+          addMessage("⚠️ No se pudo generar la imagen.", "bot error");
         }
       } catch(e) {
         typing.remove();
-        (() => { const d = document.createElement("div"); d.className = "msg bot error"; d.textContent = "⚠️ Error generando imagen."; document.getElementById("messages").appendChild(d); return d; })();
+        addMessage("⚠️ Error generando imagen.", "bot error");
         console.error(e);
       }
     };
