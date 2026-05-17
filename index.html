@@ -6869,7 +6869,7 @@ function editarImagenSeleccionarAreas(url) {
       const msg = allUserMsgs[allUserMsgs.length - 1];
       const text = msg ? (getMsgText(msg) || instruccion) : instruccion;
 
-      const typing = addMessage("🎨 Generando imagen...", "bot typing");
+      const typing = window.addMessage ? window.addMessage("🎨 Generando imagen...", "bot typing") : addMessage("🎨 Generando imagen...", "bot typing");
       messages.scrollTop = messages.scrollHeight;
 
       try {
