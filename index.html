@@ -6869,13 +6869,7 @@ function editarImagenSeleccionarAreas(url) {
       const msg = allUserMsgs[allUserMsgs.length - 1];
       const text = msg ? (getMsgText(msg) || instruccion) : instruccion;
 
-      const typing = (() => {
-        const d = document.createElement("div");
-        d.className = "msg bot typing";
-        d.textContent = "🎨 Generando imagen...";
-        document.getElementById("messages").appendChild(d);
-        return d;
-      })();
+      const typing = (() => { const d = document.createElement("div"); d.className = "msg bot typing"; d.textContent = "🎨 Generando imagen..."; document.getElementById("messages").appendChild(d); return d; })();
       messages.scrollTop = messages.scrollHeight;
 
       try {
@@ -6928,11 +6922,11 @@ function editarImagenSeleccionarAreas(url) {
             }).catch(e => console.warn("Error guardando:", e));
           }
         } else {
-          addMessage("⚠️ No se pudo generar la imagen.", "bot error");
+          (() => { const d = document.createElement("div"); d.className = "msg bot error"; d.textContent = "⚠️ No se pudo generar la imagen."; document.getElementById("messages").appendChild(d); return d; })();
         }
       } catch(e) {
         typing.remove();
-        addMessage("⚠️ Error generando imagen.", "bot error");
+        (() => { const d = document.createElement("div"); d.className = "msg bot error"; d.textContent = "⚠️ Error generando imagen."; document.getElementById("messages").appendChild(d); return d; })();
         console.error(e);
       }
     };
