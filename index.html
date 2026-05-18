@@ -6869,7 +6869,7 @@ function editarImagenSeleccionarAreas(url) {
       const msg = allUserMsgs[allUserMsgs.length - 1];
       const text = msg ? (getMsgText(msg) || instruccion) : instruccion;
 
-      const typing = addMessage("🎨 Generando imagen...", "bot typing");
+      const typing = (() => { const d = document.createElement("div"); d.className = "msg bot typing"; d.textContent = "🎨 Generando imagen..."; document.getElementById("messages").appendChild(d); return d; })();
       messages.scrollTop = messages.scrollHeight;
 
       try {
@@ -6915,18 +6915,18 @@ function editarImagenSeleccionarAreas(url) {
 
           chatHistory.push({ role: "assistant", content: "🎨 Imagen generada: " + data.imageUrl });
           if (currentUser && !currentUser.isAnonymous && activeChatId) {
-            fetch(`${BACKEND_URL}/chats`, {
+            fetch(`https://zettax-ai-pnhu.vercel.app/api/chats`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: instruccion.substring(0,50), messages: chatHistory })
             }).catch(e => console.warn("Error guardando:", e));
           }
         } else {
-          addMessage("⚠️ No se pudo generar la imagen.", "bot error");
+          (() => { const d = document.createElement("div"); d.className = "msg bot error"; d.textContent = "⚠️ No se pudo generar la imagen."; document.getElementById("messages").appendChild(d); return d; })();
         }
       } catch(e) {
         typing.remove();
-        addMessage("⚠️ Error generando imagen.", "bot error");
+        (() => { const d = document.createElement("div"); d.className = "msg bot error"; d.textContent = "⚠️ Error generando imagen."; document.getElementById("messages").appendChild(d); return d; })();
         console.error(e);
       }
     };
