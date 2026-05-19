@@ -6877,12 +6877,14 @@ function editarImagenSeleccionarAreas(url) {
       messages.scrollTop = messages.scrollHeight;
 
       try {
-        const res = await fetch(`https://zettax-ai-pnhu.vercel.app/api/imagen`, {
+        const res = await fetch(`https://irving02-zettax-inpainting.hf.space/run/predict`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: instruccion, uid: currentUser.uid, imageUrl, maskB64 })
+          body: JSON.stringify({ data: [imageUrl, maskB64 || "", instruccion] })
         });
         const data = await res.json();
+        const resultB64 = data.data?.[0];
+        data.imageUrl = resultB64 ? `data:image/png;base64,${resultB64}` : null;
         typing.remove();
 
         if (data.imageUrl) {
