@@ -6836,6 +6836,10 @@ function editarImagenSeleccionarAreas(url) {
 
     // ── Botón ↑ → enviar ────────────────────────────────────
     document.getElementById("editar-sel-send").onclick = async () => {
+      const currentUser = window._getCurrentUser ? window._getCurrentUser() : null;
+      const activeChatId = window._getActiveChatId ? window._getActiveChatId() : null;
+      const chatHistory = window._getChatHistory ? window._getChatHistory() : [];
+      const misCosasImages = window._getMisCosasImages ? window._getMisCosasImages() : [];
       const desc = document.getElementById("editar-sel-input").value.trim();
 
       // Verificar si hay algo pintado en el canvas
