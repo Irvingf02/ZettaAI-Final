@@ -6877,7 +6877,7 @@ function editarImagenSeleccionarAreas(url) {
       messages.scrollTop = messages.scrollHeight;
 
       try {
-        const res = await fetch(`https://irving02-zettax-inpainting.hf.space/run/predict`, {
+        const res = await fetch(`https://irving02-zettax-inpainting.hf.space/gradio_api/run/predict`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ data: [imageUrl, maskB64 || "", instruccion] })
