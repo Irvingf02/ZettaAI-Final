@@ -6502,7 +6502,7 @@ function editarImagen(url) {
       <button onclick="deshacerRelacion()" style="background:rgba(40,40,40,0.8);border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;margin-left:8px;">&#x21BA;</button>
       <button onclick="rehacerRelacion()" style="background:rgba(40,40,40,0.8);border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;margin-left:8px;">&#x21BB;</button>
     </div>
-    <img src="${url}" style="width:100%;height:100%;object-fit:contain;" />
+    <img src="${url}" id="editar-modal-img" style="width:100%;height:100%;object-fit:contain;" onload="(function(el){const chatImg=document.querySelector('.msg.bot img[src=\'${url}\']');if(chatImg&&chatImg.dataset.savedRatio){el.style.aspectRatio=chatImg.dataset.savedRatio;el.style.objectFit='cover';el.style.width='100%';}})(this)" />
     <div id="editar-img-bottom" style="position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:rgba(0,0,0,0.7);">
       <div style="display:flex;gap:10px;margin-bottom:10px;">
         <button onclick="editarImagenSeleccionarAreas('${url}')" style="display:none;">&#x25CC; Seleccionar áreas</button>
@@ -6974,6 +6974,10 @@ function editarImagenRelacion(url) {
   modal.appendChild(wrap);
 }
 
+// Historial de relaciones para deshacer/rehacer
+window._relacionHistorial = [];
+window._relacionHistorialIdx = -1;
+
 function aplicarRelacionAspecto(url, relacion) {
   document.getElementById("editar-relacion-wrap")?.remove();
   const img = document.querySelector("#modal-editar-imagen img");
@@ -6991,13 +6995,10 @@ function aplicarRelacionAspecto(url, relacion) {
     "Alto 2:3": "2/3"
   };
 
-  // Guardar relación anterior antes de aplicar
-  const prevRatio = img.style.aspectRatio || "";
-  // Agregar al historial
-  window._relacionHistorial = window._relacionHistorial || [];
-  window._relacionHistorialIdx = window._relacionHistorialIdx === undefined ? -1 : window._relacionHistorialIdx;
+  // Guardar relación actual en historial antes de cambiar
+  const prevRatio = img.style.aspectRatio || img.dataset.savedRatio || "";
   window._relacionHistorial = window._relacionHistorial.slice(0, window._relacionHistorialIdx + 1);
-  if (prevRatio) window._relacionHistorial.push(prevRatio);
+  window._relacionHistorial.push(prevRatio);
   window._relacionHistorialIdx = window._relacionHistorial.length - 1;
 
   const ratio = map[relacion] || "1/1";
@@ -7005,6 +7006,10 @@ function aplicarRelacionAspecto(url, relacion) {
   img.style.objectFit = "cover";
   img.style.width = "100%";
   img.style.height = "auto";
+
+  // Guardar ratio pendiente en el modal para Cancelar
+  img.dataset.pendingRatio = ratio;
+  img.dataset.prevRatio = prevRatio;
 
   // Eliminar botones anteriores si existen
   document.getElementById("editar-relacion-acciones")?.remove();
@@ -7016,22 +7021,22 @@ function aplicarRelacionAspecto(url, relacion) {
   acciones.id = "editar-relacion-acciones";
   acciones.style.cssText = "position:absolute;bottom:16px;left:0;right:0;display:flex;gap:12px;padding:0 16px;z-index:5;";
   acciones.innerHTML = `
-    <button onclick="cancelarRelacionAspecto('${prevRatio}')" style="flex:1;padding:12px;border-radius:24px;border:none;background:rgba(50,50,50,0.95);color:#fff;cursor:pointer;font-size:0.95rem;font-weight:600;">Cancelar</button>
-    <button onclick="guardarRelacionAspecto('${url}','${ratio}')" style="flex:1;padding:12px;border-radius:24px;border:none;background:#fff;color:#000;cursor:pointer;font-size:0.95rem;font-weight:600;">Guardar</button>
+    <button onclick="cancelarRelacionAspecto()" style="flex:1;padding:12px;border-radius:24px;border:none;background:rgba(50,50,50,0.95);color:#fff;cursor:pointer;font-size:0.95rem;font-weight:600;">Cancelar</button>
+    <button onclick="guardarRelacionAspecto('${url}')" style="flex:1;padding:12px;border-radius:24px;border:none;background:#fff;color:#000;cursor:pointer;font-size:0.95rem;font-weight:600;">Guardar</button>
   `;
   modal.appendChild(acciones);
 }
 
-// Historial de relaciones para deshacer/rehacer
-window._relacionHistorial = [];
-window._relacionHistorialIdx = -1;
-
 function deshacerRelacion() {
-  if (window._relacionHistorialIdx <= 0) return;
-  window._relacionHistorialIdx--;
+  if (window._relacionHistorialIdx < 0 || window._relacionHistorial.length === 0) return;
   const ratio = window._relacionHistorial[window._relacionHistorialIdx];
+  window._relacionHistorialIdx--;
   const img = document.querySelector("#modal-editar-imagen img");
-  if (img) { img.style.aspectRatio = ratio; img.style.objectFit = "cover"; img.style.width = "100%"; }
+  if (img && ratio !== undefined) {
+    img.style.aspectRatio = ratio;
+    img.style.objectFit = "cover";
+    img.style.width = "100%";
+  }
 }
 
 function rehacerRelacion() {
@@ -7039,29 +7044,40 @@ function rehacerRelacion() {
   window._relacionHistorialIdx++;
   const ratio = window._relacionHistorial[window._relacionHistorialIdx];
   const img = document.querySelector("#modal-editar-imagen img");
-  if (img) { img.style.aspectRatio = ratio; img.style.objectFit = "cover"; img.style.width = "100%"; }
+  if (img) {
+    img.style.aspectRatio = ratio;
+    img.style.objectFit = "cover";
+    img.style.width = "100%";
+  }
 }
 
-function cancelarRelacionAspecto(prevRatio) {
+function cancelarRelacionAspecto() {
   const img = document.querySelector("#modal-editar-imagen img");
-  if (img) {
-    img.style.aspectRatio = prevRatio;
+  if (img && img.dataset.prevRatio !== undefined) {
+    img.style.aspectRatio = img.dataset.prevRatio;
     img.style.objectFit = "cover";
     img.style.width = "100%";
     img.style.height = "auto";
+    // Revertir historial
+    if (window._relacionHistorialIdx >= 0) window._relacionHistorialIdx--;
   }
   document.getElementById("editar-relacion-acciones")?.remove();
 }
 
-function guardarRelacionAspecto(url, ratio) {
+function guardarRelacionAspecto(url) {
+  const img = document.querySelector("#modal-editar-imagen img");
+  const ratio = img ? img.style.aspectRatio : "";
   document.getElementById("editar-relacion-acciones")?.remove();
-  // Actualizar la imagen en el chat con la nueva relación
+  // Persistir en la imagen del chat
   const chatImg = document.querySelector(`.msg.bot img[src="${url}"]`);
   if (chatImg) {
     chatImg.style.aspectRatio = ratio;
     chatImg.style.objectFit = "cover";
     chatImg.style.width = "100%";
+    chatImg.dataset.savedRatio = ratio;
   }
+  // También guardar en el modal para que persista al reabrir
+  if (img) img.dataset.savedRatio = ratio;
 }
 
 async function compartirImagen(url) {
