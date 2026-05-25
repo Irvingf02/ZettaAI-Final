@@ -5489,6 +5489,9 @@ function loadSpecificChat(chatId, messages) {
       const img = document.createElement("img");
       img.src = imgUrl;
       img.style.cssText = "width:100%;border-radius:12px;display:block;";
+      // Restaurar relación guardada si existe
+      const savedR = (window._savedRatios || JSON.parse(localStorage.getItem('_savedRatios') || '{}'))[imgUrl];
+      if (savedR) { img.style.aspectRatio = savedR; img.style.objectFit = "cover"; }
       div.appendChild(topBar);
       div.appendChild(img);
       const bottomBarLoad = document.createElement("div");
@@ -6502,7 +6505,7 @@ function editarImagen(url) {
       <button onclick="deshacerRelacion()" style="background:rgba(40,40,40,0.8);border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;margin-left:8px;">&#x21BA;</button>
       <button onclick="rehacerRelacion()" style="background:rgba(40,40,40,0.8);border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;margin-left:8px;">&#x21BB;</button>
     </div>
-    <img src="${url}" id="editar-modal-img" style="width:100%;height:100%;object-fit:contain;" onload="(function(el){window._savedRatios=window._savedRatios||{};const r=window._savedRatios[el.src];if(r){el.style.aspectRatio=r;el.style.objectFit='cover';el.style.width='100%';}})(this)" />
+    <img src="${url}" id="editar-modal-img" style="width:100%;height:100%;object-fit:contain;" onload="(function(el){window._savedRatios=window._savedRatios||JSON.parse(localStorage.getItem('_savedRatios')||'{}');const r=window._savedRatios[el.src];if(r){el.style.aspectRatio=r;el.style.objectFit='cover';el.style.width='100%';}})(this)" />
     <div id="editar-img-bottom" style="position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:rgba(0,0,0,0.7);">
       <div style="display:flex;gap:10px;margin-bottom:10px;">
         <button onclick="editarImagenSeleccionarAreas('${url}')" style="display:none;">&#x25CC; Seleccionar áreas</button>
@@ -7069,8 +7072,9 @@ function guardarRelacionAspecto(url) {
   const ratio = img ? img.style.aspectRatio : "";
   document.getElementById("editar-relacion-acciones")?.remove();
   // Persistir en window._savedRatios usando la URL como key
-  window._savedRatios = window._savedRatios || {};
+  window._savedRatios = window._savedRatios || JSON.parse(localStorage.getItem('_savedRatios') || '{}');
   window._savedRatios[url] = ratio;
+  localStorage.setItem('_savedRatios', JSON.stringify(window._savedRatios));
   // También actualizar todas las imágenes del chat con esa URL
   document.querySelectorAll(".msg.bot img").forEach(function(chatImg) {
     if (chatImg.src === url) {
