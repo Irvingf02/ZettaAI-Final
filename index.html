@@ -7279,6 +7279,24 @@ window.navegarVersion = function(btn, dir) {
     }).catch(e => console.warn("Error:", e));
   }
 };
+
+window.descargarImagen = async function(url, filename) {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename || "zettaxai-imagen.jpg";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch(e) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename || "zettaxai-imagen.jpg";
+    a.target = "_blank";
+    a.click();
+  }
+};
 </script>
 
 <!-- Modal eliminar chat -->
