@@ -4151,8 +4151,11 @@ window.toggleSidebar = function() {
     sidebar.classList.add("sidebar-open");
     if (isDesktop) document.body.classList.add("sidebar-is-open");
     if (mobileBtn) mobileBtn.style.opacity = "0";
+    const historyList = document.getElementById("history-list");
     const _currentChatIdBefore = activeChatId;
-    loadChatHistory().then ? loadChatHistory().then(() => { activeChatId = _currentChatIdBefore; }) : loadChatHistory();
+    if (!historyList || historyList.children.length === 0) {
+      (loadChatHistory().then ? loadChatHistory().then(() => { activeChatId = _currentChatIdBefore; }) : (loadChatHistory(), activeChatId = _currentChatIdBefore));
+    }
   }
 };
 
@@ -4162,6 +4165,8 @@ document.addEventListener("click", function(e) {
   const mobileBtn = document.getElementById("mobilMenuBtn");
   if (!sidebar) return;
   if (!sidebar.classList.contains("sidebar-open")) return;
+  // Si el elemento ya fue removido del DOM (p.ej. por navegarVersion), ignorar
+  if (!document.contains(e.target)) return;
   // Si el clic fue dentro del sidebar o en el propio botón ☰, ignorar
   if (sidebar.contains(e.target) || (mobileBtn && mobileBtn.contains(e.target))) return;
   // No cerrar si el clic fue en botones de navegar versiones o en el área de mensajes
@@ -7180,13 +7185,14 @@ function actualizarNavVersiones(msg) {
     else msg.appendChild(nav);
   }
   nav.innerHTML = `
-    <button onclick="navegarVersion(this,-1)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.85rem;padding:1px 3px;" ${current===0?"disabled":""}>&#x3C;</button>
+    <button onclick="navegarVersion(this,-1,event)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.85rem;padding:1px 3px;" ${current===0?"disabled":""}>&#x3C;</button>
     <span>${current+1}/${total}</span>
-    <button onclick="navegarVersion(this,1)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.85rem;padding:1px 3px;" ${current===total-1?"disabled":""}>&#x3E;</button>
+    <button onclick="navegarVersion(this,1,event)" style="background:none;border:none;cursor:pointer;color:var(--muted,#888);font-size:0.85rem;padding:1px 3px;" ${current===total-1?"disabled":""}>&#x3E;</button>
   `;
 }
 
-window.navegarVersion = function(btn, dir) {
+window.navegarVersion = function(btn, dir, event) {
+  if (event) event.stopPropagation();
   const msg = btn.closest(".msg");
   const versions = JSON.parse(msg.dataset.versions || "[]");
   const replies = JSON.parse(msg.dataset.replies || "[]");
