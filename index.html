@@ -324,7 +324,7 @@
     }
     
     #sidebar.sidebar-open::after {
-      opacity: 1;
+      opacity: 0;
       pointer-events: auto;
     }
     
@@ -348,7 +348,7 @@
     }
 
     #sidebar.sidebar-open::after {
-      opacity: 1;
+      opacity: 0;
       pointer-events: auto;
     }
 
@@ -4151,7 +4151,8 @@ window.toggleSidebar = function() {
     sidebar.classList.add("sidebar-open");
     if (isDesktop) document.body.classList.add("sidebar-is-open");
     if (mobileBtn) mobileBtn.style.opacity = "0";
-    loadChatHistory();
+    const _currentChatIdBefore = activeChatId;
+    loadChatHistory().then ? loadChatHistory().then(() => { activeChatId = _currentChatIdBefore; }) : loadChatHistory();
   }
 };
 
@@ -4163,6 +4164,8 @@ document.addEventListener("click", function(e) {
   if (!sidebar.classList.contains("sidebar-open")) return;
   // Si el clic fue dentro del sidebar o en el propio botón ☰, ignorar
   if (sidebar.contains(e.target) || (mobileBtn && mobileBtn.contains(e.target))) return;
+  // No cerrar si el clic fue en botones de navegar versiones o en el área de mensajes
+  if (e.target.closest(".version-nav") || e.target.closest(".msg")) return;
   sidebar.classList.remove("sidebar-open");
   document.body.classList.remove("sidebar-is-open");
   if (mobileBtn) mobileBtn.style.opacity = "1";
