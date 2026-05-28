@@ -5824,22 +5824,48 @@ window.copiarMensaje = function(btn) {
 
 window.reintentarMensaje = function(btn) {
   const msg = btn.closest(".msg");
+  const box = document.getElementById("messages");
+  const allMsgs = Array.from(box.children);
   const isUser = msg.classList.contains("user");
+
+  let userMsg, text;
+
   if (isUser) {
-    const text = getMsgText(msg);
-    msg.remove();
-    document.getElementById("input").value = text;
-    window.send();
+    userMsg = msg;
+    text = getMsgText(msg);
   } else {
-    const allMsgs = document.querySelectorAll(".msg.user");
-    if (allMsgs.length > 0) {
-      const last = allMsgs[allMsgs.length - 1];
-      const text = getMsgText(last);
-      msg.remove();
-      document.getElementById("input").value = text;
-      window.send();
+    // Es bot: buscar el mensaje de usuario anterior
+    const idx = allMsgs.indexOf(msg);
+    for (let i = idx - 1; i >= 0; i--) {
+      if (allMsgs[i].classList.contains("user")) {
+        userMsg = allMsgs[i];
+        break;
+      }
+    }
+    if (!userMsg) return;
+    text = getMsgText(userMsg);
+  }
+
+  // Eliminar el mensaje de usuario y todos los mensajes posteriores
+  const userIdx = allMsgs.indexOf(userMsg);
+  for (let i = allMsgs.length - 1; i >= userIdx; i--) {
+    allMsgs[i].remove();
+  }
+
+  // Limpiar chatHistory hasta antes del mensaje de usuario eliminado
+  const userMsgsDOM = Array.from(document.querySelectorAll(".msg.user"));
+  const remainingUserCount = userMsgsDOM.length;
+  let count = -1;
+  for (let i = 0; i < chatHistory.length; i++) {
+    if (chatHistory[i].role === "user") count++;
+    if (count === remainingUserCount) {
+      chatHistory = chatHistory.slice(0, i);
+      break;
     }
   }
+
+  document.getElementById("input").value = text;
+  window.send();
 }
 
 window.editarMensaje = function(btn) {
@@ -6289,7 +6315,7 @@ window.send = async () => {
         message: text,
         mode,
         uid:     currentUser.uid,
-        history: chatHistory.slice(-15).map(m => ({ role: m.role, content: m.content }))
+        history: chatHistory.slice(-15)
       })
     });
 
