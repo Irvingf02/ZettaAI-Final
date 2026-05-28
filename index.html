@@ -6353,6 +6353,33 @@ window.send = async () => {
     addMessage(data.reply, "bot");
     chatHistory.push({ role: "assistant", content: data.reply });
 
+    // Restaurar versiones si viene de reintentarMensaje
+    if (window._reintentarVersiones) {
+      const _rv = window._reintentarVersiones;
+      const _allUserBubbles = Array.from(document.querySelectorAll(".msg.user"));
+      const _lastUserBubble = _allUserBubbles[_allUserBubbles.length - 1];
+      if (_lastUserBubble && _rv.versions) {
+        const _existingVersions = JSON.parse(_lastUserBubble.dataset.versions || "[]");
+        const _restoredVersions = _rv.versions;
+        if (!_restoredVersions.includes(text)) _restoredVersions.push(text);
+        _lastUserBubble.dataset.versions = JSON.stringify(_restoredVersions);
+        _lastUserBubble.dataset.currentVersion = String(_restoredVersions.length - 1);
+        if (_rv.replies) {
+          const _replies = JSON.parse(_rv.replies);
+          _replies[_restoredVersions.length - 1] = data.reply;
+          _lastUserBubble.dataset.replies = JSON.stringify(_replies);
+        }
+        actualizarNavVersiones(_lastUserBubble);
+        const _lastUserIdx = chatHistory.map(m=>m.role).lastIndexOf("user");
+        if (_lastUserIdx >= 0) {
+          chatHistory[_lastUserIdx].versions = _restoredVersions;
+          chatHistory[_lastUserIdx].currentVersion = _restoredVersions.length - 1;
+          chatHistory[_lastUserIdx].replies = _lastUserBubble.dataset.replies ? JSON.parse(_lastUserBubble.dataset.replies) : [];
+        }
+      }
+      window._reintentarVersiones = null;
+    }
+
     if (!currentUser.isAnonymous) {
       if (!activeChatId) activeChatId = currentUser.uid + "_" + Date.now();
       const chatId = activeChatId;
