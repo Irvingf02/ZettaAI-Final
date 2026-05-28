@@ -6289,7 +6289,7 @@ window.send = async () => {
         message: text,
         mode,
         uid:     currentUser.uid,
-        history: chatHistory.slice(-15)
+        history: chatHistory.slice(-15).map(m => ({ role: m.role, content: m.content }))
       })
     });
 
