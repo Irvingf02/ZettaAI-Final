@@ -5846,10 +5846,22 @@ window.reintentarMensaje = function(btn) {
     text = getMsgText(userMsg);
   }
 
-  // Preservar versiones antes de eliminar
-  const _savedVersions = userMsg.dataset.versions || null;
-  const _savedCurrentVersion = userMsg.dataset.currentVersion || null;
-  const _savedReplies = userMsg.dataset.replies || null;
+  // Preservar versiones del chatHistory antes de eliminar
+  const userMsgsBeforeDOM = Array.from(document.querySelectorAll(".msg.user"));
+  const targetUserDOMIdx = userMsgsBeforeDOM.indexOf(userMsg);
+  let _savedHistoryEntry = null;
+  let _userHistoryIdx = -1;
+  let userCount = -1;
+  for (let i = 0; i < chatHistory.length; i++) {
+    if (chatHistory[i].role === "user") {
+      userCount++;
+      if (userCount === targetUserDOMIdx) {
+        _savedHistoryEntry = chatHistory[i];
+        _userHistoryIdx = i;
+        break;
+      }
+    }
+  }
 
   // Eliminar el mensaje de usuario y todos los mensajes posteriores
   const userIdx = allMsgs.indexOf(userMsg);
@@ -5858,18 +5870,17 @@ window.reintentarMensaje = function(btn) {
   }
 
   // Limpiar chatHistory hasta antes del mensaje de usuario eliminado
-  const userMsgsDOM = Array.from(document.querySelectorAll(".msg.user"));
-  const remainingUserCount = userMsgsDOM.length;
-  let count = -1;
-  for (let i = 0; i < chatHistory.length; i++) {
-    if (chatHistory[i].role === "user") count++;
-    if (count === remainingUserCount) {
-      chatHistory = chatHistory.slice(0, i);
-      break;
-    }
+  if (_userHistoryIdx >= 0) {
+    chatHistory = chatHistory.slice(0, _userHistoryIdx);
   }
 
-  window._reintentarVersiones = { versions: _savedVersions, currentVersion: _savedCurrentVersion, replies: _savedReplies };
+  // Guardar datos de versiones para restaurar en el nuevo bubble
+  window._reintentarVersiones = _savedHistoryEntry ? {
+    versions: _savedHistoryEntry.versions || null,
+    currentVersion: _savedHistoryEntry.currentVersion != null ? _savedHistoryEntry.currentVersion : null,
+    replies: _savedHistoryEntry.replies || null
+  } : null;
+
   document.getElementById("input").value = text;
   window.send();
 }
@@ -6152,13 +6163,13 @@ window.send = async () => {
 
   if (validaciones[mode] && !validaciones[mode](text)) return;
 
-  const _newUserBubble = addMessage(text + (pendingFile ? `\n📎 ${pendingFile.name}` : ""), "user");
-  if (window._reintentarVersiones && _newUserBubble) {
+  const _userBubble = addMessage(text + (pendingFile ? `\n📎 ${pendingFile.name}` : ""), "user");
+  if (window._reintentarVersiones && _userBubble) {
     const _rv = window._reintentarVersiones;
-    if (_rv.versions) _newUserBubble.dataset.versions = _rv.versions;
-    if (_rv.currentVersion) _newUserBubble.dataset.currentVersion = _rv.currentVersion;
-    if (_rv.replies) _newUserBubble.dataset.replies = _rv.replies;
-    actualizarNavVersiones(_newUserBubble);
+    if (_rv.versions) _userBubble.dataset.versions = JSON.stringify(_rv.versions);
+    if (_rv.currentVersion != null) _userBubble.dataset.currentVersion = String(_rv.currentVersion);
+    if (_rv.replies) _userBubble.dataset.replies = JSON.stringify(_rv.replies);
+    actualizarNavVersiones(_userBubble);
     window._reintentarVersiones = null;
   }
   input.value       = "";
