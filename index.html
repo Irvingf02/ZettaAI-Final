@@ -5846,6 +5846,11 @@ window.reintentarMensaje = function(btn) {
     text = getMsgText(userMsg);
   }
 
+  // Preservar versiones antes de eliminar
+  const _savedVersions = userMsg.dataset.versions || null;
+  const _savedCurrentVersion = userMsg.dataset.currentVersion || null;
+  const _savedReplies = userMsg.dataset.replies || null;
+
   // Eliminar el mensaje de usuario y todos los mensajes posteriores
   const userIdx = allMsgs.indexOf(userMsg);
   for (let i = allMsgs.length - 1; i >= userIdx; i--) {
@@ -5864,6 +5869,7 @@ window.reintentarMensaje = function(btn) {
     }
   }
 
+  window._reintentarVersiones = { versions: _savedVersions, currentVersion: _savedCurrentVersion, replies: _savedReplies };
   document.getElementById("input").value = text;
   window.send();
 }
@@ -6146,7 +6152,15 @@ window.send = async () => {
 
   if (validaciones[mode] && !validaciones[mode](text)) return;
 
-  addMessage(text + (pendingFile ? `\n📎 ${pendingFile.name}` : ""), "user");
+  const _newUserBubble = addMessage(text + (pendingFile ? `\n📎 ${pendingFile.name}` : ""), "user");
+  if (window._reintentarVersiones && _newUserBubble) {
+    const _rv = window._reintentarVersiones;
+    if (_rv.versions) _newUserBubble.dataset.versions = _rv.versions;
+    if (_rv.currentVersion) _newUserBubble.dataset.currentVersion = _rv.currentVersion;
+    if (_rv.replies) _newUserBubble.dataset.replies = _rv.replies;
+    actualizarNavVersiones(_newUserBubble);
+    window._reintentarVersiones = null;
+  }
   input.value       = "";
   input.placeholder = "Escribe un mensaje...";
   pendingFile       = null;
