@@ -5875,6 +5875,7 @@ window.reintentarMensaje = function(btn) {
   }
 
   // Guardar datos de versiones para restaurar en el nuevo bubble
+  window._esReintentar = true;
   window._reintentarVersiones = _savedHistoryEntry ? {
     versions: _savedHistoryEntry.versions || null,
     currentVersion: _savedHistoryEntry.currentVersion != null ? _savedHistoryEntry.currentVersion : null,
@@ -6352,7 +6353,7 @@ window.send = async () => {
       const _ub = _allUserBubbles[_allUserBubbles.length - 1];
       if (_ub && _rv.versions) {
         const _versions = _rv.versions.slice();
-        _versions.push(text);
+        if (!_versions.includes(text)) _versions.push(text);
         _ub.dataset.versions = JSON.stringify(_versions);
         _ub.dataset.currentVersion = String(_versions.length - 1);
         const _replies = _rv.replies ? _rv.replies.slice() : [];
@@ -6367,6 +6368,7 @@ window.send = async () => {
         actualizarNavVersiones(_ub);
       }
       window._reintentarVersiones = null;
+      window._esReintentar = false;
     }
 
     if (!currentUser.isAnonymous) {
@@ -6378,7 +6380,7 @@ window.send = async () => {
         body: JSON.stringify({ userId: currentUser.uid, chatId, title: text.substring(0, 50), messages: chatHistory })
       }).catch(e => console.warn("Error guardando chat:", e));
       sessionStorage.setItem("zettax_last_chat", chatId);
-      await incrementarContador(mode);
+      if (!window._esReintentar) await incrementarContador(mode);
     }
   } catch (e) {
     typing.remove();
