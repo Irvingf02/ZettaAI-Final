@@ -6236,6 +6236,30 @@ window.send = async () => {
         // Guardar imagen en historial
         chatHistory.push({ role: "user", content: text });
         chatHistory.push({ role: "assistant", content: "🎨 Imagen generada: " + data.imageUrl });
+
+        if (window._reintentarVersiones) {
+          const _rv = window._reintentarVersiones;
+          const _allUserBubbles = Array.from(document.querySelectorAll(".msg.user"));
+          const _ub = _allUserBubbles[_allUserBubbles.length - 1];
+          if (_ub && _rv.versions) {
+            const _versions = _rv.versions.slice();
+            _versions.push(text);
+            _ub.dataset.versions = JSON.stringify(_versions);
+            _ub.dataset.currentVersion = String(_versions.length - 1);
+            const _replies = _rv.replies ? _rv.replies.slice() : [];
+            _replies[_versions.length - 1] = data.imageUrl;
+            _ub.dataset.replies = JSON.stringify(_replies);
+            const _lastUserIdx = chatHistory.map(m=>m.role).lastIndexOf("user");
+            if (_lastUserIdx >= 0) {
+              chatHistory[_lastUserIdx].versions = _versions;
+              chatHistory[_lastUserIdx].currentVersion = _versions.length - 1;
+              chatHistory[_lastUserIdx].replies = _replies;
+            }
+            actualizarNavVersiones(_ub);
+          }
+          window._reintentarVersiones = null;
+        }
+
         if (!currentUser.isAnonymous) {
           if (!activeChatId) activeChatId = currentUser.uid + "_" + Date.now();
           fetch(`${BACKEND_URL}/chats`, {
@@ -6249,7 +6273,8 @@ window.send = async () => {
       }
 
       if (!currentUser.isAnonymous) {
-        await incrementarContador("imagen");
+        if (!window._esReintentar) await incrementarContador("imagen");
+        window._esReintentar = false;
       }
     } catch (e) {
       document.querySelector(".typing") && document.querySelector(".typing").remove();
