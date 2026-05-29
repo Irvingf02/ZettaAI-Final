@@ -7071,6 +7071,7 @@ function editarImagenRelacion(url) {
 // Historial de relaciones para deshacer/rehacer
 window._relacionHistorial = [];
 window._relacionHistorialIdx = -1;
+window._savedRatios = JSON.parse(localStorage.getItem("_savedRatios") || "{}");
 
 function aplicarRelacionAspecto(url, relacion) {
   document.getElementById("editar-relacion-wrap")?.remove();
@@ -7165,6 +7166,7 @@ function guardarRelacionAspecto(url) {
   // Persistir en window._savedRatios usando la URL como key
   window._savedRatios = window._savedRatios || {};
   window._savedRatios[url] = ratio;
+  localStorage.setItem("_savedRatios", JSON.stringify(window._savedRatios));
   // También actualizar todas las imágenes del chat con esa URL
   document.querySelectorAll(".msg.bot img").forEach(function(chatImg) {
     if (chatImg.src === url) {
