@@ -6368,7 +6368,6 @@ window.send = async () => {
         actualizarNavVersiones(_ub);
       }
       window._reintentarVersiones = null;
-      window._esReintentar = false;
     }
 
     if (!currentUser.isAnonymous) {
@@ -6381,6 +6380,7 @@ window.send = async () => {
       }).catch(e => console.warn("Error guardando chat:", e));
       sessionStorage.setItem("zettax_last_chat", chatId);
       if (!window._esReintentar) await incrementarContador(mode);
+      window._esReintentar = false;
     }
   } catch (e) {
     typing.remove();
