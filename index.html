@@ -6353,7 +6353,7 @@ window.send = async () => {
       const _ub = _allUserBubbles[_allUserBubbles.length - 1];
       if (_ub && _rv.versions) {
         const _versions = _rv.versions.slice();
-        if (!_versions.includes(text)) _versions.push(text);
+        _versions.push(text);
         _ub.dataset.versions = JSON.stringify(_versions);
         _ub.dataset.currentVersion = String(_versions.length - 1);
         const _replies = _rv.replies ? _rv.replies.slice() : [];
