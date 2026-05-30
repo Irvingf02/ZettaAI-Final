@@ -5759,16 +5759,158 @@ window.getMsgText = function(msg) {
   return clone.textContent.trim();
 }
 
+
+function renderBotMessage(text) {
+  const wrapper = document.createDocumentFragment();
+  const codeBlockRegex = /```(\w+)?\n?([\s\S]*?)```/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = codeBlockRegex.exec(text)) !== null) {
+    // Text before code block
+    if (match.index > lastIndex) {
+      const pre = document.createElement("span");
+      pre.className = "msg-text";
+      pre.style.display = "block";
+      pre.textContent = text.slice(lastIndex, match.index).trim();
+      if (pre.textContent) wrapper.appendChild(pre);
+    }
+
+    const lang = (match[1] || "plaintext").toLowerCase();
+    const code = match[2].trim();
+    const ext = { html:"html", javascript:"js", js:"js", css:"css", python:"py", py:"py", java:"java", json:"json", bash:"sh", sh:"sh", typescript:"ts", ts:"ts" }[lang] || "txt";
+    const langLabel = lang.charAt(0).toUpperCase() + lang.slice(1);
+    const fileName = "codigo." + ext;
+
+    const panel = document.createElement("div");
+    panel.style.cssText = "border-radius:10px;overflow:hidden;background:#1a1a2e;border:1px solid #333;margin:8px 0;";
+
+    // Header
+    const header = document.createElement("div");
+    header.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#12121f;border-bottom:1px solid #333;";
+
+    const leftSide = document.createElement("div");
+    leftSide.style.cssText = "display:flex;align-items:center;gap:8px;";
+
+    const eyeBtn = document.createElement("button");
+    eyeBtn.innerHTML = "&#128065;";
+    eyeBtn.title = "Vista previa";
+    eyeBtn.style.cssText = "background:none;border:none;cursor:pointer;color:#aaa;font-size:1rem;padding:2px 5px;border-radius:4px;";
+
+    const codeBtn = document.createElement("button");
+    codeBtn.innerHTML = "{ }";
+    codeBtn.title = "Ver código";
+    codeBtn.style.cssText = "background:none;border:none;cursor:pointer;color:#fff;font-size:0.85rem;font-weight:700;padding:2px 5px;border-radius:4px;";
+
+    const langName = document.createElement("span");
+    langName.textContent = fileName + " · " + langLabel;
+    langName.style.cssText = "font-size:0.78rem;color:#aaa;";
+
+    leftSide.appendChild(eyeBtn);
+    leftSide.appendChild(codeBtn);
+    leftSide.appendChild(langName);
+
+    const rightSide = document.createElement("div");
+    rightSide.style.cssText = "display:flex;align-items:center;gap:6px;";
+
+    const copyBtn = document.createElement("button");
+    copyBtn.textContent = "Copiar";
+    copyBtn.style.cssText = "background:#2a2a4a;border:none;cursor:pointer;color:#fff;font-size:0.78rem;padding:4px 10px;border-radius:6px;";
+
+    const dlBtn = document.createElement("a");
+    dlBtn.href = "data:text/plain;charset=utf-8," + encodeURIComponent(code);
+    dlBtn.download = fileName;
+    dlBtn.innerHTML = "&#x2193;";
+    dlBtn.title = "Descargar";
+    dlBtn.style.cssText = "background:#2a2a4a;border:none;cursor:pointer;color:#fff;font-size:0.9rem;padding:4px 8px;border-radius:6px;text-decoration:none;";
+
+    rightSide.appendChild(copyBtn);
+    rightSide.appendChild(dlBtn);
+    header.appendChild(leftSide);
+    header.appendChild(rightSide);
+
+    // Code view
+    const pre = document.createElement("pre");
+    pre.style.cssText = "margin:0;padding:14px;overflow-x:auto;";
+    const codeEl = document.createElement("code");
+    codeEl.className = "language-" + lang;
+    codeEl.textContent = code;
+    pre.appendChild(codeEl);
+
+    // Preview view
+    const preview = document.createElement("div");
+    preview.style.cssText = "display:none;width:100%;min-height:120px;background:#fff;";
+    if (lang === "html") {
+      const iframe = document.createElement("iframe");
+      iframe.style.cssText = "width:100%;min-height:200px;border:none;background:#fff;";
+      iframe.srcdoc = code;
+      preview.appendChild(iframe);
+    } else {
+      preview.style.cssText = "display:none;padding:12px;color:#aaa;font-size:0.85rem;background:#12121f;";
+      preview.textContent = "Vista previa solo disponible para HTML.";
+    }
+
+    panel.appendChild(header);
+    panel.appendChild(pre);
+    panel.appendChild(preview);
+    wrapper.appendChild(panel);
+
+    // Button events
+    let showingCode = true;
+    eyeBtn.onclick = () => {
+      showingCode = false;
+      pre.style.display = "none";
+      preview.style.display = "block";
+      eyeBtn.style.color = "#fff";
+      codeBtn.style.color = "#aaa";
+    };
+    codeBtn.onclick = () => {
+      showingCode = true;
+      pre.style.display = "block";
+      preview.style.display = "none";
+      codeBtn.style.color = "#fff";
+      eyeBtn.style.color = "#aaa";
+    };
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(code).then(() => {
+        copyBtn.textContent = "✅ Copiado";
+        setTimeout(() => copyBtn.textContent = "Copiar", 1500);
+      });
+    };
+
+    // Highlight
+    if (window.hljs) hljs.highlightElement(codeEl);
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Remaining text after last code block
+  if (lastIndex < text.length) {
+    const rest = document.createElement("span");
+    rest.className = "msg-text";
+    rest.style.display = "block";
+    rest.textContent = text.slice(lastIndex).trim();
+    if (rest.textContent) wrapper.appendChild(rest);
+  }
+
+  return wrapper;
+}
+
 function addMessage(text, role, extra = "") {
   window._addMessage = addMessage;
   const div = document.createElement("div");
   div.className = `msg ${role}`;
 
   // Texto en span para separarlo de los botones
-  const textSpan = document.createElement("span");
-  textSpan.className = "msg-text";
-  textSpan.textContent = text;
-  div.appendChild(textSpan);
+  if (role === "bot" && text && text.includes("```")) {
+    const rendered = renderBotMessage(text);
+    div.appendChild(rendered);
+  } else {
+    const textSpan = document.createElement("span");
+    textSpan.className = "msg-text";
+    textSpan.textContent = text;
+    div.appendChild(textSpan);
+  }
 
   if (extra) {
     const meta = document.createElement("div");
