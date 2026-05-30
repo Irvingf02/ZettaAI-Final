@@ -5939,6 +5939,9 @@ window.editarMensaje = function(btn) {
     const originalBotReply = botMsgActual && botMsgActual.classList.contains("bot")
       ? (botMsgActual.querySelector(".msg-text")?.textContent || "")
       : "";
+    const originalBotImageUrl = botMsgActual && botMsgActual.classList.contains("bot")
+      ? (botMsgActual.querySelector("img")?.src || "")
+      : "";
 
     // Eliminar mensajes posteriores
     for (let i = allMsgs.length - 1; i > msgIdx; i--) allMsgs[i].remove();
@@ -5995,15 +5998,8 @@ window.editarMensaje = function(btn) {
         const curVerImg = versionsImg.length - 1;
         msg.dataset.currentVersion = String(curVerImg);
         const repliesImg = JSON.parse(msg.dataset.replies || "[]");
-        if (!repliesImg[0]) {
-          // Capturar imagen original del DOM antes de que se haya eliminado
-          const allMsgsTmp = Array.from(document.getElementById("messages").children);
-          const msgIdxTmp = allMsgsTmp.indexOf(msg);
-          const botOriginal = allMsgsTmp[msgIdxTmp + 1];
-          if (botOriginal && botOriginal.classList.contains("bot")) {
-            const imgEl = botOriginal.querySelector("img");
-            if (imgEl) repliesImg[0] = "🎨 Imagen generada: " + imgEl.src;
-          }
+        if (!repliesImg[0] && originalBotImageUrl) {
+          repliesImg[0] = "🎨 Imagen generada: " + originalBotImageUrl;
         }
         if (data.imageUrl) repliesImg[curVerImg] = "🎨 Imagen generada: " + data.imageUrl;
         msg.dataset.replies = JSON.stringify(repliesImg);
