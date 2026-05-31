@@ -652,6 +652,17 @@
     word-break: break-word;
   }
 
+  .msg.has-code {
+    max-width: 98%;
+    white-space: normal;
+  }
+
+  @media (min-width: 768px) {
+    .msg.has-code {
+      max-width: 90%;
+    }
+  }
+
   .msg.user {
     background: var(--user-bg);
     border: 1px solid rgba(0,212,255,0.2);
@@ -5903,6 +5914,7 @@ function addMessage(text, role, extra = "") {
 
   // Texto en span para separarlo de los botones
   if (role === "bot" && text && text.includes("```")) {
+    div.classList.add("has-code");
     const rendered = renderBotMessage(text);
     div.appendChild(rendered);
   } else {
