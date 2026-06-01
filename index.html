@@ -7443,10 +7443,10 @@ window.navegarVersion = function(btn, dir) {
     const replyText = nextMsg.querySelector(".msg-text");
     const replyImg = nextMsg.querySelector("img");
     const replyContent = replyText ? replyText.textContent : "";
-    if (replyContent) {
-      replies[current] = replyContent;
-    } else if (replyImg) {
+    if (replyImg) {
       replies[current] = "🎨 Imagen generada: " + replyImg.src;
+    } else if (replyContent) {
+      replies[current] = replyContent;
     } else {
       const userMsgsTmp = Array.from(document.querySelectorAll(".msg.user"));
       const userIdxTmp = userMsgsTmp.indexOf(msg);
@@ -7489,7 +7489,7 @@ window.navegarVersion = function(btn, dir) {
       imgDiv.appendChild(bottomBarNav);
       document.getElementById("messages").appendChild(imgDiv);
     } else {
-      window._addMessage(replies[newIdx], "bot");
+      addMessage(replies[newIdx], "bot");
     }
   }
 
