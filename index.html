@@ -5456,7 +5456,7 @@ async function loadChatHistory() {
       });
 
       item.querySelector(".chat-item-main").addEventListener("click", () => {
-        loadSpecificChat(chat.id, chat.messages || []);
+        loadSpecificChat(chat.id, chat.messages || [], chat.mode);
         if (window.innerWidth < 1024) toggleSidebar();
       });
 
@@ -5472,21 +5472,24 @@ async function loadChatHistory() {
     const activeChatId = window._getActiveChatId ? window._getActiveChatId() : null;
     if (lastChatId && !activeChatId) {
       const lastChat = json.chats.find(c => c.id === lastChatId);
-      if (lastChat) loadSpecificChat(lastChat.id, lastChat.messages || []);
+      if (lastChat) loadSpecificChat(lastChat.id, lastChat.messages || [], lastChat.mode);
     }
   } catch (error) {
     list.innerHTML = "";
   }
 }
 
-function loadSpecificChat(chatId, messages) {
+function loadSpecificChat(chatId, messages, chatMode) {
   const box = document.getElementById("messages");
   box.innerHTML = "";
   chatHistory = [];
   activeChatId = chatId;
   sessionStorage.setItem("zettax_last_chat", chatId);
+  if (chatMode && window.setMode) setTimeout(() => window.setMode(chatMode), 0);
+else {
   const savedMode = sessionStorage.getItem("zettax_last_mode");
   if (savedMode && window.setMode) setTimeout(() => window.setMode(savedMode), 0);
+}
   const renderedDivs = [];
   messages.forEach(m => {
     let div;
@@ -6178,7 +6181,7 @@ window.editarMensaje = function(btn) {
           fetch(`${BACKEND_URL}/chats`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chTmp[0]?.content?.substring(0,50) || "Chat", messages: chTmp })
+            body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chTmp[0]?.content?.substring(0,50) || "Chat", messages: chTmp, mode: mode })
           }).catch(e => console.warn("Error guardando:", e));
         }
         return;
@@ -6221,7 +6224,7 @@ window.editarMensaje = function(btn) {
         fetch(`${BACKEND_URL}/chats`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chatHistory[0]?.content?.substring(0,50) || "Chat", messages: chatHistory })
+          body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chatHistory[0]?.content?.substring(0,50) || "Chat", messages: chatHistory, mode: mode })
         }).catch(e => console.warn("Error guardando:", e));
       }
     } catch(e) {
@@ -6416,7 +6419,7 @@ window.send = async () => {
           fetch(`${BACKEND_URL}/chats`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: text.substring(0, 50), messages: chatHistory })
+            body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: text.substring(0, 50), messages: chatHistory, mode: mode })
           }).catch(e => console.warn("Error guardando chat:", e));
         }
       } else {
@@ -6552,7 +6555,7 @@ window.send = async () => {
       fetch(`${BACKEND_URL}/chats`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: currentUser.uid, chatId, title: text.substring(0, 50), messages: chatHistory })
+        body: JSON.stringify({ userId: currentUser.uid, chatId, title: text.substring(0, 50), messages: chatHistory, mode: mode })
       }).catch(e => console.warn("Error guardando chat:", e));
       sessionStorage.setItem("zettax_last_chat", chatId);
       if (!window._esReintentar) await incrementarContador(mode);
@@ -6713,7 +6716,7 @@ function filtrarChats(query) {
 function seleccionarChatBuscado(chatId) {
   document.getElementById("modal-buscar").style.display = "none";
   const chat = (window._todosLosChats||[]).find(c => c.id === chatId);
-  if (chat) loadSpecificChat(chat.id, chat.messages || []);
+  if (chat) loadSpecificChat(chat.id, chat.messages || [], chat.mode);
 }
 
 document.addEventListener("keydown", e => {
@@ -7171,7 +7174,7 @@ function editarImagenSeleccionarAreas(url) {
             fetch(`https://zettax-ai-pnhu.vercel.app/api/chats`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: instruccion.substring(0,50), messages: chatHistory })
+              body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: instruccion.substring(0,50), messages: chatHistory, mode: mode })
             }).catch(e => console.warn("Error guardando:", e));
           }
         } else {
@@ -7366,7 +7369,7 @@ window.toggleReaccion = function(btn, tipo) {
     fetch(`${BACKEND_URL}/chats`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chatHistory[0]?.content?.substring(0,50) || "Chat", messages: chatHistory })
+      body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chatHistory[0]?.content?.substring(0,50) || "Chat", messages: chatHistory, mode: mode })
     }).catch(e => console.warn("Error guardando reacción:", e));
   }
 };
@@ -7523,7 +7526,7 @@ window.navegarVersion = function(btn, dir) {
     fetch(`${BACKEND_URL}/chats`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chatHistory[0]?.content?.substring(0,50) || "Chat", messages: chatHistory })
+      body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chatHistory[0]?.content?.substring(0,50) || "Chat", messages: chatHistory, mode: mode })
     }).catch(e => console.warn("Error:", e));
   }
 };
