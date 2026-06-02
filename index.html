@@ -6398,7 +6398,7 @@ window.send = async () => {
             _ub.dataset.versions = JSON.stringify(_versions);
             _ub.dataset.currentVersion = String(_versions.length - 1);
             const _replies = _rv.replies ? _rv.replies.slice() : [];
-            _replies[_versions.length - 1] = data.imageUrl;
+            _replies[_versions.length - 1] = "🎨 Imagen generada: " + data.imageUrl;
             _ub.dataset.replies = JSON.stringify(_replies);
             const _lastUserIdx = chatHistory.map(m=>m.role).lastIndexOf("user");
             if (_lastUserIdx >= 0) {
