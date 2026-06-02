@@ -5467,9 +5467,10 @@ async function loadChatHistory() {
       document.querySelectorAll(".chat-menu-dropdown").forEach(d => d.style.display = "none");
     });
 
-    // Restaurar último chat abierto
+    // Restaurar último chat abierto solo si no hay un chat activo ya cargado
     const lastChatId = sessionStorage.getItem("zettax_last_chat");
-    if (lastChatId) {
+    const activeChatId = window._getActiveChatId ? window._getActiveChatId() : null;
+    if (lastChatId && !activeChatId) {
       const lastChat = json.chats.find(c => c.id === lastChatId);
       if (lastChat) loadSpecificChat(lastChat.id, lastChat.messages || []);
     }
