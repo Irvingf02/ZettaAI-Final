@@ -4459,7 +4459,7 @@ window.startPerl = function() {
   closeGems();
 
   // Activar modo correspondiente
-  if (window.setMode) setMode(data.chatMode || "chat");
+  if (window.setMode) setMode(data.chatMode || "chat", true);
 
   // Construir mensaje de inicio con contexto
   var contexto = "🪩 Perl activada: " + name + "\n";
@@ -4535,7 +4535,7 @@ window.usarGem = function(name) {
     "Escritor creativo": "chat",
   };
   const modo = modos[name] || "chat";
-  if (window.setMode) setMode(modo);
+  if (window.setMode) setMode(modo, true);
   const input = document.getElementById("input");
   if (input) input.focus();
 };
@@ -5485,10 +5485,10 @@ function loadSpecificChat(chatId, messages, chatMode) {
   chatHistory = [];
   activeChatId = chatId;
   sessionStorage.setItem("zettax_last_chat", chatId);
-  if (chatMode && window.setMode) setTimeout(() => window.setMode(chatMode), 0);
+  if (chatMode && window.setMode) setTimeout(() => window.setMode(chatMode, true), 0);
 else {
   const savedMode = sessionStorage.getItem("zettax_last_mode");
-  if (savedMode && window.setMode) setTimeout(() => window.setMode(savedMode), 0);
+  if (savedMode && window.setMode) setTimeout(() => window.setMode(savedMode, true), 0);
 }
   const renderedDivs = [];
   messages.forEach(m => {
@@ -5546,8 +5546,11 @@ const MODOS = {
   codigo:  { emoji: "💻", title: "Asistente de Código", desc: "Escribe, explica y depura código", premium: false }
 };
 
-window.setMode = (m) => {
+window.setMode = (m, fromLoad = false ) => {
   if (MODOS[m].premium && !isPremium) { showPaywall(); return; }
+  if (!fromLoad && mode !== m && chatHistory.length > 0) {
+    newChat();
+  }
   mode = m;
   sessionStorage.setItem("zettax_last_mode", m);
   document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
