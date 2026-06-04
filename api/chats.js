@@ -17,7 +17,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "POST") {
-    const { userId, chatId, title, messages } = req.body;
+    const { userId, chatId, title, messages, mode } = req.body;
     if (!userId || !chatId) return res.status(400).json({ error: "Se requiere userId y chatId." });
     try {
       await db.upsertChat(chatId, userId, title || "Chat nuevo", messages || []);

@@ -31,8 +31,8 @@ export const db = {
     const { data } = await supabase.from("chats").select("*").eq("user_id", userId).order("timestamp", { ascending: false }).limit(20);
     return data || [];
   },
-  async upsertChat(chatId, userId, title, messages) {
-    await supabase.from("chats").upsert({ id: chatId, user_id: userId, title, messages, timestamp: Date.now() }, { onConflict: "id" });
+  async upsertChat(chatId, userId, title, messages, mode) {
+    await supabase.from("chats").upsert({ id: chatId, user_id: userId, title, messages, mode: mode || "chat", timestamp: Date.now() }, { onConflict: "id" });
   },
   async deleteChat(chatId) {
     await supabase.from("chats").delete().eq("id", chatId);
