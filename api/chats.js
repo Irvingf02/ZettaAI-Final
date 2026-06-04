@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     const { userId, chatId, title, messages, mode } = req.body;
     if (!userId || !chatId) return res.status(400).json({ error: "Se requiere userId y chatId." });
     try {
-      await db.upsertChat(chatId, userId, title || "Chat nuevo", messages || []);
+      await db.upsertChat(chatId, userId, title || "Chat nuevo", messages || [], mode);
       return res.status(200).json({ ok: true });
     } catch (e) {
       return res.status(500).json({ error: e.message });
