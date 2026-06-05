@@ -2902,8 +2902,26 @@
     <div style="text-align:center; font-size:0.85rem; color:#aaa; margin-bottom:4px;">Completa tus datos para registrarte</div>
     <input class="styled-input" type="text" id="reg-name" placeholder="Nombre o apodo" style="width:100%; box-sizing:border-box;" />
     <input class="styled-input" type="email" id="reg-email" placeholder="Correo electrónico" style="width:100%; box-sizing:border-box;" />
-    <input class="styled-input" type="password" id="reg-pass" placeholder="Contraseña" style="width:100%; box-sizing:border-box;" />
-    <input class="styled-input" type="password" id="reg-pass2" placeholder="Confirmar contraseña" style="width:100%; box-sizing:border-box;" />
+    <input class="styled-input" type="password" id="reg-pass" placeholder="Contraseña" style="width:100%; box-sizing:border-box;" oninput="checkPassStrength(this.value)" />
+<div id="pass-strength-bar" style="height:4px; border-radius:4px; background:#333; margin-top:-8px;"><div id="pass-strength-fill" style="height:4px; border-radius:4px; width:0; transition:width 0.3s, background 0.3s;"></div></div>
+<div id="pass-strength-label" style="font-size:0.75rem; color:#aaa; margin-top:-4px;"></div>
+<div id="pass-reqs" style="font-size:0.75rem; color:#aaa; line-height:1.7;">
+  <span id="req-len">✗ Mínimo 8 caracteres</span><br>
+  <span id="req-upper">✗ Una mayúscula</span><br>
+  <span id="req-lower">✗ Una minúscula</span><br>
+  <span id="req-num">✗ Un número</span><br>
+  <span id="req-sym">✗ Un símbolo ($!#%&)</span>
+</div>
+    <input class="styled-input" type="password" id="reg-pass2" placeholder="Confirmar contraseña" style="width:100%; box-sizing:border-box;" oninput="checkPassStrength(this.value)" />
+<div id="pass-strength-bar" style="height:4px; border-radius:4px; background:#333; margin-top:-8px;"><div id="pass-strength-fill" style="height:4px; border-radius:4px; width:0; transition:width 0.3s, background 0.3s;"></div></div>
+<div id="pass-strength-label" style="font-size:0.75rem; color:#aaa; margin-top:-4px;"></div>
+<div id="pass-reqs" style="font-size:0.75rem; color:#aaa; line-height:1.7;">
+  <span id="req-len">✗ Mínimo 8 caracteres</span><br>
+  <span id="req-upper">✗ Una mayúscula</span><br>
+  <span id="req-lower">✗ Una minúscula</span><br>
+  <span id="req-num">✗ Un número</span><br>
+  <span id="req-sym">✗ Un símbolo ($!#%&)</span>
+</div>
     <div id="reg-error" style="color:#ff6b6b; font-size:0.82rem; text-align:center; min-height:18px;"></div>
     <div style="display:flex; gap:10px;">
       <button class="btn btn-ghost" onclick="closeRegisterModal()" style="flex:1;">Cancelar</button>
@@ -3794,6 +3812,31 @@ function updateUserProfile(user) {
   if (el("accountItemName")) el("accountItemName").textContent = user.isAnonymous ? "Invitado" : displayName;
   if (el("accountItemEmail"))el("accountItemEmail").textContent= user.isAnonymous ? "" : email;
 }
+
+window.checkPassStrength = (pass) => {
+  const reqs = [
+    { id: "req-len",   test: pass.length >= 8,       label: "Mínimo 8 caracteres" },
+    { id: "req-upper", test: /[A-Z]/.test(pass),      label: "Una mayúscula" },
+    { id: "req-lower", test: /[a-z]/.test(pass),      label: "Una minúscula" },
+    { id: "req-num",   test: /[0-9]/.test(pass),      label: "Un número" },
+    { id: "req-sym",   test: /[$!#%&]/.test(pass),    label: "Un símbolo ($!#%&)" }
+  ];
+  let score = reqs.filter(r => r.test).length;
+  reqs.forEach(r => {
+    const el = document.getElementById(r.id);
+    if (el) { el.textContent = (r.test ? "✓ " : "✗ ") + r.label; el.style.color = r.test ? "#4caf50" : "#aaa"; }
+  });
+  const fill = document.getElementById("pass-strength-fill");
+  const label = document.getElementById("pass-strength-label");
+  if (!fill || !label) return;
+  const levels = ["", "#ff4444", "#ff9800", "#ffeb3b", "#8bc34a", "#4caf50"];
+  const labels = ["", "Muy débil", "Débil", "Media", "Fuerte", "Muy fuerte"];
+  fill.style.width = (score * 20) + "%";
+  fill.style.background = levels[score] || "#333";
+  label.textContent = pass.length > 0 ? labels[score] : "";
+  label.style.color = levels[score] || "#aaa";
+};
+
 window.openRegisterModal = () => {
   document.getElementById("registerModal").style.display = "flex";
 };
@@ -3815,7 +3858,15 @@ window.register = async () => {
   errEl.textContent = "";
   if (!name || !email || !pass || !pass2) { errEl.textContent = "Completa todos los campos."; return; }
   if (pass !== pass2) { errEl.textContent = "Las contraseñas no coinciden."; return; }
-  if (pass.length < 6) { errEl.textContent = "La contraseña debe tener al menos 6 caracteres."; return; }
+  const passReqs = [
+  { test: pass.length >= 8, msg: "Mínimo 8 caracteres" },
+  { test: /[A-Z]/.test(pass), msg: "Una mayúscula" },
+  { test: /[a-z]/.test(pass), msg: "Una minúscula" },
+  { test: /[0-9]/.test(pass), msg: "Un número" },
+  { test: /[$!#%&]/.test(pass), msg: "Un símbolo ($!#%&)" }
+];
+const failing = passReqs.filter(r => !r.test);
+if (failing.length > 0) { errEl.textContent = "La contraseña debe tener: " + failing.map(r => r.msg).join(", ") + "."; return; }
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await updateProfile(cred.user, { displayName: name });
