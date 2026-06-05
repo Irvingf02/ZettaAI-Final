@@ -2846,7 +2846,7 @@
       onkeypress="if(event.key==='Enter') login()" />
   </div>
   <div class="btn-row">
-    <button class="btn btn-ghost" onclick="register()">Registrar</button>
+    <button class="btn btn-ghost" onclick="openRegisterModal()">Registrar</button>
     <button class="btn btn-primary" onclick="login()">Entrar</button>
   </div>
   <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px; width: 100%;">
@@ -2894,6 +2894,23 @@
     deferredInstallPrompt = null;
   });
 </script>
+
+<!-- MODAL REGISTRO -->
+<div id="registerModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; display:none; align-items:center; justify-content:center;">
+  <div style="background:var(--bg, #1a1a2e); border-radius:20px; padding:32px 28px; width:90%; max-width:400px; display:flex; flex-direction:column; gap:14px;">
+    <div style="text-align:center; font-size:1.6rem; font-weight:800; color:var(--text, #fff);">Crear cuenta</div>
+    <div style="text-align:center; font-size:0.85rem; color:#aaa; margin-bottom:4px;">Completa tus datos para registrarte</div>
+    <input class="styled-input" type="text" id="reg-name" placeholder="Nombre o apodo" style="width:100%; box-sizing:border-box;" />
+    <input class="styled-input" type="email" id="reg-email" placeholder="Correo electrónico" style="width:100%; box-sizing:border-box;" />
+    <input class="styled-input" type="password" id="reg-pass" placeholder="Contraseña" style="width:100%; box-sizing:border-box;" />
+    <input class="styled-input" type="password" id="reg-pass2" placeholder="Confirmar contraseña" style="width:100%; box-sizing:border-box;" />
+    <div id="reg-error" style="color:#ff6b6b; font-size:0.82rem; text-align:center; min-height:18px;"></div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-ghost" onclick="closeRegisterModal()" style="flex:1;">Cancelar</button>
+      <button class="btn btn-primary" onclick="register()" style="flex:1;">Registrarse</button>
+    </div>
+  </div>
+</div>
 
 <!-- SIDEBAR -->
 <div id="sidebar" style="display:none;">
@@ -3631,6 +3648,7 @@ import {
   getRedirectResult,
   signInAnonymously,
   signOut
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { 
   getFirestore, 
@@ -3776,17 +3794,42 @@ function updateUserProfile(user) {
   if (el("accountItemName")) el("accountItemName").textContent = user.isAnonymous ? "Invitado" : displayName;
   if (el("accountItemEmail"))el("accountItemEmail").textContent= user.isAnonymous ? "" : email;
 }
+window.openRegisterModal = () => {
+  document.getElementById("registerModal").style.display = "flex";
+};
+window.closeRegisterModal = () => {
+  document.getElementById("registerModal").style.display = "none";
+  document.getElementById("reg-error").textContent = "";
+  document.getElementById("reg-name").value = "";
+  document.getElementById("reg-email").value = "";
+  document.getElementById("reg-pass").value = "";
+  document.getElementById("reg-pass2").value = "";
+};
 
 window.register = async () => {
-  const email = document.getElementById("email").value.trim();
-  const pass  = document.getElementById("password").value;
-  if (!email || !pass) return alert("Completa todos los campos.");
+  const name  = document.getElementById("reg-name").value.trim();
+  const email = document.getElementById("reg-email").value.trim();
+  const pass  = document.getElementById("reg-pass").value;
+  const pass2 = document.getElementById("reg-pass2").value;
+  const errEl = document.getElementById("reg-error");
+  errEl.textContent = "";
+  if (!name || !email || !pass || !pass2) { errEl.textContent = "Completa todos los campos."; return; }
+  if (pass !== pass2) { errEl.textContent = "Las contraseñas no coinciden."; return; }
+  if (pass.length < 6) { errEl.textContent = "La contraseña debe tener al menos 6 caracteres."; return; }
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(cred.user, { displayName: name });
     try { await setDoc(doc(db, "users", cred.user.uid), {
-      email, premium: false, msgCount: 0, createdAt: new Date().toISOString()
+      email, name, premium: false, msgCount: 0, createdAt: new Date().toISOString()
     }); } catch(fe) { console.warn("Firebase:", fe.message); }
-  } catch (e) { alert("Error al registrar: " + e.message); }
+    closeRegisterModal();
+  } catch (e) {
+    if (e.code === "auth/email-already-in-use") {
+      errEl.textContent = "Este correo ya está siendo utilizado en otra cuenta.";
+    } else {
+      errEl.textContent = "Error al registrar: " + e.message;
+    }
+  }
 };
 
 window.login = async () => {
