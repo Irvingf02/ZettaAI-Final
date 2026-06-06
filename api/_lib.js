@@ -39,6 +39,13 @@ export const db = {
   },
   async deleteAllChats(userId) {
     await supabase.from("chats").delete().eq("user_id", userId);
+  },
+  async savePin(uid, pinHash) {
+    await supabase.from("users").upsert({ id: uid, pin_hash: pinHash }, { onConflict: "id" });
+  },
+  async getPin(uid) {
+    const { data } = await supabase.from("users").select("pin_hash").eq("id", uid).single();
+    return data?.pin_hash || null;
   }
 };
 
