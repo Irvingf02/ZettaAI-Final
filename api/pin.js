@@ -1,8 +1,8 @@
 import { setCors, db } from "./_lib.js";
-import { createHash } from "crypto";
+import crypto from "crypto";
 
 function hashPin(pin) {
-  return createHash("sha256").update(pin + "zettax_salt").digest("hex");
+  return crypto.createHash("sha256").update(pin + "zettax_salt").digest("hex");
 }
 
 export default async function handler(req, res) {
