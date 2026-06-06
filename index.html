@@ -5513,7 +5513,7 @@ async function loadChatHistory() {
   if (!list) return;
   list.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);padding:10px;'>Cargando...</p>";
   try {
-    const res = await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}`);
+    const res = await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}`, { headers: await authHeaders() });
     const json = await res.json();
     list.innerHTML = "";
     if (!json.chats || json.chats.length === 0) return;
@@ -5552,7 +5552,7 @@ async function loadChatHistory() {
           item.querySelector(".chat-menu-dropdown").style.display = "none";
           if (opt.dataset.action === "delete") {
             mostrarModalEliminar(async () => {
-              await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}&chatId=${chat.id}`, { method: "DELETE" });
+              await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}&chatId=${chat.id}`, { method: "DELETE", headers: await authHeaders()  });
               item.remove();
             });
           } else if (opt.dataset.action === "rename") {
