@@ -3693,13 +3693,10 @@ const BACKEND_URL = "https://zettax-ai-pnhu.vercel.app/api";
 
 async function authHeaders() {
   try {
-    const u = currentUser || (window._auth ? window._auth.currentUser : null);
-const token = u ? await u.getIdToken() : null;
+    const token = currentUser ? await currentUser.getIdToken() : null;
     return token ? { "Content-Type": "application/json", "Authorization": "Bearer " + token } : { "Content-Type": "application/json" };
   } catch { return { "Content-Type": "application/json" }; }
 }
-
-window._auth = auth;
 
 const LIMITES = {
   chat:    20,
@@ -5516,7 +5513,7 @@ async function loadChatHistory() {
   if (!list) return;
   list.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);padding:10px;'>Cargando...</p>";
   try {
-    const res = await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}`, { headers: await authHeaders() });
+    const res = await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}`);
     const json = await res.json();
     list.innerHTML = "";
     if (!json.chats || json.chats.length === 0) return;
@@ -5555,7 +5552,7 @@ async function loadChatHistory() {
           item.querySelector(".chat-menu-dropdown").style.display = "none";
           if (opt.dataset.action === "delete") {
             mostrarModalEliminar(async () => {
-              await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}&chatId=${chat.id}`, { method: "DELETE", headers: await authHeaders()  });
+              await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}&chatId=${chat.id}`, { method: "DELETE" });
               item.remove();
             });
           } else if (opt.dataset.action === "rename") {
@@ -7459,7 +7456,7 @@ async function compartirImagen(url) {
   }
 }
 
-window.toggleReaccion = async function(btn, tipo) {
+window.toggleReaccion = function(btn, tipo) {
   const msg = btn.closest(".msg");
   const allBots = Array.from(document.querySelectorAll(".msg.bot"));
   const idx = allBots.indexOf(msg);
@@ -7548,7 +7545,7 @@ function actualizarNavVersiones(msg) {
   `;
 }
 
-window.navegarVersion = async function(btn, dir) {
+window.navegarVersion = function(btn, dir) {
   const msg = btn.closest(".msg");
   const versions = JSON.parse(msg.dataset.versions || "[]");
   const replies = JSON.parse(msg.dataset.replies || "[]");
