@@ -3866,7 +3866,7 @@ window.verifyPin = async () => {
   const pin = document.getElementById("login-pin").value;
   const errEl = document.getElementById("pin-error");
   errEl.textContent = "";
-  if (!/^\d{6}$/.test(pin)) { errEl.textContent = "Ingresa tu PIN de 6 dígitos."; return; }
+  if (pin.length !== 6 || isNaN(pin)) { errEl.textContent = "Ingresa tu PIN de 6 dígitos."; return; }
   const user = window._pendingUser;
   if (!user) return;
   try {
