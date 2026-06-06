@@ -3691,12 +3691,6 @@ const db = getFirestore(app);
 
 const BACKEND_URL = "https://zettax-ai-pnhu.vercel.app/api";
 
-async function authHeaders() {
-  try {
-    const token = currentUser ? await currentUser.getIdToken() : null;
-    return token ? { "Content-Type": "application/json", "Authorization": "Bearer " + token } : { "Content-Type": "application/json" };
-  } catch { return { "Content-Type": "application/json" }; }
-}
 
 const LIMITES = {
   chat:    20,
@@ -5513,7 +5507,7 @@ async function loadChatHistory() {
   if (!list) return;
   list.innerHTML = "<p style='font-size:0.8rem;color:var(--muted);padding:10px;'>Cargando...</p>";
   try {
-    const res = await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}`,{headers: await authHeaders()});
+    const res = await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}`);
     const json = await res.json();
     list.innerHTML = "";
     if (!json.chats || json.chats.length === 0) return;
