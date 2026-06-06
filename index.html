@@ -2848,6 +2848,9 @@
   <div class="btn-row">
     <button class="btn btn-ghost" onclick="openRegisterModal()">Registrar</button>
     <button class="btn btn-primary" onclick="login()">Entrar</button>
+    <div style="text-align:center; margin-top:-4px;">
+    <span onclick="openForgotModal()" style="font-size:0.82rem; color:#aaa; cursor:pointer; text-decoration:underline;">¿Olvidaste tu contraseña?</span>
+  </div>
   </div>
   <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px; width: 100%;">
     <button class="btn btn-ghost" onclick="loginGoogle()" style="background: white; color: #000; display: flex; align-items: center; justify-content: center; gap: 10px;">
@@ -2917,6 +2920,20 @@
     <div style="display:flex; gap:10px;">
       <button class="btn btn-ghost" onclick="closeRegisterModal()" style="flex:1;">Cancelar</button>
       <button class="btn btn-primary" onclick="register()" style="flex:1;">Registrarse</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RECUPERAR CONTRASEÑA -->
+<div id="forgotModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:var(--bg, #1a1a2e); border-radius:20px; padding:32px 28px; width:90%; max-width:380px; display:flex; flex-direction:column; gap:14px;">
+    <div style="text-align:center; font-size:1.4rem; font-weight:800; color:var(--text, #fff);">Recuperar contraseña</div>
+    <div style="text-align:center; font-size:0.85rem; color:#aaa;">Te enviaremos un enlace a tu correo para restablecer tu contraseña.</div>
+    <input class="styled-input" type="email" id="forgot-email" placeholder="Correo electrónico" style="width:100%; box-sizing:border-box;" />
+    <div id="forgot-msg" style="font-size:0.82rem; text-align:center; min-height:18px;"></div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-ghost" onclick="closeForgotModal()" style="flex:1;">Cancelar</button>
+      <button class="btn btn-primary" onclick="sendPasswordReset()" style="flex:1;">Enviar</button>
     </div>
   </div>
 </div>
@@ -3657,7 +3674,8 @@ import {
   getRedirectResult,
   signInAnonymously,
   signOut,
-  updateProfile
+  updateProfile,
+  sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { 
   getFirestore, 
@@ -3826,6 +3844,33 @@ window.checkPassStrength = (pass) => {
   fill.style.background = levels[score] || "#333";
   label.textContent = pass.length > 0 ? labels[score] : "";
   label.style.color = levels[score] || "#aaa";
+};
+
+window.openForgotModal = () => {
+  document.getElementById("forgotModal").style.display = "flex";
+  document.getElementById("forgot-msg").textContent = "";
+  document.getElementById("forgot-email").value = "";
+};
+window.closeForgotModal = () => {
+  document.getElementById("forgotModal").style.display = "none";
+};
+window.sendPasswordReset = async () => {
+  const email = document.getElementById("forgot-email").value.trim();
+  const msgEl = document.getElementById("forgot-msg");
+  if (!email) { msgEl.style.color = "#ff6b6b"; msgEl.textContent = "Ingresa tu correo."; return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    msgEl.style.color = "#4caf50";
+    msgEl.textContent = "Correo enviado. Revisa tu bandeja de entrada.";
+    setTimeout(() => closeForgotModal(), 3000);
+  } catch (e) {
+    msgEl.style.color = "#ff6b6b";
+    if (e.code === "auth/user-not-found") {
+      msgEl.textContent = "No existe una cuenta con ese correo.";
+    } else {
+      msgEl.textContent = "Error: " + e.message;
+    }
+  }
 };
 
 window.openRegisterModal = () => {
