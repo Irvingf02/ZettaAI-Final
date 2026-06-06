@@ -3691,13 +3691,6 @@ const db = getFirestore(app);
 
 const BACKEND_URL = "https://zettax-ai-pnhu.vercel.app/api";
 
-async function authHeaders() {
-  try {
-    const token = currentUser ? await currentUser.getIdToken() : null;
-    return token ? { "Content-Type": "application/json", "Authorization": "Bearer " + token } : { "Content-Type": "application/json" };
-  } catch { return { "Content-Type": "application/json" }; }
-}
-
 const LIMITES = {
   chat:    20,
   resumen: 10,
@@ -4161,7 +4154,7 @@ async function refreshPremiumStatus() {
   }
 
   try {
-    const res  = await fetch(`${BACKEND_URL}/user-status?userId=${currentUser.uid}`,{headers: await authHeaders()});
+    const res  = await fetch(`${BACKEND_URL}/user-status?userId=${currentUser.uid}`);
     const data = await res.json();
 
     userPlan  = data.plan    || "free";
@@ -4194,7 +4187,7 @@ async function incrementarContador(modo) {
   try {
     await fetch(`${BACKEND_URL}/user-status`, {
       method: "POST",
-      headers: await authHeaders(),
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         userId:      currentUser.uid,
         email:       currentUser.email || "",
@@ -4735,7 +4728,7 @@ window.deleteSingleChat = async function(chatId, event) {
     okLabel: "Borrar",
     onOk: async () => {
       try {
-        await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}&chatId=${chatId}`, { method: "DELETE", headers: await authHeaders() });
+        await fetch(`${BACKEND_URL}/chats?userId=${currentUser.uid}&chatId=${chatId}`, { method: "DELETE" });
         event.target.closest(".activity-chat-item").remove();
       } catch (e) {
         addMessage("Error al borrar: " + e.message, "bot error");
@@ -5559,7 +5552,7 @@ async function loadChatHistory() {
             mostrarModalRenombrar(chat.title || "Chat nuevo", async (nuevoNombre) => {
               await fetch(`${BACKEND_URL}/chats`, {
                 method: "POST",
-                headers: await authHeaders(),
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userId: currentUser.uid, chatId: chat.id, title: nuevoNombre, messages: chat.messages || [] })
               });
               item.querySelector(".text").textContent = nuevoNombre.substring(0, 22) + (nuevoNombre.length > 22 ? "..." : "");
@@ -6241,7 +6234,7 @@ window.editarMensaje = function(btn) {
       if (mode === "imagen") {
         const res = await fetch(`${BACKEND_URL}/imagen`, {
           method: "POST",
-          headers: await authHeaders(),
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt: newText, uid: currentUser.uid })
         });
         const data = await res.json();
@@ -6296,7 +6289,7 @@ window.editarMensaje = function(btn) {
         if (currentUser && !currentUser.isAnonymous && activeChatId) {
           fetch(`${BACKEND_URL}/chats`, {
             method: "POST",
-            headers: await authHeaders(),
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chTmp[0]?.content?.substring(0,50) || "Chat", messages: chTmp, mode: mode })
           }).catch(e => console.warn("Error guardando:", e));
         }
@@ -6304,7 +6297,7 @@ window.editarMensaje = function(btn) {
       }
       const res = await fetch(`${BACKEND_URL}/chat`, {
         method: "POST",
-        headers: await authHeaders(),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: newText, mode, uid: currentUser.uid, history: chatHistory.slice(-15) })
       });
       const data = await res.json();
@@ -6339,7 +6332,7 @@ window.editarMensaje = function(btn) {
       if (currentUser && !currentUser.isAnonymous && activeChatId) {
         fetch(`${BACKEND_URL}/chats`, {
           method: "POST",
-          headers: await authHeaders(),
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chatHistory[0]?.content?.substring(0,50) || "Chat", messages: chatHistory, mode: mode })
         }).catch(e => console.warn("Error guardando:", e));
       }
@@ -6456,7 +6449,7 @@ window.send = async () => {
     try {
       const res = await fetch(`${BACKEND_URL}/imagen`, {
         method: "POST",
-        headers: await authHeaders(),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: text, uid: currentUser.uid })
       });
       const data = await res.json();
@@ -6534,7 +6527,7 @@ window.send = async () => {
           if (!activeChatId) activeChatId = currentUser.uid + "_" + Date.now();
           fetch(`${BACKEND_URL}/chats`, {
             method: "POST",
-            headers: await authHeaders(),
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: text.substring(0, 50), messages: chatHistory, mode: mode })
           }).catch(e => console.warn("Error guardando chat:", e));
         }
@@ -6624,7 +6617,7 @@ window.send = async () => {
   try {
     const res = await fetch(`${BACKEND_URL}/chat`, {
       method: "POST",
-      headers: await authHeaders(),
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message: text,
         mode,
@@ -6670,7 +6663,7 @@ window.send = async () => {
       const chatId = activeChatId;
       fetch(`${BACKEND_URL}/chats`, {
         method: "POST",
-        headers: await authHeaders(),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: currentUser.uid, chatId, title: text.substring(0, 50), messages: chatHistory, mode: mode })
       }).catch(e => console.warn("Error guardando chat:", e));
       sessionStorage.setItem("zettax_last_chat", chatId);
@@ -7289,7 +7282,7 @@ function editarImagenSeleccionarAreas(url) {
           if (currentUser && !currentUser.isAnonymous && activeChatId) {
             fetch(`https://zettax-ai-pnhu.vercel.app/api/chats`, {
               method: "POST",
-              headers: await authHeaders(),
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: instruccion.substring(0,50), messages: chatHistory, mode: mode })
             }).catch(e => console.warn("Error guardando:", e));
           }
@@ -7484,7 +7477,7 @@ window.toggleReaccion = function(btn, tipo) {
   if (currentUser && !currentUser.isAnonymous && activeChatId) {
     fetch(`${BACKEND_URL}/chats`, {
       method: "POST",
-      headers: await authHeaders(),
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chatHistory[0]?.content?.substring(0,50) || "Chat", messages: chatHistory, mode: mode })
     }).catch(e => console.warn("Error guardando reacción:", e));
   }
@@ -7641,7 +7634,7 @@ window.navegarVersion = function(btn, dir) {
   if (currentUser && !currentUser.isAnonymous && activeChatId) {
     fetch(`${BACKEND_URL}/chats`, {
       method: "POST",
-      headers: await authHeaders(),
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId: currentUser.uid, chatId: activeChatId, title: chatHistory[0]?.content?.substring(0,50) || "Chat", messages: chatHistory, mode: mode })
     }).catch(e => console.warn("Error:", e));
   }
