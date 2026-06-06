@@ -58,21 +58,6 @@ export const MODOS_IA = {
   codigo:  { system: "Eres ZettaxAI experto en programación. Escribe código limpio y funcional." }
 };
 
-// ── VERIFICAR TOKEN FIREBASE ─────────────────────────────────────────────────
-export async function verifyToken(req) {
-  const auth = req.headers["authorization"] || "";
-  const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
-  if (!token) return null;
-  try {
-    const r = await fetch(
-      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${process.env.FIREBASE_API_KEY}`,
-      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idToken: token }) }
-    );
-    const data = await r.json();
-    if (data.error || !data.users?.[0]) return null;
-    return data.users[0].localId;
-  } catch { return null; }
-}
 
 export async function getUserPlan(uid) {
   if (!uid) return { isPremium: false, plan: "free" };
