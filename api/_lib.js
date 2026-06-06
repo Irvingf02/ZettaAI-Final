@@ -59,6 +59,12 @@ export const MODOS_IA = {
 };
 
 
+// ── VERIFICAR API KEY ────────────────────────────────────────────────────────
+export function verifyApiKey(req) {
+  const key = req.headers["x-api-key"] || "";
+  return key === process.env.API_SECRET_KEY;
+}
+
 export async function getUserPlan(uid) {
   if (!uid) return { isPremium: false, plan: "free" };
   try {

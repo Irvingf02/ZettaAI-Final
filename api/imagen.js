@@ -1,4 +1,4 @@
-import { setCors, getUserPlan } from "./_lib.js";
+import { setCors, getUserPlan, verifyApiKey  } from "./_lib.js";
 
 function hashPrompt(str) {
   let hash = 0;
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
   const { prompt, uid, imageUrl: editImageUrl, maskB64 } = req.body;
   if (!prompt) return res.status(400).json({ reply: "Describe la imagen que quieres crear." });
-  
+  if (!verifyApiKey(req)) return res.status(401).json({ reply: "No autorizado." });
   const { plan } = await getUserPlan(uid);
 
   // ── Seleccionar áreas: edición con Stable Diffusion Inpainting ──
