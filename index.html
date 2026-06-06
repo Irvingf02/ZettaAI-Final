@@ -4074,6 +4074,15 @@ window.addAccount = () => {
 
 getRedirectResult(auth).catch(e => console.error("Redirect error:", e));
 
+// Actualizar ultima actividad en cada interaccion
+["click", "keydown", "touchstart"].forEach(evt => {
+  document.addEventListener(evt, () => {
+    if (localStorage.getItem("zettax_session") === "1") {
+      localStorage.setItem("zettax_last_activity", String(Date.now()));
+    }
+  }, { passive: true });
+});
+
 onAuthStateChanged(auth, async (user) => {
   const sidebar   = document.getElementById("sidebar");
   const mobileBtn = document.getElementById("mobilMenuBtn");
@@ -4081,6 +4090,18 @@ onAuthStateChanged(auth, async (user) => {
   if (user) {
     // Guardar marca de sesión para la próxima carga
     localStorage.setItem("zettax_session", "1");
+
+    // Expiracion de sesion: actualizar ultima actividad
+const lastActivity = localStorage.getItem("zettax_last_activity");
+const now = Date.now();
+const sevenDays = 7 * 24 * 60 * 60 * 1000;
+if (lastActivity && (now - parseInt(lastActivity)) > sevenDays) {
+  signOut(auth);
+  localStorage.removeItem("zettax_session");
+  localStorage.removeItem("zettax_last_activity");
+  return;
+}
+localStorage.setItem("zettax_last_activity", String(now));
 
     currentUser = user;
     // Mostrar la app DE INMEDIATO sin esperar a Firebase
