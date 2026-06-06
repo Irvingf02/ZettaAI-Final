@@ -1,4 +1,4 @@
-import { setCors, db } from "./_lib.js";
+import { setCors, db, verifyToken } from "./_lib.js";
 
 export default async function handler(req, res) {
   setCors(res);
@@ -6,6 +6,8 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
 
   if (req.method === "GET") {
+    const tokenUid = await verifyToken(req);
+if (!tokenUid) return res.status(401).json({ error: "No autorizado." });
     const { userId } = req.query;
     if (!userId) return res.status(400).json({ error: "Se requiere userId." });
     try {
@@ -17,6 +19,8 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "POST") {
+    const tokenUid = await verifyToken(req);
+if (!tokenUid) return res.status(401).json({ error: "No autorizado." });
     const { userId, chatId, title, messages, mode } = req.body;
     if (!userId || !chatId) return res.status(400).json({ error: "Se requiere userId y chatId." });
     try {
@@ -28,6 +32,8 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "DELETE") {
+    const tokenUid = await verifyToken(req);
+if (!tokenUid) return res.status(401).json({ error: "No autorizado." });
     const { userId, chatId } = req.query;
     if (!userId) return res.status(400).json({ error: "Se requiere userId." });
     try {

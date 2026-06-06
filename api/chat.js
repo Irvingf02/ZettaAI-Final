@@ -1,4 +1,4 @@
-import { setCors, getUserPlan, PLAN_CONFIG, MODOS_IA } from "./_lib.js";
+import { setCors, getUserPlan, PLAN_CONFIG, MODOS_IA, verifyToken } from "./_lib.js";
 
 const RATE_LIMITS = { free: 30, go: 300, plus: 600, ultra: 2000 };
 const rateLimitMap = new Map();
@@ -35,6 +35,9 @@ export default async function handler(req, res) {
 
   const { message, mode, history, uid } = req.body;
   if (!message) return res.status(400).json({ reply: "Escribe algo primero." });
+
+  const tokenUid = await verifyToken(req);
+if (!tokenUid) return res.status(401).json({ reply: "No autorizado." });
 
   const ip = req.headers["x-forwarded-for"]?.split(",")[0] || "unknown";
   const { isPremium, plan } = await getUserPlan(uid);
