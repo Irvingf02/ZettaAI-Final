@@ -3693,10 +3693,13 @@ const BACKEND_URL = "https://zettax-ai-pnhu.vercel.app/api";
 
 async function authHeaders() {
   try {
-    const token = currentUser ? await currentUser.getIdToken(true) : null;
+    const u = currentUser || (window._auth ? window._auth.currentUser : null);
+const token = u ? await u.getIdToken() : null;
     return token ? { "Content-Type": "application/json", "Authorization": "Bearer " + token } : { "Content-Type": "application/json" };
   } catch { return { "Content-Type": "application/json" }; }
 }
+
+window._auth = auth;
 
 const LIMITES = {
   chat:    20,
