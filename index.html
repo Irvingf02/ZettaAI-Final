@@ -2953,6 +2953,7 @@
   </div>
 </div>
 
+
 <!-- SIDEBAR -->
 <div id="sidebar" style="display:none;">
   <div class="sidebar-header">
@@ -3872,21 +3873,15 @@ window.verifyPin = async () => {
     const res = await fetch(`https://zettax-ai-pnhu.vercel.app/api/pin?uid=${user.uid}&pin=${pin}`);
     const data = await res.json();
     if (data.ok) {
-  document.getElementById("pinModal").style.display = "none";
-  document.getElementById("appDiv").style.display = "flex";
-  const sidebar = window._pendingSidebar;
-  const mobileBtn = window._pendingMobileBtn;
-  if (sidebar) sidebar.style.display = "flex";
-  if (mobileBtn) mobileBtn.style.display = "flex";
-  const params = window._pendingParams;
-  if (params && params.get("success") === "true") {
-    document.getElementById("successBanner").style.display = "block";
-    window.history.replaceState({}, "", window.location.pathname);
-    setTimeout(() => { document.getElementById("successBanner").style.display = "none"; }, 5000);
-  }
-  window._pendingUser = null;
-  loadChatHistory(); 
-}else {
+      document.getElementById("pinModal").style.display = "none";
+      document.getElementById("appDiv").style.display = "flex";
+      const sidebar = window._pendingSidebar;
+      const mobileBtn = window._pendingMobileBtn;
+      if (sidebar) sidebar.style.display = "flex";
+      if (mobileBtn) mobileBtn.style.display = "flex";
+      window._pendingUser = null;
+      loadChatHistory();
+    } else {
       errEl.textContent = "PIN incorrecto. Intenta de nuevo.";
       document.getElementById("login-pin").value = "";
     }
@@ -4181,26 +4176,38 @@ onAuthStateChanged(auth, async (user) => {
   const sidebar   = document.getElementById("sidebar");
   const mobileBtn = document.getElementById("mobilMenuBtn");
 
- if (user) {
+  if (user) {
   localStorage.setItem("zettax_session", "1");
   currentUser = user;
   document.getElementById("loginDiv").style.display = "none";
   document.getElementById("appDiv").style.display   = "none";
-  if (sidebar) sidebar.style.display = "none";
+  sidebar.style.display   = "none";
   if (mobileBtn) mobileBtn.style.display = "none";
   const pinModal = document.getElementById("pinModal");
-  if (pinModal) {
-    pinModal.style.display = "flex";
-    document.getElementById("login-pin").value = "";
-    document.getElementById("pin-error").textContent = "";
-  }
+  pinModal.style.display = "flex";
+  document.getElementById("login-pin").value = "";
+  document.getElementById("pin-error").textContent = "";
   window._pendingUser = user;
   window._pendingSidebar = sidebar;
   window._pendingMobileBtn = mobileBtn;
-  window._pendingParams = new URLSearchParams(window.location.search);
   setTimeout(() => updateUserProfile(user), 100);
-  refreshPremiumStatus();
-}
+    
+    const params = new URLSearchParams(window.location.search);
+    const el = document.getElementById("payLoading");
+    if (el) el.remove();
+
+    // Cargar datos en segundo plano (sin bloquear la UI)
+    if (params.get("success") === "true") {
+      document.getElementById("successBanner").style.display = "block";
+      window.history.replaceState({}, "", window.location.pathname);
+      refreshPremiumStatus().then(() => {
+        setTimeout(() => {
+          document.getElementById("successBanner").style.display = "none";
+        }, 5000);
+      });
+    } else {
+      refreshPremiumStatus(); // sin await
+    }
     
     loadChatHistory(); // sin await
   } else {
@@ -4214,7 +4221,8 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("appDiv").style.display   = "none";
     sidebar.style.display   = "none";
     if (mobileBtn) mobileBtn.style.display = "none";
-  });
+  }
+});
 
 async function refreshPremiumStatus() {
   if (!currentUser) return;
