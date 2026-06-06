@@ -2916,6 +2916,9 @@
   <span id="req-sym">✗ Un símbolo ($!#%&)</span>
 </div>
     <input class="styled-input" type="password" id="reg-pass2" placeholder="Confirmar contraseña" style="width:100%; box-sizing:border-box;" />
+    <input class="styled-input" type="password" id="reg-pin" placeholder="PIN de seguridad (6 dígitos)" maxlength="6" inputmode="numeric" style="width:100%; box-sizing:border-box;" />
+<input class="styled-input" type="password" id="reg-pin2" placeholder="Confirmar PIN" maxlength="6" inputmode="numeric" style="width:100%; box-sizing:border-box;" />
+<div style="font-size:0.75rem; color:#aaa;">El PIN protege tu cuenta al iniciar sesión. Solo números, 6 dígitos.</div>
     <div id="reg-error" style="color:#ff6b6b; font-size:0.82rem; text-align:center; min-height:18px;"></div>
     <div style="display:flex; gap:10px;">
       <button class="btn btn-ghost" onclick="closeRegisterModal()" style="flex:1;">Cancelar</button>
@@ -2935,6 +2938,18 @@
       <button class="btn btn-ghost" onclick="closeForgotModal()" style="flex:1;">Cancelar</button>
       <button class="btn btn-primary" onclick="sendPasswordReset()" style="flex:1;">Enviar</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL PIN -->
+<div id="pinModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:var(--bg, #1a1a2e); border-radius:20px; padding:32px 28px; width:90%; max-width:360px; display:flex; flex-direction:column; gap:16px; text-align:center;">
+    <div style="font-size:1.4rem; font-weight:800; color:var(--text, #fff);">Ingresa tu PIN</div>
+    <div style="font-size:0.85rem; color:#aaa;">Introduce tu PIN de 6 dígitos para continuar.</div>
+    <input class="styled-input" type="password" id="login-pin" placeholder="••••••" maxlength="6" inputmode="numeric" style="width:100%; box-sizing:border-box; text-align:center; font-size:1.5rem; letter-spacing:8px;" />
+    <div id="pin-error" style="color:#ff6b6b; font-size:0.82rem; min-height:18px;"></div>
+    <button class="btn btn-primary" onclick="verifyPin()" style="width:100%;">Confirmar</button>
+    <span onclick="signOut(auth)" style="font-size:0.78rem; color:#aaa; cursor:pointer; text-decoration:underline;">No soy yo, cerrar sesión</span>
   </div>
 </div>
 
@@ -3846,6 +3861,34 @@ window.checkPassStrength = (pass) => {
   label.style.color = levels[score] || "#aaa";
 };
 
+window.verifyPin = async () => {
+  const pin = document.getElementById("login-pin").value;
+  const errEl = document.getElementById("pin-error");
+  errEl.textContent = "";
+  if (!/^\d{6}$/.test(pin)) { errEl.textContent = "Ingresa tu PIN de 6 dígitos."; return; }
+  const user = window._pendingUser;
+  if (!user) return;
+  try {
+    const res = await fetch(`https://zettax-ai-pnhu.vercel.app/api/pin?uid=${user.uid}&pin=${pin}`);
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById("pinModal").style.display = "none";
+      document.getElementById("appDiv").style.display = "flex";
+      const sidebar = window._pendingSidebar;
+      const mobileBtn = window._pendingMobileBtn;
+      if (sidebar) sidebar.style.display = "flex";
+      if (mobileBtn) mobileBtn.style.display = "flex";
+      window._pendingUser = null;
+      loadChatHistory();
+    } else {
+      errEl.textContent = "PIN incorrecto. Intenta de nuevo.";
+      document.getElementById("login-pin").value = "";
+    }
+  } catch(e) {
+    errEl.textContent = "Error al verificar PIN.";
+  }
+};
+
 window.openForgotModal = () => {
   document.getElementById("forgotModal").style.display = "flex";
   document.getElementById("forgot-msg").textContent = "";
@@ -3903,12 +3946,21 @@ window.register = async () => {
 ];
 const failing = passReqs.filter(r => !r.test);
 if (failing.length > 0) { errEl.textContent = "La contraseña debe tener: " + failing.map(r => r.msg).join(", ") + "."; return; }
+const pin  = document.getElementById("reg-pin").value;
+const pin2 = document.getElementById("reg-pin2").value;
+if (!/^\d{6}$/.test(pin)) { errEl.textContent = "El PIN debe ser de exactamente 6 dígitos numéricos."; return; }
+if (pin !== pin2) { errEl.textContent = "Los PINs no coinciden."; return; }
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await updateProfile(cred.user, { displayName: name });
     try { await setDoc(doc(db, "users", cred.user.uid), {
       email, name, premium: false, msgCount: 0, createdAt: new Date().toISOString()
     }); } catch(fe) { console.warn("Firebase:", fe.message); }
+    await fetch("https://zettax-ai-pnhu.vercel.app/api/pin", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ uid: cred.user.uid, pin })
+});
     closeRegisterModal();
   } catch (e) {
     if (e.code === "auth/email-already-in-use") {
@@ -4124,16 +4176,20 @@ onAuthStateChanged(auth, async (user) => {
   const mobileBtn = document.getElementById("mobilMenuBtn");
 
   if (user) {
-    // Guardar marca de sesión para la próxima carga
-    localStorage.setItem("zettax_session", "1");
-
-    currentUser = user;
-    // Mostrar la app DE INMEDIATO sin esperar a Firebase
-    document.getElementById("loginDiv").style.display = "none";
-    document.getElementById("appDiv").style.display   = "flex";
-    sidebar.style.display   = "flex";
-    if (mobileBtn) mobileBtn.style.display = "flex";
-    setTimeout(() => updateUserProfile(user), 100);
+  localStorage.setItem("zettax_session", "1");
+  currentUser = user;
+  document.getElementById("loginDiv").style.display = "none";
+  document.getElementById("appDiv").style.display   = "none";
+  sidebar.style.display   = "none";
+  if (mobileBtn) mobileBtn.style.display = "none";
+  const pinModal = document.getElementById("pinModal");
+  pinModal.style.display = "flex";
+  document.getElementById("login-pin").value = "";
+  document.getElementById("pin-error").textContent = "";
+  window._pendingUser = user;
+  window._pendingSidebar = sidebar;
+  window._pendingMobileBtn = mobileBtn;
+  setTimeout(() => updateUserProfile(user), 100);
     
     const params = new URLSearchParams(window.location.search);
     const el = document.getElementById("payLoading");
