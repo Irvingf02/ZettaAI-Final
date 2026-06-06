@@ -2848,9 +2848,6 @@
   <div class="btn-row">
     <button class="btn btn-ghost" onclick="openRegisterModal()">Registrar</button>
     <button class="btn btn-primary" onclick="login()">Entrar</button>
-    <div style="text-align:center; margin-top:-4px;">
-    <span onclick="openForgotModal()" style="font-size:0.82rem; color:#aaa; cursor:pointer; text-decoration:underline;">¿Olvidaste tu contraseña?</span>
-  </div>
   </div>
   <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px; width: 100%;">
     <button class="btn btn-ghost" onclick="loginGoogle()" style="background: white; color: #000; display: flex; align-items: center; justify-content: center; gap: 10px;">
@@ -2916,9 +2913,6 @@
   <span id="req-sym">✗ Un símbolo ($!#%&)</span>
 </div>
     <input class="styled-input" type="password" id="reg-pass2" placeholder="Confirmar contraseña" style="width:100%; box-sizing:border-box;" />
-    <input class="styled-input" type="password" id="reg-pin" placeholder="PIN de seguridad (6 dígitos)" maxlength="6" inputmode="numeric" style="width:100%; box-sizing:border-box;" />
-<input class="styled-input" type="password" id="reg-pin2" placeholder="Confirmar PIN" maxlength="6" inputmode="numeric" style="width:100%; box-sizing:border-box;" />
-<div style="font-size:0.75rem; color:#aaa;">El PIN protege tu cuenta al iniciar sesión. Solo números, 6 dígitos.</div>
     <div id="reg-error" style="color:#ff6b6b; font-size:0.82rem; text-align:center; min-height:18px;"></div>
     <div style="display:flex; gap:10px;">
       <button class="btn btn-ghost" onclick="closeRegisterModal()" style="flex:1;">Cancelar</button>
@@ -2926,33 +2920,6 @@
     </div>
   </div>
 </div>
-
-<!-- MODAL RECUPERAR CONTRASEÑA -->
-<div id="forgotModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
-  <div style="background:var(--bg, #1a1a2e); border-radius:20px; padding:32px 28px; width:90%; max-width:380px; display:flex; flex-direction:column; gap:14px;">
-    <div style="text-align:center; font-size:1.4rem; font-weight:800; color:var(--text, #fff);">Recuperar contraseña</div>
-    <div style="text-align:center; font-size:0.85rem; color:#aaa;">Te enviaremos un enlace a tu correo para restablecer tu contraseña.</div>
-    <input class="styled-input" type="email" id="forgot-email" placeholder="Correo electrónico" style="width:100%; box-sizing:border-box;" />
-    <div id="forgot-msg" style="font-size:0.82rem; text-align:center; min-height:18px;"></div>
-    <div style="display:flex; gap:10px;">
-      <button class="btn btn-ghost" onclick="closeForgotModal()" style="flex:1;">Cancelar</button>
-      <button class="btn btn-primary" onclick="sendPasswordReset()" style="flex:1;">Enviar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL PIN -->
-<div id="pinModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center;">
-  <div style="background:var(--bg, #1a1a2e); border-radius:20px; padding:32px 28px; width:90%; max-width:360px; display:flex; flex-direction:column; gap:16px; text-align:center;">
-    <div style="font-size:1.4rem; font-weight:800; color:var(--text, #fff);">Ingresa tu PIN</div>
-    <div style="font-size:0.85rem; color:#aaa;">Introduce tu PIN de 6 dígitos para continuar.</div>
-    <input class="styled-input" type="password" id="login-pin" placeholder="••••••" maxlength="6" inputmode="numeric" style="width:100%; box-sizing:border-box; text-align:center; font-size:1.5rem; letter-spacing:8px;" />
-    <div id="pin-error" style="color:#ff6b6b; font-size:0.82rem; min-height:18px;"></div>
-    <button class="btn btn-primary" onclick="verifyPin()" style="width:100%;">Confirmar</button>
-    <span onclick="signOut(auth)" style="font-size:0.78rem; color:#aaa; cursor:pointer; text-decoration:underline;">No soy yo, cerrar sesión</span>
-  </div>
-</div>
-
 
 <!-- SIDEBAR -->
 <div id="sidebar" style="display:none;">
@@ -3690,8 +3657,7 @@ import {
   getRedirectResult,
   signInAnonymously,
   signOut,
-  updateProfile,
-  sendPasswordResetEmail
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { 
   getFirestore, 
@@ -3862,61 +3828,6 @@ window.checkPassStrength = (pass) => {
   label.style.color = levels[score] || "#aaa";
 };
 
-window.verifyPin = async () => {
-  const pin = document.getElementById("login-pin").value;
-  const errEl = document.getElementById("pin-error");
-  errEl.textContent = "";
-  if (!/^\d{6}$/.test(pin)) { errEl.textContent = "Ingresa tu PIN de 6 dígitos."; return; }
-  const user = window._pendingUser;
-  if (!user) return;
-  try {
-    const res = await fetch(`https://zettax-ai-pnhu.vercel.app/api/pin?uid=${user.uid}&pin=${pin}`);
-    const data = await res.json();
-    if (data.ok) {
-      document.getElementById("pinModal").style.display = "none";
-      document.getElementById("appDiv").style.display = "flex";
-      const sidebar = window._pendingSidebar;
-      const mobileBtn = window._pendingMobileBtn;
-      if (sidebar) sidebar.style.display = "flex";
-      if (mobileBtn) mobileBtn.style.display = "flex";
-      window._pendingUser = null;
-      loadChatHistory();
-    } else {
-      errEl.textContent = "PIN incorrecto. Intenta de nuevo.";
-      document.getElementById("login-pin").value = "";
-    }
-  } catch(e) {
-    errEl.textContent = "Error al verificar PIN.";
-  }
-};
-
-window.openForgotModal = () => {
-  document.getElementById("forgotModal").style.display = "flex";
-  document.getElementById("forgot-msg").textContent = "";
-  document.getElementById("forgot-email").value = "";
-};
-window.closeForgotModal = () => {
-  document.getElementById("forgotModal").style.display = "none";
-};
-window.sendPasswordReset = async () => {
-  const email = document.getElementById("forgot-email").value.trim();
-  const msgEl = document.getElementById("forgot-msg");
-  if (!email) { msgEl.style.color = "#ff6b6b"; msgEl.textContent = "Ingresa tu correo."; return; }
-  try {
-    await sendPasswordResetEmail(auth, email);
-    msgEl.style.color = "#4caf50";
-    msgEl.textContent = "Correo enviado. Revisa tu bandeja de entrada.";
-    setTimeout(() => closeForgotModal(), 3000);
-  } catch (e) {
-    msgEl.style.color = "#ff6b6b";
-    if (e.code === "auth/user-not-found") {
-      msgEl.textContent = "No existe una cuenta con ese correo.";
-    } else {
-      msgEl.textContent = "Error: " + e.message;
-    }
-  }
-};
-
 window.openRegisterModal = () => {
   document.getElementById("registerModal").style.display = "flex";
 };
@@ -3947,21 +3858,12 @@ window.register = async () => {
 ];
 const failing = passReqs.filter(r => !r.test);
 if (failing.length > 0) { errEl.textContent = "La contraseña debe tener: " + failing.map(r => r.msg).join(", ") + "."; return; }
-const pin  = document.getElementById("reg-pin").value;
-const pin2 = document.getElementById("reg-pin2").value;
-if (!/^\d{6}$/.test(pin)) { errEl.textContent = "El PIN debe ser de exactamente 6 dígitos numéricos."; return; }
-if (pin !== pin2) { errEl.textContent = "Los PINs no coinciden."; return; }
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await updateProfile(cred.user, { displayName: name });
     try { await setDoc(doc(db, "users", cred.user.uid), {
       email, name, premium: false, msgCount: 0, createdAt: new Date().toISOString()
     }); } catch(fe) { console.warn("Firebase:", fe.message); }
-    await fetch("https://zettax-ai-pnhu.vercel.app/api/pin", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ uid: cred.user.uid, pin })
-});
     closeRegisterModal();
   } catch (e) {
     if (e.code === "auth/email-already-in-use") {
@@ -4177,20 +4079,16 @@ onAuthStateChanged(auth, async (user) => {
   const mobileBtn = document.getElementById("mobilMenuBtn");
 
   if (user) {
-  localStorage.setItem("zettax_session", "1");
-  currentUser = user;
-  document.getElementById("loginDiv").style.display = "none";
-  document.getElementById("appDiv").style.display   = "none";
-  sidebar.style.display   = "none";
-  if (mobileBtn) mobileBtn.style.display = "none";
-  const pinModal = document.getElementById("pinModal");
-  pinModal.style.display = "flex";
-  document.getElementById("login-pin").value = "";
-  document.getElementById("pin-error").textContent = "";
-  window._pendingUser = user;
-  window._pendingSidebar = sidebar;
-  window._pendingMobileBtn = mobileBtn;
-  setTimeout(() => updateUserProfile(user), 100);
+    // Guardar marca de sesión para la próxima carga
+    localStorage.setItem("zettax_session", "1");
+
+    currentUser = user;
+    // Mostrar la app DE INMEDIATO sin esperar a Firebase
+    document.getElementById("loginDiv").style.display = "none";
+    document.getElementById("appDiv").style.display   = "flex";
+    sidebar.style.display   = "flex";
+    if (mobileBtn) mobileBtn.style.display = "flex";
+    setTimeout(() => updateUserProfile(user), 100);
     
     const params = new URLSearchParams(window.location.search);
     const el = document.getElementById("payLoading");
