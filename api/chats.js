@@ -22,6 +22,10 @@ export default async function handler(req, res) {
 
     const { userId, chatId, title, messages, mode } = req.body;
     if (!userId || !chatId) return res.status(400).json({ error: "Se requiere userId y chatId." });
+    if (typeof userId !== "string" || userId.length > 128) return res.status(400).json({ error: "userId inválido." });
+    if (typeof chatId !== "string" || chatId.length > 128) return res.status(400).json({ error: "chatId inválido." });
+    if (title && typeof title !== "string") return res.status(400).json({ error: "title inválido." });
+    if (messages && !Array.isArray(messages)) return res.status(400).json({ error: "messages inválido." });
     try {
       await db.upsertChat(chatId, userId, title || "Chat nuevo", messages || [], mode);
       return res.status(200).json({ ok: true });
@@ -34,6 +38,7 @@ export default async function handler(req, res) {
     
     const { userId, chatId } = req.query;
     if (!userId) return res.status(400).json({ error: "Se requiere userId." });
+    if (typeof userId !== "string" || userId.length > 128) return res.status(400).json({ error: "userId inválido." });
     try {
       if (chatId) await db.deleteChat(chatId);
       else await db.deleteAllChats(userId);

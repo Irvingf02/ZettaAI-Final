@@ -17,6 +17,8 @@ export default async function handler(req, res) {
   const { prompt, uid, imageUrl: editImageUrl, maskB64 } = req.body;
   if (!prompt) return res.status(400).json({ reply: "Describe la imagen que quieres crear." });
   if (!verifyApiKey(req)) return res.status(401).json({ reply: "No autorizado." });
+  if (typeof prompt !== "string" || prompt.length > 2000) return res.status(400).json({ reply: "Prompt inválido." });
+  if (uid && (typeof uid !== "string" || uid.length > 128)) return res.status(400).json({ reply: "Usuario inválido." });
   const { plan } = await getUserPlan(uid);
 
   // ── Seleccionar áreas: edición con Stable Diffusion Inpainting ──
