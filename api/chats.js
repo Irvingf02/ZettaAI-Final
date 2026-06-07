@@ -1,4 +1,4 @@
-import { setCors, db, , verifyApiKey } from "./_lib.js";
+import { setCors, db, verifyApiKey } from "./_lib.js";
 
 export default async function handler(req, res) {
   setCors(res);
