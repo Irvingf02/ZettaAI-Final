@@ -44,7 +44,7 @@ export const db = {
 
 // ── PLAN CONFIG ───────────────────────────────────────────────────────────────
 export const PLAN_CONFIG = {
-  free:  { model: "openai/gpt-oss-20b", maxTokens: 300,  temp: 0.6,  memory: 4,  imgQuality: "standard", imgSize: "1024x1024", systemSuffix: "Sé conciso. Máximo 3 oraciones por respuesta.", codeSuffix: "Genera código funcional y breve. Sin comentarios extensos. Máximo 50 líneas." },
+  free:  { model: "gpt-4o-mini", maxTokens: 300,  temp: 0.6,  memory: 4,  imgQuality: "standard", imgSize: "1024x1024", systemSuffix: "Sé conciso. Máximo 3 oraciones por respuesta.", codeSuffix: "Genera código funcional y breve. Sin comentarios extensos. Máximo 50 líneas." },
   go:    { model: "gpt-4o-mini", maxTokens: 800,  temp: 0.65, memory: 8,  imgQuality: "standard", imgSize: "1024x1024", systemSuffix: "Da respuestas completas y bien estructuradas.", codeSuffix: "Genera código limpio con comentarios. Máximo 150 líneas." },
   plus:  { model: "gpt-4o",      maxTokens: 1800, temp: 0.7,  memory: 14, imgQuality: "hd",       imgSize: "1024x1024", systemSuffix: "Da respuestas detalladas y con ejemplos prácticos.", codeSuffix: "Genera código profesional. Máximo 300 líneas." },
   ultra: { model: "gpt-4o",      maxTokens: 4000, temp: 0.75, memory: 20, imgQuality: "hd",       imgSize: "1792x1024", systemSuffix: "Eres la versión más avanzada de ZettaxAI. Da respuestas exhaustivas.", codeSuffix: "Genera código de arquitectura profesional sin límite de líneas." }
