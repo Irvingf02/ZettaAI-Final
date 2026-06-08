@@ -5,7 +5,7 @@ const rateLimitMap = new Map();
 
 // Todos los planes usan el modelo más preciso
 const GROQ_MODELS = {
-  free:  "llama-3.3-70b-versatile",
+  free:  "openai/gpt-oss-20b",
   go:    "llama-3.3-70b-versatile",
   plus:  "llama-3.3-70b-versatile",
   ultra: "llama-3.3-70b-versatile"
