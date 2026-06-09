@@ -1,4 +1,4 @@
-import { setCors, getUserPlan, PLAN_CONFIG, MODOS_IA, verifyApiKey } from "./_lib.js";
+import { setCors, getUserPlan, PLAN_CONFIG, MODOS_IA, verifyApiKey, verifyOrigin } from "./_lib.js";
 
 const RATE_LIMITS = { free: 30, go: 300, plus: 600, ultra: 2000 };
 const rateLimitMap = new Map();
@@ -35,10 +35,10 @@ export default async function handler(req, res) {
 
   const { message, mode, history, uid } = req.body;
   if (!message) return res.status(400).json({ reply: "Escribe algo primero." });
-  if (!verifyApiKey(req)) return res.status(401).json({ reply: "No autorizado." });
+  if (!verifyApiKey(req) || !verifyOrigin(req)) return res.status(401).json({ reply: "No autorizado." });
   if (typeof message !== "string" || message.length > 10000) return res.status(400).json({ reply: "Mensaje inválido." });
-if (uid && (typeof uid !== "string" || uid.length > 128)) return res.status(400).json({ reply: "Usuario inválido." });
-if (mode && !["chat","resumen","ideas","tarea","codigo","imagen"].includes(mode)) return res.status(400).json({ reply: "Modo inválido." });
+  if (uid && (typeof uid !== "string" || uid.length > 128)) return res.status(400).json({ reply: "Usuario inválido." });
+  if (mode && !["chat","resumen","ideas","tarea","codigo","imagen"].includes(mode)) return res.status(400).json({ reply: "Modo inválido." });
   
   const ip = req.headers["x-forwarded-for"]?.split(",")[0] || "unknown";
   const { isPremium, plan } = await getUserPlan(uid);

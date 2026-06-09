@@ -1,10 +1,10 @@
-import { setCors, db, verifyApiKey  } from "./_lib.js";
+import { setCors, db, verifyApiKey, verifyOrigin  } from "./_lib.js";
 
 export default async function handler(req, res) {
   setCors(res);
   res.setHeader("Cache-Control", "no-store");
   if (req.method === "OPTIONS") return res.status(204).end();
-  if (!verifyApiKey(req)) return res.status(401).json({ error: "No autorizado." });
+  if (!verifyApiKey(req) || !verifyOrigin(req)) return res.status(401).json({ error: "No autorizado." });
   if (req.method === "GET") {
     
     const { userId } = req.query;

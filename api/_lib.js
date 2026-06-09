@@ -58,6 +58,13 @@ export const MODOS_IA = {
   codigo:  { system: "Eres ZettaxAI experto en programación. Escribe código limpio y funcional." }
 };
 
+// ── VERIFICAR ORIGEN ─────────────────────────────────────────────────────────
+export function verifyOrigin(req) {
+  const origin  = req.headers["origin"]  || "";
+  const referer = req.headers["referer"] || "";
+  const allowed = "https://zettax-ai-pnhu.vercel.app";
+  return origin.startsWith(allowed) || referer.startsWith(allowed);
+}
 
 // ── VERIFICAR API KEY ────────────────────────────────────────────────────────
 export function verifyApiKey(req) {
