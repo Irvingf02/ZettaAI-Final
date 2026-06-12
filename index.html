@@ -3912,7 +3912,7 @@ window.login = async () => {
   const attempts = parseInt(localStorage.getItem("zettax_login_attempts") || "0");
 
   if (attempts >= 5) {
-    const captchaResponse = grecaptcha.getResponse(0);
+    const captchaResponse = grecaptcha.getResponse();
     if (!captchaResponse) {
       blockMsg.style.display = "block";
       blockMsg.textContent = "Por favor completa el captcha.";
