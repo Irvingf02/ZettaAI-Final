@@ -2850,10 +2850,7 @@
     <button class="btn btn-ghost" onclick="openRegisterModal()">Registrar</button>
     <button class="btn btn-primary" onclick="login()">Entrar</button>
   </div>
-  <div id="captcha-container" style="display:none; margin-top:12px; justify-content:center;">
-    <div id="recaptcha-widget"></div>
-  </div>
-  <div id="login-block-msg" style="display:none; color:#ff6b6b; font-size:0.85rem; text-align:center; margin-top:8px;"></div>
+
   <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px; width: 100%;">
     <button class="btn btn-ghost" onclick="loginGoogle()" style="background: white; color: #000; display: flex; align-items: center; justify-content: center; gap: 10px;">
       <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="16"> 
@@ -3895,87 +3892,14 @@ if (failing.length > 0) { errEl.textContent = "La contraseña debe tener: " + fa
 };
 
 window.login = async () => {
-  const email   = document.getElementById("email").value.trim();
-  const pass    = document.getElementById("password").value;
-  const blockMsg = document.getElementById("login-block-msg");
-  const captchaContainer = document.getElementById("captcha-container");
+  const email = document.getElementById("email").value.trim();
+  const pass  = document.getElementById("password").value;
   if (!email || !pass) return alert("Completa todos los campos.");
-
-  const blockUntil = parseInt(localStorage.getItem("zettax_login_block") || "0");
-  if (Date.now() < blockUntil) {
-    const secsLeft = Math.ceil((blockUntil - Date.now()) / 1000);
-    blockMsg.style.display = "block";
-    blockMsg.textContent = `Demasiados intentos. Espera ${secsLeft} segundos.`;
-    return;
-  }
-
-  const attempts = parseInt(localStorage.getItem("zettax_login_attempts") || "0");
-
-if (attempts >= 5) {
-    const widgetDiv = document.getElementById("recaptcha-widget");
-    if (widgetDiv && widgetDiv.innerHTML === "") {
-      blockMsg.style.display = "block";
-      blockMsg.textContent = "Por favor completa el captcha.";
-      captchaContainer.style.display = "flex";
-      grecaptcha.render("recaptcha-widget", { sitekey: "6Lep4RYtAAAAFAGBGILRNz7L7PdT7UzRfudi_Fi" });
-      return;
-    }
-const captchaResponse = grecaptcha.getResponse();
-    if (!captchaResponse) {
-      blockMsg.style.display = "block";
-      blockMsg.textContent = "Por favor completa el captcha.";
-      return;
-    }
-    const verif = await fetch("https://zettax-ai-pnhu.vercel.app/api/recaptcha", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-API-Key": "zettax_8x#mK2@pL9vQwRtY6nJ5sHdFbCeAuXi2gNoPqMlWk0Z" },
-      body: JSON.stringify({ token: captchaResponse })
-    });
-    
-    const verifData = await verif.json();
-    if (!verifData.ok) {
-      blockMsg.style.display = "block";
-      blockMsg.textContent = "Captcha inválido. Intenta de nuevo.";
-      grecaptcha.reset();
-      return;
-    }
-  }
-
   try {
     await signInWithEmailAndPassword(auth, email, pass);
-    localStorage.removeItem("zettax_login_attempts");
-    localStorage.removeItem("zettax_login_block");
-    blockMsg.style.display = "none";
-    captchaContainer.style.display = "none";
-  } catch (e) {
-    const newAttempts = attempts + 1;
-    localStorage.setItem("zettax_login_attempts", String(newAttempts));
-
-    if (newAttempts >= 10) {
-      localStorage.setItem("zettax_login_block", String(Date.now() + 5 * 60 * 1000));
-      localStorage.setItem("zettax_login_attempts", "0");
-      blockMsg.style.display = "block";
-      blockMsg.textContent = "Demasiados intentos. Cuenta bloqueada por 5 minutos.";
-      captchaContainer.style.display = "none";
-      if (typeof grecaptcha !== "undefined") grecaptcha.reset();
-    } else if (newAttempts >= 5) {
-      captchaContainer.style.display = "flex";
-      blockMsg.style.display = "block";
-      blockMsg.textContent = `Intento ${newAttempts}/9. Completa el captcha para continuar.`;
-      if (typeof grecaptcha !== "undefined"){
-  const widgetDiv = document.getElementById("recaptcha-widget");
-  if (widgetDiv && widgetDiv.innerHTML === "") {
-    grecaptcha.render("recaptcha-widget", { sitekey: "6Lep4RYtAAAAFAGBGILRNz7L7PdT7UzRfudi_Fi" });
-  } else {
-   grecaptcha.reset();
- }
- }
-    } else {
-      blockMsg.style.display = "block";
-      blockMsg.textContent = `Credenciales incorrectas. Intento ${newAttempts}/4.`;
-    }
-  }
+  } catch (e) { alert("Error al iniciar sesión: " + e.message); }
 };
+
 
 window.loginGoogle = async () => {
   const provider = new GoogleAuthProvider();
@@ -7816,6 +7740,6 @@ window.descargarImagen = async function(url, filename) {
     </div>
   </div>
 </div>
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 </body>
 </html>
