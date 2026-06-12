@@ -3912,17 +3912,20 @@ window.login = async () => {
   const attempts = parseInt(localStorage.getItem("zettax_login_attempts") || "0");
 
   if (attempts >= 5) {
+    const widgetDiv = document.getElementById("recaptcha-widget");
+    if (widgetDiv && widgetDiv.innerHTML === "") {
+      blockMsg.style.display = "block";
+      blockMsg.textContent = "Por favor completa el captcha.";
+      captchaContainer.style.display = "flex";
+      grecaptcha.render("recaptcha-widget", { sitekey: "6Lep4RYtAAAAFAGBGILRNz7L7PdT7UzRfudi_Fi" });
+      return;
+    }
     const captchaResponse = grecaptcha.getResponse();
     if (!captchaResponse) {
       blockMsg.style.display = "block";
       blockMsg.textContent = "Por favor completa el captcha.";
       return;
-    }
-    const verif = await fetch("https://zettax-ai-pnhu.vercel.app/api/recaptcha", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-API-Key": "zettax_8x#mK2@pL9vQwRtY6nJ5sHdFbCeAuXi2gNoPqMlWk0Z" },
-      body: JSON.stringify({ token: captchaResponse })
-    });
+    };
     const verifData = await verif.json();
     if (!verifData.ok) {
       blockMsg.style.display = "block";
