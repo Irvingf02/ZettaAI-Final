@@ -2850,7 +2850,7 @@
     <button class="btn btn-ghost" onclick="openRegisterModal()">Registrar</button>
     <button class="btn btn-primary" onclick="login()">Entrar</button>
   </div>
-
+<div id="login-block-msg" style="display:none; font-size:0.82rem; text-align:center; margin-top:8px; color:#ff6b6b;"></div>
   <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px; width: 100%;">
     <button class="btn btn-ghost" onclick="loginGoogle()" style="background: white; color: #000; display: flex; align-items: center; justify-content: center; gap: 10px;">
       <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="16"> 
@@ -3892,14 +3892,45 @@ if (failing.length > 0) { errEl.textContent = "La contraseña debe tener: " + fa
 };
 
 window.login = async () => {
-  const email = document.getElementById("email").value.trim();
-  const pass  = document.getElementById("password").value;
+  const email    = document.getElementById("email").value.trim();
+  const pass     = document.getElementById("password").value;
+  const blockMsg = document.getElementById("login-block-msg");
   if (!email || !pass) return alert("Completa todos los campos.");
+
+  const blockUntil = parseInt(localStorage.getItem("zettax_login_block") || "0");
+  if (Date.now() < blockUntil) {
+    const secsLeft = Math.ceil((blockUntil - Date.now()) / 1000);
+    blockMsg.style.display = "block";
+    blockMsg.textContent = `Cuenta bloqueada. Espera ${secsLeft} segundos.`;
+    return;
+  }
+
+  const attempts = parseInt(localStorage.getItem("zettax_login_attempts") || "0");
+
   try {
     await signInWithEmailAndPassword(auth, email, pass);
-  } catch (e) { alert("Error al iniciar sesión: " + e.message); }
-};
+    localStorage.removeItem("zettax_login_attempts");
+    localStorage.removeItem("zettax_login_block");
+    blockMsg.style.display = "none";
+  } catch (e) {
+    const newAttempts = attempts + 1;
+    localStorage.setItem("zettax_login_attempts", String(newAttempts));
 
+    if (newAttempts >= 10) {
+      localStorage.setItem("zettax_login_block", String(Date.now() + 5 * 60 * 1000));
+      localStorage.setItem("zettax_login_attempts", "0");
+      blockMsg.style.display = "block";
+      blockMsg.textContent = "Demasiados intentos fallidos. Cuenta bloqueada por 5 minutos.";
+    } else if (newAttempts >= 5) {
+      blockMsg.style.display = "block";
+      blockMsg.style.color = "#ff4444";
+      blockMsg.textContent = `⚠️ Credenciales incorrectas. Intento ${newAttempts}/9. Serás bloqueado en ${10 - newAttempts} intentos más.`;
+    } else {
+      blockMsg.style.display = "block";
+      blockMsg.textContent = `Credenciales incorrectas. Intento ${newAttempts}/4.`;
+    }
+  }
+};
 
 window.loginGoogle = async () => {
   const provider = new GoogleAuthProvider();
