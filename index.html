@@ -5106,7 +5106,7 @@ window.switchAppsTab = function(tab) {
           : '<input type="checkbox" ' + checked + ' onchange="toggleApp(\'' + g.toggleId + '\', this.checked)"><span class="apps-toggle-slider"></span>')
       + '</label>'
       + '</div>'
-     + (!g.locked && subHtml ? '<div class="apps-subgrid">' + subHtml + '</div>' : '')
+    + (subHtml ? '<div class="apps-subgrid">' + subHtml + '</div>' : '')
       + '</div>';
   });
 };
