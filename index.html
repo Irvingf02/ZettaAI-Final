@@ -4991,6 +4991,30 @@ const APPS_DATA = {
         { icon: "💳", name: "Stripe Checkout", handle: "@Stripe", link: false },
         { icon: "🔔", name: "Webhooks", handle: "@StripeWebhooks", link: false },
       ]
+    },
+    {
+      groupName: "Groq",
+      groupDesc: "Motor de inferencia ultrarrápido para modelos de lenguaje",
+      groupIcons: ["⚡"],
+      toggleId: "toggle-groq",
+      defaultOn: true,
+      locked: true,
+      subApps: [
+        { icon: "⚡", name: "Groq LPU", handle: "@Groq", link: false },
+        { icon: "🧠", name: "Modelos Groq", handle: "@GroqModels", link: false },
+      ]
+    },
+    {
+      groupName: "Pollinations.ai",
+      groupDesc: "Generación de imágenes gratuita y sin restricciones con IA",
+      groupIcons: ["🌸"],
+      toggleId: "toggle-pollinations",
+      defaultOn: true,
+      locked: true,
+      subApps: [
+        { icon: "🌸", name: "Pollinations Image", handle: "@Pollinations", link: false },
+        { icon: "🎨", name: "Generador Flux", handle: "@PollinationsFlux", link: false },
+      ]
     }
   ],
   otras: [
@@ -5092,6 +5116,8 @@ window.toggleApp = function(id, on) {
     "toggle-suite":      { name: "ZettaxAI Suite",    external: false },
     "toggle-supabase":   { name: "Supabase",           external: false },
     "toggle-stripe":     { name: "Stripe Pagos",       external: false },
+    "toggle-groq":         { name: "Groq",               external: false },
+    "toggle-pollinations": { name: "Pollinations.ai",    external: false },
     "toggle-gworkspace": { name: "Google Workspace",   external: true,  icon: "🗂️", desc: "Conecta tu Google Calendar, Gmail, Docs y Drive para obtener respuestas más inteligentes.", ready: false },
     "toggle-notion":     { name: "Notion",             external: true,  icon: "📓", desc: "Accede y organiza tus notas y bases de datos de Notion directamente desde ZettaxAI.",        ready: true  },
     "toggle-slack":      { name: "Slack",              external: true,  icon: "💬", desc: "Lee, busca y envía mensajes en tu workspace de Slack directamente desde ZettaxAI.",        ready: true,  premium: true }
