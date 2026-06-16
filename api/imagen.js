@@ -86,10 +86,11 @@ export default async function handler(req, res) {
     // Seed basado en el prompt para consistencia
     const seed = hashPrompt(enhancedPrompt);
     const encodedPrompt = encodeURIComponent(enhancedPrompt);
-    const imagenUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
 
     res.json({ imageUrl, plan });
   } catch (error) {
+    console.error("Error en /api/imagen:", error);
     res.status(500).json({ reply: "Error generando imagen. Intenta de nuevo." });
   }
 }
