@@ -1823,13 +1823,18 @@
   .apps-tab:hover:not(.active) { border-color: var(--text); color: var(--text); }
 
   .apps-body {
-    overflow-y: auto;
+    overflow-y: scroll;
     flex: 1;
     padding: 18px 24px 24px;
     display: flex;
     flex-direction: column;
     gap: 16px;
   }
+
+  .apps-body::-webkit-scrollbar { width: 6px; }
+.apps-body::-webkit-scrollbar-track { background: transparent; }
+.apps-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
 
   .apps-section-title {
     font-size: 0.82rem;
