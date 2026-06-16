@@ -5077,6 +5077,7 @@ window.switchAppsTab = function(tab) {
       ? '<span style="font-size:0.6rem;' + badgeStyle + 'padding:2px 8px;border-radius:10px;font-weight:700;margin-left:8px;">' + g.badge + '</span>'
       : "";
 
+    const visibleApps = g.subApps.filter(function(s) { return s.link; });
     const subHtml = g.subApps.map(function(s) {
       return '<div class="apps-sub-item">'
         + '<div class="apps-sub-icon">' + s.icon + '</div>'
@@ -5106,7 +5107,7 @@ window.switchAppsTab = function(tab) {
           : '<input type="checkbox" ' + checked + ' onchange="toggleApp(\'' + g.toggleId + '\', this.checked)"><span class="apps-toggle-slider"></span>')
       + '</label>'
       + '</div>'
-    + '<div class="apps-subgrid">' + subHtml + '</div>'
+    + (subHtml ? '<div class="apps-subgrid">' + subHtml + '</div>' : '')
       + '</div>';
   });
 };
