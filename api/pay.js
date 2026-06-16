@@ -42,7 +42,27 @@ export default async function handler(req, res) {
       });
     }
 
-    // Crear sesión — Google Pay aparece automáticamente según el dispositivo
+ // Verificar si el usuario tiene descuento de estudiante activo
+    let discounts;
+    try {
+      const userData = await db.getUser(userId);
+      if (userData?.studentDiscount && userData?.studentDiscountExpires) {
+        const expira = new Date(userData.studentDiscountExpires);
+        if (expira > new Date()) {
+          const coupon = await stripe.coupons.create({
+            percent_off: 25,
+            duration: "repeating",
+            duration_in_months: 3,
+            name: "Descuento estudiante"
+          });
+          discounts = [{ coupon: coupon.id }];
+        }
+      }
+    } catch (discountError) {
+      console.error("Error verificando descuento estudiante:", discountError.message);
+    }
+    
+    // Crear sesión de pago
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode:     "subscription",
