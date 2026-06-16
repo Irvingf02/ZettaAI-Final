@@ -86,8 +86,13 @@ export default async function handler(req, res) {
     // Seed basado en el prompt para consistencia
     const seed = hashPrompt(enhancedPrompt);
     const encodedPrompt = encodeURIComponent(enhancedPrompt);
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
 
+    const imgRes = await fetch(pollinationsUrl);
+    if (!imgRes.ok) throw new Error("No se pudo descargar la imagen");
+    const imgBuffer = await imgRes.arrayBuffer();
+    const imageB64 = Buffer.from(imgBuffer).toString("base64");
+    const imageUrl = `data:image/jpeg;base64,${imageB64}`;
     res.json({ imageUrl, plan });
   } catch (error) {
     res.status(500).json({ reply: "Error generando imagen. Intenta de nuevo." });
