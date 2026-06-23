@@ -4,11 +4,12 @@ const RATE_LIMITS = { free: 30, go: 300, plus: 600, ultra: 2000 };
 const rateLimitMap = new Map();
 
 // Todos los planes usan el modelo más preciso
-const GROQ_MODELS = {
-  free:  "llama-3.3-70b-versatile",
-  go:    "llama-3.3-70b-versatile",
-  plus:  "llama-3.3-70b-versatile",
-  ultra: "llama-3.3-70b-versatile"
+// Modelos por plan
+const MODEL_CONFIG = {
+  free:  { provider: "groq", model: "llama-3.3-70b-versatile" },
+  go:    { provider: "zai",  model: "glm-4.7-flash" },
+  plus:  { provider: "zai",  model: "glm-5.1" },
+  ultra: { provider: "zai",  model: "glm-5.2" }
 };
 
 function checkRateLimit(key, plan) {
@@ -63,26 +64,31 @@ export default async function handler(req, res) {
   }
   messages.push({ role: "user", content: message });
 
-  const groqModel = GROQ_MODELS[plan] || GROQ_MODELS.free;
+ const { provider, model } = MODEL_CONFIG[plan] || MODEL_CONFIG.free;
+  const apiUrl = provider === "zai"
+    ? "https://api.z.ai/api/openai/v1/chat/completions"
+    : "https://api.groq.com/openai/v1/chat/completions";
+  const apiKey = provider === "zai"
+    ? process.env.ZAI_API_KEY
+    : process.env.GROQ_API_KEY;
 
   try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        "Authorization": `Bearer ${apiKey}`,
         "Content-Type":  "application/json"
       },
       body: JSON.stringify({
-        model: groqModel,
+        model,
         messages,
         max_tokens: planCfg.maxTokens,
         temperature: planCfg.temp
       })
     });
-
     if (!response.ok) {
       const err = await response.json();
-      return res.status(response.status).json({ reply: "Error de Groq: " + (err.error?.message || "desconocido") });
+      return res.status(response.status).json({ reply: "Error de Modelo: " + (err.error?.message || "desconocido") });
     }
 
     const data = await response.json();
