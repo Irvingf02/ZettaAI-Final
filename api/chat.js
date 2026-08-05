@@ -1,6 +1,29 @@
 import { setCors, getUserPlan, PLAN_CONFIG, MODOS_IA, verifyApiKey, verifyOrigin } from "./_lib.js";
 
 const RATE_LIMITS = { free: 30, go: 300, plus: 600, ultra: 2000 };
+
+// Búsqueda web con DuckDuckGo (sin API key, sin límites)
+async function webSearch(query) {
+  try {
+    const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; ZettaxAI/1.0)" }
+    });
+    const html = await res.text();
+    // Extraer snippets de resultados
+    const snippets = [];
+    const regex = /<a class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
+    let match;
+    while ((match = regex.exec(html)) !== null && snippets.length < 5) {
+      const text = match[1].replace(/<[^>]+>/g, "").trim();
+      if (text) snippets.push(text);
+    }
+    return snippets.join("\n");
+  } catch (e) {
+    return "";
+  }
+}
+
 const rateLimitMap = new Map();
 
 // Todos los planes usan el modelo más preciso
@@ -55,8 +78,14 @@ export default async function handler(req, res) {
     });
   }
 
+  // Búsqueda web para enriquecer la respuesta
+const searchResults = await webSearch(message);
+const searchContext = searchResults
+  ? `\n\nInformación actualizada de la web (úsala si es relevante):\n${searchResults}`
+  : "";
+
   const suffix       = (mode === "codigo" && planCfg.codeSuffix) ? planCfg.codeSuffix : planCfg.systemSuffix;
-  const systemPrompt = `${modoCfg.system} ${suffix}`;
+  const systemPrompt = `${modoCfg.system} ${suffix${searchContext}}`;
   const messages     = [{ role: "system", content: systemPrompt }];
 
   if (Array.isArray(history) && history.length > 0) {
