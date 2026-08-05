@@ -3414,7 +3414,7 @@
 </div>
 
 <!-- MODAL DE ACTIVIDAD -->
-<div id="activityModal">
+<div id="activityModal" onclick="if(event.target===this)closeActivity()">
   <div class="activity-card">
     <div class="activity-header">
       <h2>📊 Mi Actividad</h2>
@@ -3442,7 +3442,7 @@
 </div>
 
 <!-- MODAL AYUDA -->
-<div id="helpModal">
+<div id="helpModal" onclick="if(event.target===this)closeHelp()">
   <div class="help-card">
     <div class="help-top">
       <h3>Ayuda</h3>
@@ -3492,7 +3492,7 @@
 </div>
 
 <!-- MODAL FEEDBACK -->
-<div id="feedbackModal">
+<div id="feedbackModal" onclick="if(event.target===this)closeFeedback()">
   <div class="feedback-card">
     <div class="feedback-top">
       <h3>Enviar comentarios a ZettaxAI</h3>
@@ -3521,7 +3521,7 @@
 </div>
 
 <!-- MODAL MIS COSAS -->
-<div id="misCosasModal">
+<div id="misCosasModal" onclick="if(event.target===this)closeMisCosas()">
   <div class="miscosas-card">
     <div class="miscosas-header">
       <h2>⭐ Mis cosas</h2>
@@ -3539,7 +3539,7 @@
 </div>
 
 <!-- PAYWALL MODAL -->
-<div id="paywallModal">
+<div id="paywallModal" onclick="if(event.target===this)closePaywall()">
   <div class="modal-card" style="max-width:620px; padding:24px 16px; position:relative;">
     <button onclick="closePaywall()" style="position:absolute; top:12px; left:12px; background:none; border:none; color:var(--muted); font-size:1.4rem; cursor:pointer; line-height:1;">✕</button>
     <div class="modal-icon">🚀</div>
