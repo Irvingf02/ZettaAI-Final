@@ -24,6 +24,58 @@ async function webSearch(query) {
 
 const rateLimitMap = new Map();
 
+// Planes con acceso a Notion y Slack (temporal: free incluido para pruebas)
+const NOTION_PLANS = ["free", "go", "plus", "ultra"];
+const SLACK_PLANS  = ["free", "plus", "ultra"];
+
+// Detección de intención Notion
+function detectNotion(msg) {
+  const m = msg.toLowerCase();
+  if (m.includes("notion")) return true;
+  if (m.includes("mis notas") || m.includes("mi nota")) return true;
+  if (m.includes("mis páginas") || m.includes("mi página") || m.includes("mis paginas") || m.includes("mi pagina")) return true;
+  if (m.includes("base de datos") || m.includes("mi workspace")) return true;
+  return false;
+}
+
+// Detección de intención Slack
+function detectSlack(msg) {
+  const m = msg.toLowerCase();
+  if (m.includes("slack")) return true;
+  if (m.includes("canal") || m.includes("canales")) return true;
+  if (m.includes("mensaje de slack") || m.includes("mensajes de slack")) return true;
+  if (m.includes("manda un mensaje") || m.includes("envía un mensaje") || m.includes("envia un mensaje")) return true;
+  return false;
+}
+
+// Llamar a Notion
+async function callNotion(action, params, baseUrl) {
+  try {
+    const res = await fetch(`${baseUrl}/api/notion`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, ...params })
+    });
+    if (!res.ok) return "";
+    const data = await res.json();
+    return JSON.stringify(data);
+  } catch (e) { return ""; }
+}
+
+// Llamar a Slack
+async function callSlack(action, params, baseUrl) {
+  try {
+    const res = await fetch(`${baseUrl}/api/slack`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, ...params })
+    });
+    if (!res.ok) return "";
+    const data = await res.json();
+    return JSON.stringify(data);
+  } catch (e) { return ""; }
+}
+
 // Todos los planes usan el modelo más preciso
 // Modelos por plan
 const MODEL_CONFIG = {
@@ -85,8 +137,24 @@ export default async function handler(req, res) {
     }
   }
 
+  // Integración Notion
+let notionContext = "";
+if ((!mode || mode === "chat") && NOTION_PLANS.includes(plan) && detectNotion(message)) {
+  const baseUrl = "https://zettax-ai-pnhu.vercel.app";
+  const result = await callNotion("search", { query: message }, baseUrl);
+  if (result) notionContext = `\n\nDatos de Notion del usuario:\n${result}`;
+}
+
+// Integración Slack
+let slackContext = "";
+if ((!mode || mode === "chat") && SLACK_PLANS.includes(plan) && detectSlack(message)) {
+  const baseUrl = "https://zettax-ai-pnhu.vercel.app";
+  const result = await callSlack("listChannels", {}, baseUrl);
+  if (result) slackContext = `\n\nCanales de Slack del usuario:\n${result}`;
+}
+
   const suffix       = (mode === "codigo" && planCfg.codeSuffix) ? planCfg.codeSuffix : planCfg.systemSuffix;
-  const systemPrompt = `${modoCfg.system} ${suffix}${searchContext}`;
+  const systemPrompt = `${modoCfg.system} ${suffix}${searchContext}${notionContext}${slackContext}`;
   const messages     = [{ role: "system", content: systemPrompt }];
 
   if (Array.isArray(history) && history.length > 0) {
