@@ -25,8 +25,8 @@ async function webSearch(query) {
 const rateLimitMap = new Map();
 
 // Planes con acceso a Notion y Slack (temporal: free incluido para pruebas)
-const NOTION_PLANS = ["free", "go", "plus", "ultra"];
-const SLACK_PLANS  = ["free", "plus", "ultra"];
+const NOTION_PLANS = ["go", "plus", "ultra"];
+const SLACK_PLANS  = ["plus", "ultra"];
 
 // Detección de intención Notion
 function detectNotion(msg) {
