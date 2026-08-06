@@ -154,7 +154,7 @@ if ((!mode || mode === "chat") && SLACK_PLANS.includes(plan) && detectSlack(mess
 }
 
   const suffix       = (mode === "codigo" && planCfg.codeSuffix) ? planCfg.codeSuffix : planCfg.systemSuffix;
-  const systemPrompt = `${modoCfg.system} ${suffix}${searchContext}${notionContext}${slackContext}`;
+  const systemPrompt = `${modoCfg.system} ${suffix}Importante: cuando recibas datos de Notion o Slack, nunca muestres JSON crudo al usuario, interpreta los datos y responde de forma natural en español.${searchContext}${notionContext}${slackContext}`;
   const messages     = [{ role: "system", content: systemPrompt }];
 
   if (Array.isArray(history) && history.length > 0) {
