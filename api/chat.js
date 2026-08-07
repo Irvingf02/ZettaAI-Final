@@ -190,7 +190,7 @@ if ((!mode || mode === "chat") && SLACK_PLANS.includes(plan) && detectSlack(mess
     }
 
     const data = await response.json();
-    res.json({ reply: data.choices[0].message.content, remaining: rate.remaining, isPremium, plan });
+    res.json({ reply: data.choices[0].message.content, remaining: rate.remaining, isPremium, plan, didSearch: !!searchContext });
 
   } catch (error) {
     res.status(500).json({ reply: "Error interno. Intenta de nuevo." });
