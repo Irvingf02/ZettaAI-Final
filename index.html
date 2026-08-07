@@ -6744,7 +6744,7 @@ window.send = async () => {
   }
 
   chatHistory.push({ role: "user", content: text });
-  const typing = addMessage("IA escribiendo...", "bot typing");
+  const typing = addMessage((!mode || mode === "chat") ? "🔍 Buscando en la web..." :"IA escribiendo...", "bot typing");
 
   try {
     const res = await fetch(`${BACKEND_URL}/chat`, {
