@@ -158,7 +158,8 @@ if ((!mode || mode === "chat") && SLACK_PLANS.includes(plan) && detectSlack(mess
   const messages     = [{ role: "system", content: systemPrompt }];
 
   if (Array.isArray(history) && history.length > 0) {
-    messages.push(...history.slice(-(planCfg.memory * 2)));
+     const cleanHistory = history.slice(-(planCfg.memory * 2)).map(m => ({ role: m.role, content: m.content }));
+    messages.push(...cleanHistory);
   }
   messages.push({ role: "user", content: message });
 
