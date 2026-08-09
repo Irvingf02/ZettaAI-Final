@@ -13,12 +13,14 @@ async function webSearch(query) {
       },
       body: JSON.stringify({ q: query, num: 5, hl: "es" })
     });
-    if (!res.ok) return "";
+    if (!res.ok) return { snippets: "", sources: [] };
     const data = await res.json();
-    const snippets = (data.organic || []).map(r => `${r.title}: ${r.snippet}`).join("\n");
-    return snippets;
+    const organic = data.organic || [];
+    const snippets = organic.map(r => `${r.title}: ${r.snippet}`).join("\n");
+    const sources = organic.slice(0, 3).map(r => ({ title: r.title, url: r.link }));
+    return { snippets, sources };
   } catch (e) {
-    return "";
+    return { snippets: "", sources: [] };
   }
 }
 
@@ -130,10 +132,12 @@ export default async function handler(req, res) {
 
   // Búsqueda web solo en modo chat
   let searchContext = "";
+  let searchSources = [];
   if (!mode || mode === "chat") {
-    const searchResults = await webSearch(message);
-    if (searchResults) {
-      searchContext = `\n\nInformación actualizada de la web (úsala si es relevante para responder):\n${searchResults}`;
+    const { snippets, sources } = await webSearch(message);
+    if (snippets) {
+      searchContext = `\n\nInformación actualizada de la web (úsala si es relevante para responder):\n${snippets}`;
+      searchSources = sources;
     }
   }
 
@@ -191,7 +195,7 @@ if ((!mode || mode === "chat") && SLACK_PLANS.includes(plan) && detectSlack(mess
     }
 
     const data = await response.json();
-    res.json({ reply: data.choices[0].message.content, remaining: rate.remaining, isPremium, plan, didSearch: !!searchContext });
+    res.json({ reply: data.choices[0].message.content, remaining: rate.remaining, isPremium, plan, didSearch: !!searchContext, sources: searchSources });
 
   } catch (error) {
     res.status(500).json({ reply: "Error interno. Intenta de nuevo." });
