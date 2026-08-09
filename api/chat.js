@@ -158,7 +158,7 @@ if ((!mode || mode === "chat") && SLACK_PLANS.includes(plan) && detectSlack(mess
 }
 
   const suffix       = (mode === "codigo" && planCfg.codeSuffix) ? planCfg.codeSuffix : planCfg.systemSuffix;
-  const systemPrompt = `${modoCfg.system} ${suffix}Usa formato Markdown en tus respuestas: ## para títulos, **negrita** para términos importantes, - para listas. Importante: cuando recibas datos de Notion o Slack, nunca muestres JSON crudo al usuario, interpreta los datos y responde de forma natural en español.${searchContext}${notionContext}${slackContext}`;
+  const systemPrompt = `${modoCfg.system} ${suffix}Usa formato Markdown rico en tus respuestas: ## con emoji relevante para títulos (ejemplo: ## 🏆 Campeón, ## 🌍 Sede, ## ⚽ Final), **negrita** para términos importantes, - para listas compactas. Importante: cuando recibas datos de Notion o Slack, nunca muestres JSON crudo al usuario, interpreta los datos y responde de forma natural en español.${searchContext}${notionContext}${slackContext}`;
   const messages     = [{ role: "system", content: systemPrompt }];
 
   if (Array.isArray(history) && history.length > 0) {
