@@ -691,6 +691,16 @@
 
   .msg.error { border-color: var(--danger); color: var(--danger); }
 
+  .markdown h1, .markdown h2, .markdown h3 { font-weight: 700; margin: 8px 0 4px; }
+.markdown h1 { font-size: 1.2rem; }
+.markdown h2 { font-size: 1.05rem; }
+.markdown h3 { font-size: 0.95rem; }
+.markdown ul { padding-left: 18px; margin: 4px 0; }
+.markdown li { margin: 2px 0; }
+.markdown p { margin: 4px 0; }
+.markdown strong { font-weight: 700; }
+.markdown em { font-style: italic; }
+
   .msg-content {
     white-space: pre-wrap;
     word-break: break-word;
@@ -6151,6 +6161,25 @@ function renderBotMessage(text) {
   return wrapper;
 }
 
+
+function renderMarkdown(text) {
+  const div = document.createElement("div");
+  div.className = "msg-text markdown";
+  let html = text
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+    .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+    .replace(/^# (.+)$/gm, "<h1>$1</h1>")
+    .replace(/^[-•] (.+)$/gm, "<li>$1</li>")
+    .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>")
+    .replace(/\n\n/g, "</p><p>")
+    .replace(/\n/g, "<br>");
+  div.innerHTML = "<p>" + html + "</p>";
+  return div;
+}
+
 function addMessage(text, role, extra = "") {
   window._addMessage = addMessage;
   const div = document.createElement("div");
@@ -6161,7 +6190,9 @@ function addMessage(text, role, extra = "") {
     div.classList.add("has-code");
     const rendered = renderBotMessage(text);
     div.appendChild(rendered);
-  } else {
+  }else if (role === "bot") {
+  div.appendChild(renderMarkdown(text));
+  }else {
     const textSpan = document.createElement("span");
     textSpan.className = "msg-text";
     textSpan.textContent = text;
@@ -6766,6 +6797,23 @@ window.send = async () => {
 
     addMessage(data.reply, "bot");
     chatHistory.push({ role: "assistant", content: data.reply });
+
+  if (data.sources && data.sources.length > 0) {
+  const lastBot = document.querySelector("#messages .msg.bot:last-child");
+  if (lastBot) {
+    const sourcesDiv = document.createElement("div");
+    sourcesDiv.style.cssText = "display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;";
+    data.sources.forEach(s => {
+      const badge = document.createElement("a");
+      badge.href = s.url;
+      badge.target = "_blank";
+      badge.textContent = s.title.length > 30 ? s.title.slice(0, 30) + "…" : s.title;
+      badge.style.cssText = "font-size:0.72rem;padding:3px 8px;border-radius:12px;background:var(--surface);border:1px solid var(--border);color:var(--accent);text-decoration:none;";
+      sourcesDiv.appendChild(badge);
+    });
+    lastBot.appendChild(sourcesDiv);
+  }
+}
 
     if (window._reintentarVersiones) {
       const _rv = window._reintentarVersiones;
