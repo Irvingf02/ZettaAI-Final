@@ -7780,18 +7780,18 @@ window.navegarVersion = function(btn, dir) {
     msg.dataset.replies = JSON.stringify(replies);
   }
 
-  msg.dataset.currentVersion = String(newIdx);
-  const msgText = msg.querySelector(".msg-text");
-  if (msgText) msgText.textContent = versions[newIdx];
-  actualizarNavVersiones(msg);
-
-  // Guardar mensajes de abajo (después de la respuesta bot) en la versión actual
+ // Guardar mensajes de abajo (después de la respuesta bot) en la versión actual
 const afterMsgs = allMsgs.slice(msgIdx + 2);
 if (afterMsgs.length > 0) {
   const savedAfter = JSON.parse(msg.dataset.savedAfterMsgs || "{}");
   savedAfter[current] = afterMsgs.map(m => m.outerHTML);
   msg.dataset.savedAfterMsgs = JSON.stringify(savedAfter);
 }
+
+  msg.dataset.currentVersion = String(newIdx);
+  const msgText = msg.querySelector(".msg-text");
+  if (msgText) msgText.textContent = versions[newIdx];
+  actualizarNavVersiones(msg);
 
   // Eliminar respuesta actual y restaurar la guardada
   for (let i = allMsgs.length - 1; i > msgIdx; i--) allMsgs[i].remove();
