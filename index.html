@@ -6292,8 +6292,12 @@ window.reintentarMensaje = function(btn) {
     }
   }
 
-  // Eliminar el mensaje de usuario y todos los mensajes posteriores
+  // Guardar mensajes de abajo (después de bot response) antes de eliminar
   const userIdx = allMsgs.indexOf(userMsg);
+  const msgsAfterBot = allMsgs.slice(userIdx + 2);
+  window._savedAfterMsgsForPrevVersion = msgsAfterBot.map(m => m.outerHTML);
+
+  // Eliminar el mensaje de usuario y todos los mensajes posteriores
   for (let i = allMsgs.length - 1; i >= userIdx; i--) {
     allMsgs[i].remove();
   }
@@ -6827,6 +6831,14 @@ window.send = async () => {
         const _replies = _rv.replies ? _rv.replies.slice() : [];
         _replies[_versions.length - 1] = data.reply;
         _ub.dataset.replies = JSON.stringify(_replies);
+         // Guardar mensajes de abajo en la versión anterior del bubble
+        if (window._savedAfterMsgsForPrevVersion && window._savedAfterMsgsForPrevVersion.length > 0) {
+          const _prevIdx = _rv.currentVersion != null ? _rv.currentVersion : _versions.length - 2;
+          const _savedAfter = {};
+          _savedAfter[_prevIdx] = window._savedAfterMsgsForPrevVersion;
+          _ub.dataset.savedAfterMsgs = JSON.stringify(_savedAfter);
+          window._savedAfterMsgsForPrevVersion = null;
+        }
         const _lastUserIdx = chatHistory.map(m=>m.role).lastIndexOf("user");
         if (_lastUserIdx >= 0) {
           chatHistory[_lastUserIdx].versions = _versions;
