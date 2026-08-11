@@ -5777,6 +5777,7 @@ else {
       div.dataset.versions = JSON.stringify(m.versions);
       div.dataset.replies = JSON.stringify(replies);
       div.dataset.currentVersion = String(curVer);
+      if (m.savedAfterMsgs) div.dataset.savedAfterMsgs = JSON.stringify(m.savedAfterMsgs);
       setTimeout(() => actualizarNavVersiones(div), 100);
     }
   });
@@ -6844,6 +6845,9 @@ window.send = async () => {
           chatHistory[_lastUserIdx].versions = _versions;
           chatHistory[_lastUserIdx].currentVersion = _versions.length - 1;
           chatHistory[_lastUserIdx].replies = _replies;
+          if (_ub.dataset.savedAfterMsgs) {
+            chatHistory[_lastUserIdx].savedAfterMsgs = JSON.parse(_ub.dataset.savedAfterMsgs);
+          }
         }
         actualizarNavVersiones(_ub);
       }
