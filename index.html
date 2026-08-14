@@ -7671,7 +7671,7 @@ async function compartirImagen(url) {
   }
 }
 
-window.toggleReaccion = function(btn, tipo) {
+window.toggleReaccion = async function(btn, tipo) {
   const msg = btn.closest(".msg");
   const allBots = Array.from(document.querySelectorAll(".msg.bot"));
   const idx = allBots.indexOf(msg);
@@ -7760,7 +7760,7 @@ function actualizarNavVersiones(msg) {
   `;
 }
 
-window.navegarVersion = function(btn, dir) {
+window.navegarVersion = async function(btn, dir) {
   const msg = btn.closest(".msg");
   const versions = JSON.parse(msg.dataset.versions || "[]");
   const replies = JSON.parse(msg.dataset.replies || "[]");
