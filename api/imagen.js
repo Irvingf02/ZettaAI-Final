@@ -1,4 +1,4 @@
-import { setCors, getUserPlan, verifyApiKey, verifyOrigin  } from "./_lib.js";
+import { setCors, getUserPlan, verifyApiKey, verifyOrigin, getVerifiedUid  } from "./_lib.js";
 
 function hashPrompt(str) {
   let hash = 0;
@@ -14,11 +14,13 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).end();
 
-  const { prompt, uid, imageUrl: editImageUrl, maskB64 } = req.body;
+  const { prompt, uid: legacyUid, imageUrl: editImageUrl, maskB64 } = req.body;
   if (!prompt) return res.status(400).json({ reply: "Describe la imagen que quieres crear." });
   if (!verifyApiKey(req) || !verifyOrigin(req)) return res.status(401).json({ reply: "No autorizado." });
   if (typeof prompt !== "string" || prompt.length > 2000) return res.status(400).json({ reply: "Prompt inválido." });
-  if (uid && (typeof uid !== "string" || uid.length > 128)) return res.status(400).json({ reply: "Usuario inválido." });
+  if (legacyUid && (typeof legacyUid !== "string" || legacyUid.length > 128)) return res.status(400).json({ reply: "Usuario inválido." });
+
+  const uid = await getVerifiedUid(req, legacyUid);
   const { plan } = await getUserPlan(uid);
 
   // ── Seleccionar áreas: edición con Stable Diffusion Inpainting ──

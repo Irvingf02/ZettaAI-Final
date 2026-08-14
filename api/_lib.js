@@ -14,7 +14,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 export function setCors(res) {
   res.setHeader("Access-Control-Allow-Origin",      "https://zettax-ai-pnhu.vercel.app");
   res.setHeader("Access-Control-Allow-Methods",     "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers",     "Content-Type, Authorization, stripe-signature");
+  res.setHeader("Access-Control-Allow-Headers",     "Content-Type, Authorization, stripe-signature, X-API-Key");
   res.setHeader("Access-Control-Allow-Credentials", "true");
 }
 
@@ -63,13 +63,51 @@ export function verifyOrigin(req) {
   const origin  = req.headers["origin"]  || "";
   const referer = req.headers["referer"] || "";
   const allowed = "https://zettax-ai-pnhu.vercel.app";
-  return origin.startsWith(allowed) || referer.startsWith(allowed);
+  const fromWeb = origin.startsWith(allowed) || referer.startsWith(allowed);
+  const noOriginHeaders = !origin && !referer;
+  return fromWeb || noOriginHeaders;
 }
 
 // ── VERIFICAR API KEY ────────────────────────────────────────────────────────
 export function verifyApiKey(req) {
   const key = req.headers["x-api-key"] || "";
   return key === process.env.API_SECRET_KEY;
+}
+
+
+// ── VERIFICAR IDENTIDAD REAL (token de Firebase) ─────────────────────────────
+// Confirma con Google que el token de sesión es real y de quién es.
+// No requiere clave privada de Firebase Admin, usa la API pública de Identity Toolkit.
+const FIREBASE_WEB_API_KEY = "AIzaSyBkylBC97yOx9K0CWcxvbyA1hsouygvTXY";
+
+export async function getVerifiedUid(req, legacyUid) {
+  const authHeader = req.headers["authorization"] || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
+
+  if (token) {
+    try {
+      const res = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_WEB_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idToken: token })
+        }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const verifiedUid = data.users?.[0]?.localId;
+        if (verifiedUid) return verifiedUid;
+      }
+    } catch (e) {
+      // Token inválido, expirado, o error de red: cae al respaldo de abajo.
+    }
+  }
+
+  // ⚠️ RESPALDO TEMPORAL: mientras web y app terminan de mandar el token,
+  // seguimos aceptando el uid tal cual venga en la petición. Esto se debe
+  // quitar en cuanto los 3 (backend, web, app) estén actualizados.
+  return legacyUid || null;
 }
 
 export async function getUserPlan(uid) {

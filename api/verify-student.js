@@ -1,21 +1,23 @@
-import { setCors, verifyApiKey, verifyOrigin, db } from "./_lib.js";
+import { setCors, verifyApiKey, verifyOrigin, db, getVerifiedUid  } from "./_lib.js";
 
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).end();
 
-  const { uid, imageB64 } = req.body;
+  const { uid: legacyUid, imageB64 } = req.body;
 
   if (!verifyApiKey(req) || !verifyOrigin(req)) {
     return res.status(401).json({ ok: false, reply: "No autorizado." });
   }
-  if (!uid || typeof uid !== "string") {
+  if (!legacyUid || typeof legacyUid !== "string") {
     return res.status(400).json({ ok: false, reply: "Usuario inválido." });
   }
   if (!imageB64 || typeof imageB64 !== "string") {
     return res.status(400).json({ ok: false, reply: "Falta la imagen de la credencial." });
   }
+
+const uid = await getVerifiedUid(req, legacyUid);
 
   try {
     const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {

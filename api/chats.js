@@ -1,4 +1,4 @@
-import { setCors, db, verifyApiKey, verifyOrigin } from "./_lib.js";
+import { setCors, db, verifyApiKey, verifyOrigin, getVerifiedUid } from "./_lib.js";
 
 export default async function handler(req, res) {
   setCors(res);
@@ -8,8 +8,9 @@ export default async function handler(req, res) {
 
   if (req.method === "GET") {
 
-    const { userId } = req.query;
-    if (!userId) return res.status(400).json({ error: "Se requiere userId." });
+    const { userId: legacyUserId } = req.query;
+    if (!legacyUserId) return res.status(400).json({ error: "Se requiere userId." });
+    const userId = await getVerifiedUid(req, legacyUserId);
     try {
       const chats = await db.getChats(userId);
       return res.status(200).json({ chats });
@@ -20,12 +21,13 @@ export default async function handler(req, res) {
 
   if (req.method === "POST") {
 
-    const { userId, chatId, title, messages, mode } = req.body;
-    if (!userId || !chatId) return res.status(400).json({ error: "Se requiere userId y chatId." });
-    if (typeof userId !== "string" || userId.length > 128) return res.status(400).json({ error: "userId inválido." });
+    const { userId: legacyUserId, chatId, title, messages, mode } = req.body;
+    if (!legacyUserId || !chatId) return res.status(400).json({ error: "Se requiere userId y chatId." });
+    if (typeof legacyUserId !== "string" || legacyUserId.length > 128) return res.status(400).json({ error: "userId inválido." });
     if (typeof chatId !== "string" || chatId.length > 128) return res.status(400).json({ error: "chatId inválido." });
     if (title && typeof title !== "string") return res.status(400).json({ error: "title inválido." });
     if (messages && !Array.isArray(messages)) return res.status(400).json({ error: "messages inválido." });
+    const userId = await getVerifiedUid(req, legacyUserId);
     try {
       await db.upsertChat(chatId, userId, title || "Chat nuevo", messages || [], mode);
       return res.status(200).json({ ok: true });
@@ -36,9 +38,10 @@ export default async function handler(req, res) {
 
   if (req.method === "DELETE") {
     
-    const { userId, chatId } = req.query;
-    if (!userId) return res.status(400).json({ error: "Se requiere userId." });
-    if (typeof userId !== "string" || userId.length > 128) return res.status(400).json({ error: "userId inválido." });
+    const { userId: legacyUserId, chatId } = req.query;
+    if (!legacyUserId) return res.status(400).json({ error: "Se requiere userId." });
+    if (typeof legacyUserId !== "string" || legacyUserId.length > 128) return res.status(400).json({ error: "userId inválido." });
+    const userId = await getVerifiedUid(req, legacyUserId);
     try {
       if (chatId) await db.deleteChat(chatId);
       else await db.deleteAllChats(userId);
